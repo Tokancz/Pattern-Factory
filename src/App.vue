@@ -1,146 +1,225 @@
 <template>
-    <header>
-        <div id="header_info">
-            <img src="/img/Header.png" alt="Header" draggable="false">
-            <h1>{{ factoryName }}</h1>
-            <div>
-                <p id="user">{{ userName }}</p>
-                <p id="lvl">lvl: {{ lvl }}</p>
-                <p>Next Lvl in {{ expToNextLvl - exp }} exp</p>
-            </div>
-        </div>
-    </header>
-    <main>
-        <aside id="stats">
-            <section>
-                <h3>Stats</h3>
-                <p>Income: 0 IGM/s</p>
-                <p>Idle: 0 IGM/h</p>
-                <p>Parts Sold: </p>
-            </section>
-            <section>
-                <h3>Progress</h3>
-                <p>Next Part: {{ partProgress }} %</p>
-                <input type="range" min="0" max="100" v-model="partProgress" class="slider">
-                <p>Part Price: {{ pattern.value }} IGM</p>
-            </section>
-            <section>
-                <h3>Daily Pattern</h3>
-                <p>Price: {{ dailyPattern.value }} IGM</p>
-                <img :src="dailyPattern.src" alt="Daily Pattern" id="daily_pattern">
-            </section>
-        </aside>
-        <section id="simulation">
-            <div @click="click" id="factory">
-                <img src="/img/Factory.png" alt="Factory" draggable="false">
-                <img :src="pattern.src" alt="Pattern" id="pattern" draggable="false">
-                <p id="progress">Progress {{ partProgress }} %</p>
-            </div>
-            <div id="belt"></div>
-            <ul id="parts">
-                <img v-for="part in parts" :src="part.src" :style="{
-                    top: part.y + 'px'
-                }"></img>
-            </ul>
-            <img src="/img/Seller.png" alt="Seller" id="seller" draggable="false">
-        </section>
-        <section id="shop">
-            <aside>
-                <div class="shop_header">
-                    <h2>SHOP</h2>
-                    <i class="fa-solid fa-basket-shopping" aria-hidden="true"></i>
-                </div>
-                <div class="shop_buttons">
-                    <button class="shop_button">Patterns</button>
-                    <button class="shop_button">Tools</button>
-                    <button class="shop_button">Upgrades</button>
-                    <button class="shop_button">Prestige</button>
-                </div>
-            </aside>
-        </section>
-    </main>
-    <footer>
-        <p>Money: {{ money }} IGM</p>
-    </footer>
+  <main id="simulation">
+    <!-- CONVEYOR -->
+    <div id="belt"></div>
+
+    <!-- PARTS -->
+    <img
+      v-for="part in parts"
+      :key="part.id"
+      :src="getPartSprite(part)"
+      class="part"
+      :style="partStyle(part)"
+      draggable="false"
+    />
+
+    <!-- FACTORY BUTTON -->
+    <button id="spawn" @click="spawnPart">Spawn</button>
+
+    <!-- HUD -->
+    <div id="hud">
+      <p>Money: {{ money }} IGM</p>
+      <p>Level: {{ lvl }}</p>
+      <p>EXP: {{ exp }} / {{ expToNextLvl }}</p>
+    </div>
+  </main>
 </template>
 
 <script setup lang="ts">
-    import { ref } from "vue";
+import { ref } from "vue"
 
-    const factoryName = ref("Factory Name");
-    const userName = ref("User");
-    
-    const money = ref<number>(localStorage.getItem("money") ? parseInt(localStorage.getItem("money")!) : 0);
-        
-    const lvl = ref<number>(localStorage.getItem("lvl") ? parseInt(localStorage.getItem("lvl")!) : 1);
-    const exp = ref<number>(localStorage.getItem("exp") ? parseInt(localStorage.getItem("exp")!) : 0);
-    const expToNextLvl = ref<number>(localStorage.getItem("expToNextLvl") ? parseInt(localStorage.getItem("expToNextLvl")!) : 100);
-    const parts = ref([]);
-    const partProgress = ref(0);
+/* -------------------------------------------------
+   TYPES
+------------------------------------------------- */
+type Point = { x: number; y: number }
 
-    const pattern = ref({
-        src: "/img/Circle.png",
-        value: 1,
-        y: 0,
-        expGained: 2
-    });
-     const dailyPattern = ref({
-        src: "/img/CircleRed.png",
-        value: 25,
-        y: 0,
-        expGained: 5
-    });
-    
-    //Prompts
-    //const factoryName = ref(prompt("Your Factory Name?","Factory Name"));
-    //const userName = ref(prompt("Whats Your Name?","User"));
+type Part = {
+  id: number
+  patternId: string
+  progress: number
+  speed: number
+  traits: {
+    color?: string
+    cut?: boolean
+    merged?: boolean
+  }
+}
 
-    async function sleep(ms: number): Promise<void> {
-        return new Promise((resolve) => setTimeout(resolve, ms));
+type Pattern = {
+  id: string
+  baseValue: number
+  baseExp: number
+}
+
+type Machine = {
+  at: number // progress position (0–1)
+  apply(part: Part): Part
+}
+
+/* -------------------------------------------------
+   STATE
+------------------------------------------------- */
+const money = ref(0)
+const lvl = ref(1)
+const exp = ref(0)
+const expToNextLvl = ref(100)
+
+const parts = ref<Part[]>([])
+let partId = 0
+
+/* -------------------------------------------------
+   CONVEYOR PATH (ANY SHAPE)
+------------------------------------------------- */
+const conveyorPath: Point[] = [
+  { x: 100, y: 50 },
+  { x: 100, y: 200 },
+  { x: 250, y: 200 }, // turn
+  { x: 250, y: 350 }
+]
+
+/* -------------------------------------------------
+   PATTERNS (BLUEPRINTS)
+------------------------------------------------- */
+const patterns: Record<string, Pattern> = {
+  basic: {
+    id: "basic",
+    baseValue: 1,
+    baseExp: 2
+  }
+}
+
+/* ------------------------------------------------
+   MACHINES (TRANSFORMATIONS)
+------------------------------------------------- */
+const machines: Machine[] = [
+  {
+    at: 0.4,
+    apply(part) {
+      if (part.traits.color) return part
+      return {
+        ...part,
+        traits: { ...part.traits, color: "red" }
+      }
     }
-
-    async function spawnPart(){
-        parts.value.push({...pattern.value});
-        await sleep(1600);
-        money.value += pattern.value.value;
-        localStorage.setItem("money", money.value.toString()); //localStorage update
-        parts.value.shift();
-        levelProgress(pattern.value.expGained);
+  },
+  {
+    at: 0.7,
+    apply(part) {
+      if (part.traits.cut) return part
+      return {
+        ...part,
+        traits: { ...part.traits, cut: true }
+      }
     }
+  }
+]
 
-    function click(){
-        partProgress.value += 25;
+/* -------------------------------------------------
+   SPAWN
+------------------------------------------------- */
+function spawnPart() {
+  parts.value.push({
+    id: partId++,
+    patternId: "basic",
+    progress: 0,
+    speed: 0.003,
+    traits: {}
+  })
+}
+
+/* -------------------------------------------------
+   PATH INTERPOLATION (CORE FIX)
+------------------------------------------------- */
+function getPositionOnPath(path: Point[], progress: number) {
+  const segments = path.length - 1
+  const segProgress = progress * segments
+  const index = Math.floor(segProgress)
+  const t = segProgress - index
+
+  const p1 = path[index]
+  const p2 = path[index + 1] ?? p1
+
+  return {
+    x: p1.x + (p2.x - p1.x) * t,
+    y: p1.y + (p2.y - p1.y) * t
+  }
+}
+
+function partStyle(part: Part) {
+  const pos = getPositionOnPath(conveyorPath, part.progress)
+  return {
+    transform: `translate(${pos.x}px, ${pos.y}px)`
+  }
+}
+
+/* -------------------------------------------------
+   VISUAL RESOLUTION
+------------------------------------------------- */
+function getPartSprite(part: Part) {
+  if (part.traits.cut && part.traits.color) return "/img/CircleRedCut.png"
+  if (part.traits.cut) return "/img/CircleCut.png"
+  if (part.traits.color) return "/img/CircleRed.png"
+  return "/img/Circle.png"
+}
+
+/* -------------------------------------------------
+   ECONOMY
+------------------------------------------------- */
+function calculateValue(part: Part) {
+  let value = patterns[part.patternId].baseValue
+
+  if (part.traits.color) value *= 1.25
+  if (part.traits.cut) value *= 1.5
+  if (part.traits.merged) value *= 2
+
+  return Math.floor(value)
+}
+
+function calculateExp(part: Part) {
+  return patterns[part.patternId].baseExp +
+    Object.keys(part.traits).length
+}
+
+/* -------------------------------------------------
+   SELL & LEVEL
+------------------------------------------------- */
+function sellPart(part: Part) {
+  money.value += calculateValue(part)
+  gainExp(calculateExp(part))
+}
+
+function gainExp(amount: number) {
+  exp.value += amount
+  if (exp.value >= expToNextLvl.value) {
+    exp.value = 0
+    lvl.value++
+    expToNextLvl.value = Math.floor(expToNextLvl.value * 1.5)
+  }
+}
+
+/* -------------------------------------------------
+   GAME LOOP
+------------------------------------------------- */
+setInterval(() => {
+  parts.value.forEach((part, index) => {
+    part.progress += part.speed
+
+    // apply machines
+    machines.forEach(machine => {
+      if (
+        part.progress >= machine.at &&
+        !(part as any)[`m_${machine.at}`]
+      ) {
+        Object.assign(part, machine.apply(part))
+        ;(part as any)[`m_${machine.at}`] = true
+      }
+    })
+
+    // sell
+    if (part.progress >= 1) {
+      sellPart(part)
+      parts.value.splice(index, 1)
     }
-
-    function levelProgress(expGained: number){
-        exp.value += expGained;
-        localStorage.setItem("exp", exp.value.toString()); //localStorage update
-        if (exp.value >= expToNextLvl.value){
-            lvl.value += 1;
-            exp.value = 0;
-            expToNextLvl.value = Math.floor(expToNextLvl.value * 1.5);
-            localStorage.setItem("lvl", lvl.value.toString()); //localStorage update
-            localStorage.setItem("exp", exp.value.toString()); //localStorage update
-            localStorage.setItem("expToNextLvl", expToNextLvl.value.toString());
-        }
-    }
-
-    function move(part){
-        return part.y += 10;
-    }
-
-    function gameLoop(){
-        setInterval(() => {
-            parts.value.forEach((part) => {
-                move(part);
-            });
-            partProgress.value += 1;
-
-            if (partProgress.value >= 100){
-                partProgress.value = 0;
-                spawnPart();
-            }
-        }, 50);
-    }
-    gameLoop();
+  })
+}, 16)
 </script>

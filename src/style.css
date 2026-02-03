@@ -199,29 +199,38 @@ body {
   user-select: none;
   z-index: 1;
 }
+#app main section#shop {
+  position: relative;
+}
+#app main section#shop > img {
+  position: absolute;
+  top: -30px;
+  filter: opacity(0.8);
+  user-select: none;
+}
 #app main section#shop aside {
+  position: relative;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   gap: 20px;
   padding: 20px;
-  background-color: var(--primary75);
+  z-index: 1;
 }
 #app main section#shop aside div.shop_header {
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 0px;
+  gap: 10px;
 }
 #app main section#shop aside div.shop_header h2 {
   color: var(--darkgray);
   font-size: 3em;
 }
-#app main section#shop aside div.shop_header i {
-  font-size: 2.5em;
-  color: var(--darkgray);
-  cursor: pointer;
+#app main section#shop aside div.shop_header img {
+  width: 36px;
+  user-select: none;
 }
 #app main section#shop aside div.shop_buttons {
   display: flex;
@@ -242,6 +251,7 @@ body {
   border-radius: 8px;
   border: 1px solid --darkgray;
   font-size: 2em;
+  cursor: pointer;
 }
 #app footer {
   position: sticky;
@@ -252,8 +262,13 @@ body {
   align-items: center;
   gap: 0px;
 }
+#app footer img {
+  position: absolute;
+  filter: opacity(0.8);
+  height: 100%;
+}
 #app footer p {
-  background-color: var(--primary75);
+  z-index: 1;
   padding: 20px;
   color: var(--darkgray);
   font-size: 2em;
