@@ -75,6 +75,7 @@ body {
 #app header div#header_info h1 {
   font-size: 3em;
   z-index: 1;
+  padding: 0 10px;
 }
 #app header div#header_info div {
   display: flex;
@@ -196,6 +197,7 @@ body {
 }
 #app main section#shop {
   position: relative;
+  width: 250px;
 }
 #app main section#shop > img {
   position: absolute;
@@ -209,7 +211,7 @@ body {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  gap: 20px;
+  gap: 40px;
   padding: 20px;
   z-index: 1;
 }
@@ -234,7 +236,7 @@ body {
   align-items: center;
   gap: 10px;
 }
-#app main section#shop aside div.shop_buttons .shop_button {
+#app main section#shop aside .button {
   width: 200px;
   height: 40px;
   display: flex;
@@ -246,6 +248,60 @@ body {
   border-radius: 8px;
   border: 1px solid --darkgray;
   font-size: 2em;
+  cursor: pointer;
+}
+#app main section#patternShop {
+  position: fixed;
+  width: 50%;
+  height: 500px;
+  display: flex;
+  flex-direction: column;
+  justify-content: start;
+  align-items: start;
+  gap: 20px;
+  background-color: var(--primary);
+  z-index: 10;
+  transform: translateX(50%);
+  padding: 20px;
+}
+#app main section#patternShop div.shop_header {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0;
+}
+#app main section#patternShop div.shop_header h4 {
+  font-size: 3em;
+}
+#app main section#patternShop div.shop_header p {
+  font-size: 3em;
+  cursor: pointer;
+}
+#app main section#patternShop div.container {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  align-items: start;
+  gap: 20px;
+}
+#app main section#patternShop div.container .pattern {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: start;
+  align-items: center;
+  gap: 20px;
+  padding: 10px;
+  border: var(--darkgray) 2px solid;
+  border-radius: 8px;
+  cursor: pointer;
+}
+#app main section#patternShop div.container .pattern button {
+  background: var(--lightgray);
+  border: 2px solid var(--darkgray);
+  border-radius: 8px;
+  padding: 5px;
   cursor: pointer;
 }
 #app footer {

@@ -6,7 +6,7 @@
             <div>
                 <p id="user">{{ userName }}</p>
                 <p>Level: {{ lvl }}</p>
-                <p>EXP: {{ exp }} / {{ expToNextLvl }}</p>
+                <p>EXP: {{ exp }}/ {{ expToNextLvl }}</p>
             </div>
         </div>
     </header>
@@ -16,25 +16,25 @@
                 <h3>Stats</h3>
                 <p>Income: 0 IGM/s</p>
                 <p>Idle: 0 IGM/h</p>
-                <p>Parts Sold: </p>
+                <p>Parts Sold: {{ partsSold }}</p>
             </section>
             <section>
                 <h3>Progress</h3>
-                <p>Next Part:  %</p>
-                <input type="range" min="0" max="100" class="slider" v-model="parts.progress" disabled="true">
-                <p>Part Price: IGM</p>
+                <p>Next Part: {{ creatingProgress }} %</p>
+                <input type="range" min="0" max="100" class="slider" v-model="creatingProgress" disabled="true">
+                <p>Part Price: {{ currentPattern.baseValue }} IGM</p>
             </section>
             <section>
                 <h3>Daily Pattern</h3>
-                <p>Price: IGM</p>
-                <img alt="Daily Pattern" id="daily_pattern">
+                <p>Price: {{ dailyPattern.baseValue }} IGM</p> <!-- NEEDS FIX -->
+                <img alt="Daily Pattern" id="daily_pattern" :src="dailyPattern.src">
             </section>
         </aside>
         <section id="simulation">
-            <div @click="spawnPart" id="factory">
+            <div @click="click" id="factory">
                 <img src="/img/Factory.png" alt="Factory" draggable="false">
-                <img alt="Pattern" id="pattern" draggable="false">
-                <p id="progress">Progress %</p>
+                <img :src="currentPattern.src" alt="Pattern" id="pattern" draggable="false">
+                <p id="progress">Progress {{ creatingProgress }} %</p>
             </div>
             <div id="belt"></div>
             <img src="/img/Seller.png" alt="Seller" id="seller" draggable="false">
@@ -56,12 +56,25 @@
                     <img src="/img/ShoppingCart.png" alt="Shop Icon" draggable="false">
                 </div>
                 <div class="shop_buttons">
-                    <button class="shop_button">Patterns</button>
-                    <button class="shop_button">Tools</button>
-                    <button class="shop_button">Upgrades</button>
-                    <button class="shop_button">Prestige</button>
+                    <button class="button" @click="patternShop = !patternShop">Patterns</button>
+                    <button class="button">Tools</button>
+                    <button class="button">Upgrades</button>
+                    <button class="button">Prestige</button>
                 </div>
+                <button class="button">Inventory</button>
             </aside>
+        </section>
+        <section id="patternShop" v-if="patternShop">
+            <div class="shop_header">
+                <h4>Pattern Shop</h4>
+                <p @click="patternShop = !patternShop">X</p>
+            </div>
+            <div class="container">
+                <div class="pattern" v-for="pattern in patterns">
+                    <img :src="pattern.src" alt="pattern" draggable="false">
+                    <button>Price: {{ pattern.price }}</button>
+                </div>
+            </div>
         </section>
     </main>
     <footer>
@@ -77,36 +90,40 @@ import { ref } from "vue"
 type Point = { x: number; y: number }
 
 type Part = {
-  id: number
-  patternId: string
-  progress: number
-  speed: number
-  traits: {
-    color?: string
-    cut?: boolean
-    merged?: boolean
-  }
+    id: number
+    patternId: string
+    progress: number
+    speed: number
+    traits: {
+        color?: string
+        cut?: boolean
+        merged?: boolean
+    }
 }
 
 type Pattern = {
-  id: string
-  baseValue: number
-  baseExp: number
-  traits: {
-    color?: string
-    cut?: boolean
-    merged?: boolean
-  }
+    id: string
+    baseValue: number
+    baseExp: number
+    price: number
+    traits: {
+        color?: string
+        cut?: boolean
+        merged?: boolean
+    }
+    src?: string
 }
 
 type Machine = {
-  at: number // progress position (0–1)
-  apply(part: Part): Part
+    at: number // progress position (0–1)
+    apply(part: Part): Part
 }
 
 //STATE
 const factoryName = ref("Pattern Factory")
 const userName = ref("Player")
+
+const patternShop = ref(false);
 
 const money = ref(localStorage.getItem("money") ? parseInt(localStorage.getItem("money")!) : 0)
 const lvl = ref(localStorage.getItem("lvl") ? parseInt(localStorage.getItem("lvl")!) : 1)
@@ -116,37 +133,61 @@ const expToNextLvl = ref(localStorage.getItem("expToNextLvl") ? parseInt(localSt
 const parts = ref<Part[]>([])
 let partId = 0
 
+const creatingProgress = ref(0)
+const creatingSpeed = ref(1);
+const clickPower = ref(10);
+
+const partsSold = ref(localStorage.getItem("partsSold") ? parseInt(localStorage.getItem("partsSold")!) : 0);
+
 //CONVEYOR PATH (ANY SHAPE)
 const conveyorPath: Point[] = [
-  { x: 0, y: 120 },
-  { x: 0, y: 500 },
+    { x: 0, y: 120 },
+    { x: 0, y: 500 },
 ]
 
 //PATTERNS (BLUEPRINTS) LIST OF ALL PATTERN TYPES
 const patterns: Record<string, Pattern> = {
-  basic: {
-    id: "basic",
-    baseValue: 1,
-    baseExp: 2,
-    traits: {
-        color: undefined,
-        cut: false,
-        merged: false
+    basic: {
+        id: "basic",
+        baseValue: 1,
+        baseExp: 2,
+        price: 0,
+        traits: {
+            color: undefined,
+            cut: false,
+            merged: false
+        },
+        src: "/img/Circle.png"
+    },
+    redCircle: {
+        id: "redCircle",
+        baseValue: 5,
+        baseExp: 3,
+        price: 100,
+        traits: {
+            color: "red",
+            cut: false,
+            merged: false
+        },
+        src: "/img/CircleRed.png"
+    },
+    blueCircle: {
+        id: "blueCircle",
+        baseValue: 10,
+        baseExp: 8,
+        price: 500,
+        traits: {
+            color: "blue",
+            cut: false,
+            merged: false
+        },
+        src: "/img/CircleBlue.png"
     }
-  },
-  redCircle: {
-    id: "redCircle",
-    baseValue: 5,
-    baseExp: 3,
-    traits: {
-        color: "red",
-        cut: false,
-        merged: false
-    }
-  },
 }
 
-const currentPattern = ref<Pattern>(patterns.basic);
+const currentPattern = ref<Pattern>(patterns.redCircle);
+const dailyPattern = ref<Pattern>(patterns.blueCircle);
+dailyPattern.value.baseValue *= 1.5; // 50% price increase for daily pattern
 
 //MACHINES
 const machines: Machine[] = [
@@ -181,6 +222,13 @@ function spawnPart() {
     traits: {}
   })
 }
+function click() {
+    creatingProgress.value += clickPower.value
+    if (creatingProgress.value >= 100) {
+        spawnPart()
+        creatingProgress.value = 0
+    }
+}
 
 //PATH INTERPOLATION (CORE FIX)
 function getPositionOnPath(path: Point[], progress: number) {
@@ -213,10 +261,15 @@ function getPartSprite(part: Part) {
   return "/img/Circle.png"
 }
 
-//VALUE CALCULATION AND EXP CALCULATION
+//VALUE CALCULATION AND EXP CALCULATION -- REMOVE SCHIZO LOGS
 function calculateValue(part: Part) {
   let value = currentPattern.value.baseValue
-  return Math.floor(value)
+  if (currentPattern.value.id === dailyPattern.value.id) {
+    value = dailyPattern.value.baseValue
+    console.log("Daily !!")
+  }
+  console.log("Calculated Value:", value);
+  return value
 }
 function calculateExp(part: Part) {
   return currentPattern.value.baseExp
@@ -224,9 +277,11 @@ function calculateExp(part: Part) {
 
 //SELL & LEVEL
 function sellPart(part: Part) {
-  money.value += calculateValue(part)
-  localStorage.setItem("money", money.value.toString())
-  gainExp(calculateExp(part))
+    money.value += calculateValue(part)
+    partsSold.value += 1;
+    localStorage.setItem("money", money.value.toString())
+    localStorage.setItem("partsSold", partsSold.value.toString())
+    gainExp(calculateExp(part))
 }
 
 function gainExp(amount: number) {
@@ -261,6 +316,11 @@ setInterval(() => {
         parts.value.splice(index, 1)
         }
     })
+    creatingProgress.value += creatingSpeed.value;
+    if (creatingProgress.value >= 100) {
+        spawnPart()
+        creatingProgress.value = 0
+    }
     /*
     document.addEventListener('mousemove', (event) => {
         console.log(`Mouse X: ${event.clientX}, Mouse Y: ${event.clientY}`);

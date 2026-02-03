@@ -80,6 +80,7 @@ body {
       h1 {
         font-size: 3em;
         z-index: 1;
+        padding: 0 10px;
       }
       div{
         @include flexRow(10px);
@@ -188,6 +189,7 @@ body {
     }
     section#shop {
       position: relative;
+      width: 250px;
 
       >img {
         position: absolute;
@@ -197,7 +199,7 @@ body {
       }
       aside {
         position: relative;
-        @include flexColumn(20px);
+        @include flexColumn(40px);
         padding: 20px;
         z-index: 1;
 
@@ -215,16 +217,62 @@ body {
         }
         div.shop_buttons {
           @include flexColumn(10px);
+        }
+        .button {
+          width: 200px;
+          height: 40px;
+          @include flexRow();
+          background-color: var(--lightgray);
+          color: var(--darkgray);
+          border-radius: 8px;
+          border: 1px solid --darkgray;
+          font-size: 2em;
+          cursor: pointer;
+        }
+      }
+    }
+    section#patternShop {
+      position: fixed;
+      width: 50%;
+      height: 500px;
+      @include flexColumn(20px, start, start);
+      background-color: var(--primary);
+      z-index: 10;
+      transform: translateX(50%);
+      padding: 20px;
 
-          .shop_button {
-            width: 200px;
-            height: 40px;
-            @include flexRow();
-            background-color: var(--lightgray);
-            color: var(--darkgray);
+      div.shop_header {
+        width: 100%;
+        @include flexRow(0, space-between);
+
+        h4 {
+          font-size: 3em;
+        }
+        p {
+          font-size: 3em;
+          cursor: pointer;
+        }
+      }
+      div.container {
+        width: 100%;
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        align-items: start;
+        gap: 20px;
+
+        .pattern {
+          width: 100%;
+          @include flexColumn(20px, start);
+          padding: 10px;
+          border: var(--darkgray) 2px solid;
+          border-radius: 8px;
+          cursor: pointer;
+
+          button {
+            background: var(--lightgray);
+            border: 2px solid var(--darkgray);
             border-radius: 8px;
-            border: 1px solid --darkgray;
-            font-size: 2em;
+            padding: 5px;
             cursor: pointer;
           }
         }
