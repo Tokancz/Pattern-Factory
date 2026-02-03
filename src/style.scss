@@ -1,11 +1,20 @@
+@import url('https://fonts.googleapis.com/css2?family=Tiny5&display=swap');
+
 :root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-family: "Tiny5", sans-serif;
   line-height: 1.5;
   font-weight: 400;
 
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+  --black: #000000;
+  --white: #FFFFFF;
+  --primary: #8F7676;
+  --primary75: #8f7676c3;
+  --darkgray: #555555;
+  --gray: #696969;
+  --lightgray: #BABABA;
+
+  color: var(--black);
+  background-color: var(--white);
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -13,17 +22,209 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
-body {
-  margin: 0;
+@mixin flexRow($gap:0px, $justify: center, $align: center) {
   display: flex;
+  justify-content: $justify;
+  align-items: $align;
+  gap: $gap;
+}
+@mixin flexColumn($gap:0px, $justify: center, $align: center) {
+  display: flex;
+  flex-direction: column;
+  justify-content: $justify;
+  align-items: $align;
+  gap: $gap;
+}
+
+body {
+  @include flexRow();
   place-items: center;
+  box-sizing: border-box;
   min-width: 320px;
-  min-height: 100vh;
+  min-height: 100dvh;
+
+  background-image: url(/img/Tile.png);
+  background-size: 3%;
 }
 
 #app {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
+  max-width: 1440px;
+  max-height: 1024px;
+  width: 100%;
+  height: 100dvh;
+  @include flexColumn(0px, start);
   text-align: center;
+  overflow: hidden;
+
+  header {
+    width: 100%;
+    @include flexRow(0px,space-between, start);
+
+    div#header_info {
+      @include flexColumn(0, center, start);
+      background-color: var(--primary);
+      padding: 0 10px;
+      color: var(--white);
+
+      h1 {
+        font-size: 3em;
+      }
+      div{
+        @include flexRow(10px);
+
+        p {
+          color: var(--lightgray);
+          font-size: 1.5em;
+
+          &#user {
+            color: var(--white);
+            font-size: 2em;
+          }
+        }
+      }
+    }
+    i {
+      font-size: 4em;
+      cursor: pointer;
+      color: var(--gray);
+    }
+  }
+  main {
+    width: 100%;
+    height: 100%;
+    @include flexRow(0, space-between);
+
+    aside#stats {
+      @include flexColumn(10px, center, start);
+      padding: 20px;
+
+      section {
+        width: 200px;
+        @include flexColumn();
+        background-color: var(--primary75);
+        padding: 10px;
+        color: var(--darkgray);
+        text-align: start;
+
+        h3 {
+          width: 100%;
+          font-size: 2.5em;
+        }
+        p {
+          width: 100%;
+          font-size: 1.5em;
+          color: var(--lightgray);
+        }
+        img#daily_pattern {
+          width: 100px;
+        }
+        .slider {
+          width: 100%;
+          accent-color: var(--primary);
+        }
+        .slider::-webkit-slider-thumb {
+          -webkit-appearance: none;
+          appearance: none;
+        }
+      }
+    }
+    section#simulation {
+      position: relative;
+      height: 600px;
+      @include flexColumn(0px, space-between);
+
+      #factory {
+        position: relative;
+        width: 200px;
+        @include flexColumn();
+        user-select: none;
+        z-index: 1;
+        cursor: pointer;
+
+        #pattern {
+          position: absolute;
+          left: 58px;
+          top: 58px;
+          width: 80px;
+        }
+        #progress {
+          position: absolute;
+          top: 150px;
+          color: var(--white);
+        }
+      }
+      #belt {
+        position: absolute;
+        top: 180px;
+        width: 60px;
+        height: 350px;
+        background-image: url(/img/Belt.png);
+        background-size: contain;
+      }
+      #parts {
+        position: absolute;
+        top: 180px;
+        width: 50px;
+        height: auto;
+
+        img {
+          position: absolute;
+          user-select: none;
+        }
+      }
+      #seller {
+        width: 120px;
+        user-select: none;
+        z-index: 1;
+      }
+    }
+    section#shop {
+      aside {
+        @include flexColumn();
+        padding: 20px;
+        background-color: var(--primary75);
+
+        div.shop_header {
+          @include flexRow();
+
+          h2 {
+            color: var(--darkgray);
+            font-size: 3em;
+          }
+          i {
+            font-size: 2.5em;
+            color: var(--darkgray);
+            cursor: pointer;
+          }
+        }
+        div.shop_buttons {
+          @include flexColumn(10px);
+
+          .shop_button {
+            width: 200px;
+            height: 40px;
+            @include flexRow();
+            background-color: var(--lightgray);
+            color: var(--darkgray);
+            border-radius: 8px;
+            border: 1px solid --darkgray;
+            font-size: 2em;
+          }
+        }
+      }
+    }
+  }
+  footer {
+    position: sticky;
+    bottom: 0;
+    width: 100%;
+    @include flexRow();
+
+    p {
+      background-color: var(--primary75);
+      padding: 20px;
+      color: var(--darkgray);
+      font-size: 2em;
+    }
+  }
 }
