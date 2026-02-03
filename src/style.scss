@@ -1,9 +1,14 @@
-@import url('https://fonts.googleapis.com/css2?family=Tiny5&display=swap');
+@font-face {
+  font-family: 'dogica';
+  src: url("/fonts/dogica.ttf");
+}
 
 :root {
-  font-family: "Tiny5", sans-serif;
-  line-height: 1.5;
+  font-family: "dogica", sans-serif;
+  line-height: 1.1;
+  letter-spacing: -5px;
   font-weight: 400;
+  font-size: .65em;
 
   --black: #000000;
   --white: #FFFFFF;
@@ -11,7 +16,7 @@
   --primary75: #8f7676c3;
   --darkgray: #555555;
   --gray: #696969;
-  --lightgray: #BABABA;
+  --lightgray: #cdcdcd;
 
   color: var(--black);
   background-color: var(--white);
@@ -61,16 +66,25 @@ body {
     @include flexRow(0px,space-between, start);
 
     div#header_info {
+      position: relative;
+      width: 500px;
+      height: 100px;
       @include flexColumn(0, center, start);
-      background-color: var(--primary);
-      padding: 0 10px;
       color: var(--white);
 
+      img {
+        position: absolute;
+        width: 100%;
+        user-select: none;
+      }
       h1 {
         font-size: 3em;
+        z-index: 1;
       }
       div{
         @include flexRow(10px);
+        z-index: 1;
+        padding: 0 10px;
 
         p {
           color: var(--lightgray);
@@ -95,16 +109,17 @@ body {
     @include flexRow(0, space-between);
 
     aside#stats {
-      @include flexColumn(10px, center, start);
+      @include flexColumn(20px, center, start);
       padding: 20px;
 
       section {
-        width: 200px;
-        @include flexColumn();
+        width: 250px;
+        @include flexColumn(5px);
         background-color: var(--primary75);
-        padding: 10px;
+        padding: 20px;
         color: var(--darkgray);
         text-align: start;
+        border: var(--primary) 3px solid;
 
         h3 {
           width: 100%;
@@ -117,14 +132,12 @@ body {
         }
         img#daily_pattern {
           width: 100px;
+          user-select: none;
         }
         .slider {
           width: 100%;
+          height: 10px;
           accent-color: var(--primary);
-        }
-        .slider::-webkit-slider-thumb {
-          -webkit-appearance: none;
-          appearance: none;
         }
       }
     }
@@ -180,7 +193,7 @@ body {
     }
     section#shop {
       aside {
-        @include flexColumn();
+        @include flexColumn(20px);
         padding: 20px;
         background-color: var(--primary75);
 

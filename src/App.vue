@@ -1,6 +1,7 @@
 <template>
     <header>
         <div id="header_info">
+            <img src="/img/Header.png" alt="Header" draggable="false">
             <h1>{{ factoryName }}</h1>
             <div>
                 <p id="user">{{ userName }}</p>
