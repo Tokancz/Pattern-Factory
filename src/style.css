@@ -136,9 +136,10 @@ body {
   font-size: 1.5em;
   color: var(--lightgray);
 }
-#app main aside#stats section img#daily_pattern {
+#app main aside#stats section svg {
   width: 100px;
   user-select: none;
+  stroke: var(--black);
 }
 #app main aside#stats section .slider {
   width: 100%;
@@ -166,11 +167,12 @@ body {
   z-index: 1;
   cursor: pointer;
 }
-#app main section#simulation #factory #pattern {
+#app main section#simulation #factory svg {
   position: absolute;
   left: 58px;
   top: 58px;
   width: 80px;
+  stroke: var(--black);
 }
 #app main section#simulation #factory #progress {
   position: absolute;
@@ -185,15 +187,27 @@ body {
   background-image: url(/img/Belt.png);
   background-size: contain;
 }
-#app main section#simulation img.part {
+#app main section#simulation .part {
   width: 60px;
   position: absolute;
   user-select: none;
+  stroke: var(--black);
+}
+#app main section#simulation #color_machine {
+  position: absolute;
+  top: 260px;
+  width: 100px;
+  z-index: 5;
 }
 #app main section#simulation #seller {
   width: 120px;
   user-select: none;
   z-index: 1;
+}
+#app main section#simulation #pattern_svg {
+  width: 60px;
+  fill: #ffffff;
+  stroke: rgb(0, 0, 0);
 }
 #app main section#shop {
   position: relative;
@@ -296,6 +310,10 @@ body {
   border: var(--darkgray) 2px solid;
   border-radius: 8px;
   cursor: pointer;
+}
+#app main section#patternShop div.container .pattern svg {
+  stroke: var(--black);
+  fill: white;
 }
 #app main section#patternShop div.container .pattern button {
   background: var(--lightgray);

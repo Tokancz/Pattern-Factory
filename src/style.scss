@@ -131,9 +131,10 @@ body {
           font-size: 1.5em;
           color: var(--lightgray);
         }
-        img#daily_pattern {
+        svg {
           width: 100px;
           user-select: none;
+          stroke: var(--black);
         }
         .slider {
           width: 100%;
@@ -155,11 +156,12 @@ body {
         z-index: 1;
         cursor: pointer;
 
-        #pattern {
+        svg {
           position: absolute;
           left: 58px;
           top: 58px;
           width: 80px;
+          stroke: var(--black);
         }
         #progress {
           position: absolute;
@@ -176,15 +178,27 @@ body {
         background-size: contain;
       }
       
-      img.part {
+      .part {
         width: 60px;
         position: absolute;
         user-select: none;
+        stroke: var(--black);
+      }
+      #color_machine {
+        position: absolute;
+        top: 260px;
+        width: 100px;
+        z-index: 5;
       }
       #seller {
         width: 120px;
         user-select: none;
         z-index: 1;
+      }
+      #pattern_svg {
+        width: 60px;
+        fill: #ffffff;
+        stroke: rgb(0, 0, 0);
       }
     }
     section#shop {
@@ -268,6 +282,10 @@ body {
           border-radius: 8px;
           cursor: pointer;
 
+          svg {
+            stroke: var(--black);
+            fill: white;
+          }
           button {
             background: var(--lightgray);
             border: 2px solid var(--darkgray);
