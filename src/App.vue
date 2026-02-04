@@ -20,8 +20,8 @@
             </section>
             <section>
                 <h3>Progress</h3>
-                <p>Next Part: {{ creatingProgress }} %</p>
-                <input type="range" min="0" max="100" class="slider" v-model="creatingProgress" disabled="true">
+                <p>Next Part: {{ Math.floor(creatingProgress / currentPattern.creationTime * 100) }} %</p>
+                <input type="range" min="0" :max="currentPattern.creationTime" class="slider" v-model="creatingProgress" disabled="true">
                 <p>Part Price: {{ currentPattern.baseValue }} IGM</p>
             </section>
             <section>
@@ -42,7 +42,7 @@
                     <g><path d="M16,0C16.025,2.675 16,32 16,32"/></g>
                     <g transform="matrix(0.96875,0,0,1,0.5,0)"><path d="M32,16L0,16"/></g>
                 </svg>
-                <p id="progress">Progress {{ creatingProgress }} %</p>
+                <p id="progress">Progress {{ Math.floor(creatingProgress / currentPattern.creationTime * 100) }} %</p>
             </div>
             <div id="belt"></div>
             <img src="/img/ColorMachine.png" alt="color machine" id="color_machine">
@@ -60,7 +60,7 @@
             </svg>
             <!-- PARTS -->
         </section>
-        <section id="shop">
+        <section id="shopList">
             <img src="/img/Shop.png" alt="shopBG" draggable="false">
             <aside>
                 <div class="shop_header">
@@ -70,13 +70,13 @@
                 <div class="shop_buttons">
                     <button class="button" @click="patternShop = !patternShop">Patterns</button>
                     <button class="button">Tools</button>
-                    <button class="button">Upgrades</button>
+                    <button class="button" @click="upgradesShop = !upgradesShop">Upgrades</button>
                     <button class="button">Prestige</button>
                 </div>
-                <button class="button">Inventory</button>
+                <button class="button" @click="inventory = !inventory">Inventory</button>
             </aside>
         </section>
-        <section id="patternShop" v-if="patternShop">
+        <section class="shop" v-if="patternShop">
             <div class="shop_header">
                 <h4>Pattern Shop</h4>
                 <p @click="patternShop = !patternShop">X</p>
@@ -90,6 +90,36 @@
                     </svg>
                     <button v-if="!pattern.owned" @click="buyPattern(pattern)">Price: {{ pattern.price }}</button>
                     <button v-else>Owned</button>
+                </div>
+            </div>
+        </section>
+        <section class="shop" v-if="upgradesShop">
+            <div class="shop_header">
+                <h4>Upgrade</h4>
+                <p @click="upgradesShop = !upgradesShop">X</p>
+            </div>
+            <div class="container">
+                <div class="upgrade">
+                    <p>Clickinng Power: {{ clickPower }}</p>
+                    <p>Cost: </p>
+                    <button class="buy_button" @click="upgrade">Buy</button>
+                </div>
+            </div>
+        </section>
+        <section class="shop" v-if="inventory">
+            <div class="shop_header">
+                <h4>Inventory</h4>
+                <p @click="inventory = !inventory">X</p>
+            </div>
+            <div class="container">
+                <div class="pattern" v-for="pattern in patterns" :key="pattern.id" v-show="pattern.owned">
+                    <svg viewBox="0 0 32 32" draggable="false" :style="{fill: pattern.traits.color}">
+                        <g transform="matrix(0.96875,0,0,0.96875,0.5,0.5)"><circle cx="16" cy="16" r="16"/></g>
+                        <g><path d="M16,0C16.025,2.675 16,32 16,32"/></g>
+                        <g transform="matrix(0.96875,0,0,1,0.5,0)"><path d="M32,16L0,16"/></g>
+                    </svg>
+                    <button v-if="currentPattern.id !== pattern.id"  @click="currentPattern = pattern">Select</button>
+                    <button v-if="currentPattern.id == pattern.id">Selected</button>
                 </div>
             </div>
         </section>
@@ -122,6 +152,7 @@ type Pattern = {
     id: string
     baseValue: number
     baseExp: number
+    creationTime: number
     price: number
     owned: boolean
     traits: {
@@ -137,11 +168,20 @@ type Machine = {
     apply(part: Part): Part
 }
 
+type Upgrade = {
+    id: string
+    lvl: number
+    value: number
+    power: number
+}
+
 //STATE
 const factoryName = ref("Pattern Factory")
 const userName = ref("Player")
 
 const patternShop = ref(false);
+const upgradesShop = ref(false);
+const inventory = ref(false);
 
 const money = ref(localStorage.getItem("money") ? parseInt(localStorage.getItem("money")!) : 0)
 const lvl = ref(localStorage.getItem("lvl") ? parseInt(localStorage.getItem("lvl")!) : 1)
@@ -151,7 +191,7 @@ const expToNextLvl = ref(localStorage.getItem("expToNextLvl") ? parseInt(localSt
 const parts = ref<Part[]>([])
 let partId = 0
 
-const creatingProgress = ref(0)
+const creatingProgress = ref<number>(0);
 const creatingSpeed = ref(1);
 const clickPower = ref(10);
 
@@ -170,12 +210,28 @@ const colors: {} = {
     greenCircle: "#4ddf88"
 }
 
+const upgrades: Record<string, Upgrade> = {//Use Clicking Power.power as prev clicking power
+    clickingPower: {
+        id: "clickingPower",
+        lvl: 1,
+        value: 50,
+        power: 25
+    },
+    creationSpeed: {
+        id: "creationSpeed",
+        lvl: 1,
+        value: 100,
+        power: 1
+    }
+}
+
 //PATTERNS (BLUEPRINTS) LIST OF ALL PATTERN TYPES
 const patterns: Record<string, Pattern> = {
     basic: {
         id: "basic",
         baseValue: 1,
         baseExp: 2,
+        creationTime: 100,
         price: 0,
         owned: true,
         traits: {
@@ -188,6 +244,7 @@ const patterns: Record<string, Pattern> = {
         id: "redCircle",
         baseValue: 5,
         baseExp: 3,
+        creationTime: 120,
         price: 100,
         owned: localStorage.getItem("redCircle_owned") ? true : false,
         traits: {
@@ -200,6 +257,7 @@ const patterns: Record<string, Pattern> = {
         id: "blueCircle",
         baseValue: 10,
         baseExp: 8,
+        creationTime: 150,
         price: 500,
         owned: localStorage.getItem("blueCircle_owned") ? true : false,
         traits: {
@@ -212,6 +270,7 @@ const patterns: Record<string, Pattern> = {
         id: "greenCircle",
         baseValue: 25,
         baseExp: 15,
+        creationTime: 200,
         price: 5000,
         owned: localStorage.getItem("greenCircle_owned") ? true : false,
         traits: {
@@ -226,6 +285,7 @@ const patterns: Record<string, Pattern> = {
 const currentPattern = ref<Pattern>(patterns.redCircle);
 const dailyPattern = ref<Pattern>(patterns.greenCircle);
 dailyPattern.value.baseValue *= 1.5; // 50% price increase for daily pattern
+
 
 //MACHINES
 const machines: Machine[] = [
@@ -264,7 +324,7 @@ function spawnPart() {
 }
 function click() {
     creatingProgress.value += clickPower.value
-    if (creatingProgress.value >= 100) {
+    if (creatingProgress.value >= currentPattern.value.creationTime) {
         spawnPart()
         creatingProgress.value = 0
     }
@@ -337,6 +397,11 @@ function buyPattern(pattern: Pattern) {
         localStorage.setItem(`${pattern.id}_owned`, "true");
     }
 }
+function upgrade(cost: number){
+    if (money.value >= cost){
+
+    }
+}
 
 //GAME LOOP
 setInterval(() => {
@@ -359,7 +424,7 @@ setInterval(() => {
         }
     })
     creatingProgress.value += creatingSpeed.value;
-    if (creatingProgress.value >= 100) {
+    if (creatingProgress.value >= currentPattern.value.creationTime) {
         spawnPart()
         creatingProgress.value = 0
     }

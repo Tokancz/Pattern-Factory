@@ -5,7 +5,7 @@
 :root {
   font-family: "dogica", sans-serif;
   line-height: 1.1;
-  letter-spacing: -5px;
+  letter-spacing: -3px;
   font-weight: 400;
   font-size: 0.65em;
   --black: #000000;
@@ -58,7 +58,7 @@ body {
 }
 #app header div#header_info {
   position: relative;
-  width: 500px;
+  width: 600px;
   height: 100px;
   display: flex;
   flex-direction: column;
@@ -209,17 +209,17 @@ body {
   fill: #ffffff;
   stroke: rgb(0, 0, 0);
 }
-#app main section#shop {
+#app main section#shopList {
   position: relative;
   width: 250px;
 }
-#app main section#shop > img {
+#app main section#shopList > img {
   position: absolute;
   top: -30px;
   filter: opacity(0.8);
   user-select: none;
 }
-#app main section#shop aside {
+#app main section#shopList aside {
   position: relative;
   display: flex;
   flex-direction: column;
@@ -229,28 +229,28 @@ body {
   padding: 20px;
   z-index: 1;
 }
-#app main section#shop aside div.shop_header {
+#app main section#shopList aside div.shop_header {
   display: flex;
   justify-content: center;
   align-items: center;
   gap: 10px;
 }
-#app main section#shop aside div.shop_header h2 {
+#app main section#shopList aside div.shop_header h2 {
   color: var(--darkgray);
   font-size: 3em;
 }
-#app main section#shop aside div.shop_header img {
+#app main section#shopList aside div.shop_header img {
   width: 36px;
   user-select: none;
 }
-#app main section#shop aside div.shop_buttons {
+#app main section#shopList aside div.shop_buttons {
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   gap: 10px;
 }
-#app main section#shop aside .button {
+#app main section#shopList aside .button {
   width: 200px;
   height: 40px;
   display: flex;
@@ -264,9 +264,9 @@ body {
   font-size: 2em;
   cursor: pointer;
 }
-#app main section#patternShop {
+#app main section.shop {
   position: fixed;
-  width: 50%;
+  width: 800px;
   height: 500px;
   display: flex;
   flex-direction: column;
@@ -278,28 +278,28 @@ body {
   transform: translateX(50%);
   padding: 20px;
 }
-#app main section#patternShop div.shop_header {
+#app main section.shop div.shop_header {
   width: 100%;
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 0;
 }
-#app main section#patternShop div.shop_header h4 {
+#app main section.shop div.shop_header h4 {
   font-size: 3em;
 }
-#app main section#patternShop div.shop_header p {
+#app main section.shop div.shop_header p {
   font-size: 3em;
   cursor: pointer;
 }
-#app main section#patternShop div.container {
+#app main section.shop div.container {
   width: 100%;
   display: grid;
   grid-template-columns: repeat(5, 1fr);
   align-items: start;
   gap: 20px;
 }
-#app main section#patternShop div.container .pattern {
+#app main section.shop div.container .pattern, #app main section.shop div.container .upgrade {
   width: 100%;
   display: flex;
   flex-direction: column;
@@ -311,16 +311,19 @@ body {
   border-radius: 8px;
   cursor: pointer;
 }
-#app main section#patternShop div.container .pattern svg {
+#app main section.shop div.container .pattern svg, #app main section.shop div.container .upgrade svg {
   stroke: var(--black);
   fill: white;
 }
-#app main section#patternShop div.container .pattern button {
+#app main section.shop div.container .pattern button, #app main section.shop div.container .upgrade button {
   background: var(--lightgray);
   border: 2px solid var(--darkgray);
   border-radius: 8px;
   padding: 5px;
   cursor: pointer;
+}
+#app main section.shop div.container .pattern p, #app main section.shop div.container .upgrade p {
+  font-size: 1.5em;
 }
 #app footer {
   position: sticky;

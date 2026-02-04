@@ -6,7 +6,7 @@
 :root {
   font-family: "dogica", sans-serif;
   line-height: 1.1;
-  letter-spacing: -5px;
+  letter-spacing: -3px;
   font-weight: 400;
   font-size: .65em;
 
@@ -67,7 +67,7 @@ body {
 
     div#header_info {
       position: relative;
-      width: 500px;
+      width: 600px;
       height: 100px;
       @include flexColumn(0, center, start);
       color: var(--white);
@@ -201,7 +201,7 @@ body {
         stroke: rgb(0, 0, 0);
       }
     }
-    section#shop {
+    section#shopList {
       position: relative;
       width: 250px;
 
@@ -245,9 +245,9 @@ body {
         }
       }
     }
-    section#patternShop {
+    section.shop {
       position: fixed;
-      width: 50%;
+      width: 800px;
       height: 500px;
       @include flexColumn(20px, start, start);
       background-color: var(--primary);
@@ -274,7 +274,7 @@ body {
         align-items: start;
         gap: 20px;
 
-        .pattern {
+        .pattern, .upgrade{
           width: 100%;
           @include flexColumn(20px, start);
           padding: 10px;
@@ -292,6 +292,9 @@ body {
             border-radius: 8px;
             padding: 5px;
             cursor: pointer;
+          }
+          p {
+            font-size: 1.5em;
           }
         }
       }
