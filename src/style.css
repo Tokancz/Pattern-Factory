@@ -295,7 +295,7 @@ body {
 #app main section.shop div.container {
   width: 100%;
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   align-items: start;
   gap: 20px;
 }
@@ -310,6 +310,7 @@ body {
   border: var(--darkgray) 2px solid;
   border-radius: 8px;
   cursor: pointer;
+  background-color: var(--gray);
 }
 #app main section.shop div.container .pattern svg, #app main section.shop div.container .upgrade svg {
   stroke: var(--black);
@@ -324,6 +325,7 @@ body {
 }
 #app main section.shop div.container .pattern p, #app main section.shop div.container .upgrade p {
   font-size: 1.5em;
+  color: var(--white);
 }
 #app footer {
   position: sticky;

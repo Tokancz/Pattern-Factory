@@ -99,10 +99,10 @@
                 <p @click="upgradesShop = !upgradesShop">X</p>
             </div>
             <div class="container">
-                <div class="upgrade">
-                    <p>Clickinng Power: {{ clickPower }}</p>
-                    <p>Cost: </p>
-                    <button class="buy_button" @click="upgrade">Buy</button>
+                <div class="upgrade" v-for="upgrade in upgrades">
+                    <p>{{ upgrade.id + " lvl: " + upgrade.lvl}}</p>
+                    <p>Cost: {{ upgrade.value }}</p>
+                    <button class="buy_button" @click="buyUpgrade(upgrade)">Buy</button>
                 </div>
             </div>
         </section>
@@ -118,7 +118,7 @@
                         <g><path d="M16,0C16.025,2.675 16,32 16,32"/></g>
                         <g transform="matrix(0.96875,0,0,1,0.5,0)"><path d="M32,16L0,16"/></g>
                     </svg>
-                    <button v-if="currentPattern.id !== pattern.id"  @click="currentPattern = pattern">Select</button>
+                    <button v-if="currentPattern.id !== pattern.id"  @click="setPattern(pattern)">Select</button>
                     <button v-if="currentPattern.id == pattern.id">Selected</button>
                 </div>
             </div>
@@ -166,6 +166,8 @@ type Pattern = {
 type Machine = {
     at: number // progress position (0–1)
     apply(part: Part): Part
+    owned: boolean
+    src: string
 }
 
 type Upgrade = {
@@ -192,8 +194,6 @@ const parts = ref<Part[]>([])
 let partId = 0
 
 const creatingProgress = ref<number>(0);
-const creatingSpeed = ref(1);
-const clickPower = ref(10);
 
 const partsSold = ref(localStorage.getItem("partsSold") ? parseInt(localStorage.getItem("partsSold")!) : 0);
 
@@ -212,13 +212,13 @@ const colors: {} = {
 
 const upgrades: Record<string, Upgrade> = {//Use Clicking Power.power as prev clicking power
     clickingPower: {
-        id: "clickingPower",
+        id: "Clicking Power",
         lvl: 1,
         value: 50,
         power: 25
     },
     creationSpeed: {
-        id: "creationSpeed",
+        id: "Creation Speed",
         lvl: 1,
         value: 100,
         power: 1
@@ -282,7 +282,9 @@ const patterns: Record<string, Pattern> = {
 
 }
 
-const currentPattern = ref<Pattern>(patterns.redCircle);
+let storagePattern = localStorage.getItem("currentPattern") //fix Later
+const currentPattern = ref<Pattern>(patterns.storagePattern ? false : patterns.basic);
+console.log(currentPattern.value.id)
 const dailyPattern = ref<Pattern>(patterns.greenCircle);
 dailyPattern.value.baseValue *= 1.5; // 50% price increase for daily pattern
 
@@ -296,7 +298,9 @@ const machines: Machine[] = [
         ...part,
         traits: { ...part.traits, color: currentPattern.value.traits.color }
       }
-    }
+    },
+    owned: true,
+    src:"/img/ColorMachine.png"
   },
   {
     at: 0.7, //CUTTING MACHINE
@@ -305,7 +309,9 @@ const machines: Machine[] = [
         ...part,
         traits: { ...part.traits, cut: currentPattern.value.traits.cut }
       }
-    }
+    },
+    owned: false,
+    src:"/img/ColorMachine.png"//change sprite
   }
 ]
 
@@ -323,7 +329,7 @@ function spawnPart() {
   })
 }
 function click() {
-    creatingProgress.value += clickPower.value
+    creatingProgress.value += upgrades.clickingPower?.power
     if (creatingProgress.value >= currentPattern.value.creationTime) {
         spawnPart()
         creatingProgress.value = 0
@@ -397,10 +403,21 @@ function buyPattern(pattern: Pattern) {
         localStorage.setItem(`${pattern.id}_owned`, "true");
     }
 }
-function upgrade(cost: number){
-    if (money.value >= cost){
-
+function buyUpgrade(upgrade: Upgrade){
+    if (money.value >= upgrade.value) {
+        money.value -= upgrade.value
+        upgrade.lvl ++
+        upgrade.power *= 1.2
+        upgrade.value *= 2
     }
+}
+
+function calculateIdle() {
+    let timer = Date.now()
+}
+function setPattern(pattern: Pattern) {
+    currentPattern.value = pattern
+    localStorage.setItem("currentPattern", pattern.id)
 }
 
 //GAME LOOP
@@ -423,7 +440,7 @@ setInterval(() => {
         parts.value.splice(index, 1)
         }
     })
-    creatingProgress.value += creatingSpeed.value;
+    creatingProgress.value += upgrades.creationSpeed?.power;
     if (creatingProgress.value >= currentPattern.value.creationTime) {
         spawnPart()
         creatingProgress.value = 0
