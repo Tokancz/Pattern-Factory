@@ -8,6 +8,7 @@
                 <p>Level: {{ lvl }}</p>
                 <p>EXP: {{ exp }}/ {{ expToNextLvl }}</p>
             </div>
+            <p v-if="lvlPopUp"> + {{ gainedMoney }} IGM</p>
         </div>
     </header>
     <main>
@@ -68,18 +69,18 @@
                     <img src="/img/ShoppingCart.png" alt="Shop Icon" draggable="false">
                 </div>
                 <div class="shop_buttons">
-                    <button class="button" @click="patternShop = !patternShop">Patterns</button>
+                    <button class="button" @click="openedShop = 'patterns'">Patterns</button>
                     <button class="button">Tools</button>
-                    <button class="button" @click="upgradesShop = !upgradesShop">Upgrades</button>
+                    <button class="button" @click="openedShop = 'upgrades'">Upgrades</button>
                     <button class="button">Prestige</button>
                 </div>
-                <button class="button" @click="inventory = !inventory">Inventory</button>
+                <button class="button" @click="openedShop = 'inventory'">Inventory</button>
             </aside>
         </section>
-        <section class="shop" v-if="patternShop">
+        <section class="shop" v-if="openedShop === 'patterns'">
             <div class="shop_header">
                 <h4>Pattern Shop</h4>
-                <p @click="patternShop = !patternShop">X</p>
+                <p @click="openedShop = ''">X</p>
             </div>
             <div class="container">
                 <div class="pattern" v-for="pattern in patterns" :key="pattern.id">
@@ -93,10 +94,10 @@
                 </div>
             </div>
         </section>
-        <section class="shop" v-if="upgradesShop">
+        <section class="shop" v-if="openedShop === 'upgrades'">
             <div class="shop_header">
                 <h4>Upgrade</h4>
-                <p @click="upgradesShop = !upgradesShop">X</p>
+                <p @click="openedShop = ''">X</p>
             </div>
             <div class="container">
                 <div class="upgrade" v-for="upgrade in upgrades">
@@ -106,10 +107,10 @@
                 </div>
             </div>
         </section>
-        <section class="shop" v-if="inventory">
+        <section class="shop" v-if="openedShop === 'inventory'">
             <div class="shop_header">
                 <h4>Inventory</h4>
-                <p @click="inventory = !inventory">X</p>
+                <p @click="openedShop = ''">X</p>
             </div>
             <div class="container">
                 <div class="pattern" v-for="pattern in patternList" :key="pattern.id" v-show="pattern.owned">
@@ -129,7 +130,7 @@
     </main>
     <footer>
         <img src="/img/Footer.png" alt="Footer" draggable="false">
-        <p>Money: {{ money }} IGM</p>
+        <p>Money: {{ formattedMoney }} IGM</p>
     </footer>
 </template>
 
@@ -184,9 +185,7 @@ type Upgrade = {
 const factoryName = ref("Pattern Factory")
 const userName = ref("Player")
 
-const patternShop = ref(false);
-const upgradesShop = ref(false);
-const inventory = ref(false);
+const openedShop = ref("")
 
 const money = ref(localStorage.getItem("money") ? parseInt(localStorage.getItem("money")!) : 0)
 const lvl = ref(localStorage.getItem("lvl") ? parseInt(localStorage.getItem("lvl")!) : 1)
@@ -258,7 +257,7 @@ const patterns: Record<string, Pattern> = {
         id: "redCircle",
         baseValue: 5,
         baseExp: 3,
-        creationTime: 120,
+        creationTime: 150,
         price: 100,
         owned: localStorage.getItem("redCircle_owned") ? true : false,
         traits: {
@@ -271,7 +270,7 @@ const patterns: Record<string, Pattern> = {
         id: "blueCircle",
         baseValue: 10,
         baseExp: 8,
-        creationTime: 150,
+        creationTime: 200,
         price: 500,
         owned: localStorage.getItem("blueCircle_owned") ? true : false,
         traits: {
@@ -284,7 +283,7 @@ const patterns: Record<string, Pattern> = {
         id: "greenCircle",
         baseValue: 25,
         baseExp: 15,
-        creationTime: 200,
+        creationTime: 300,
         price: 5000,
         owned: localStorage.getItem("greenCircle_owned") ? true : false,
         traits: {
@@ -308,7 +307,7 @@ const currentPattern = ref<Pattern>(
     ? patterns[storagePattern] : patterns.basic
 )
 
-const dailyPattern = ref<Pattern>({ ...patterns.greenCircle });
+const dailyPattern = ref<Pattern>({ ...patterns.blueCircle });
 dailyPattern.value.baseValue *= 1.5; // 50% price increase for daily pattern
 
 //MACHINES
@@ -402,7 +401,23 @@ function sellPart(part: Part) {
     partsSold.value += 1;
     localStorage.setItem("money", money.value.toString())
     localStorage.setItem("partsSold", partsSold.value.toString())
-    gainExp(calculateExp(part))
+    gainExp(calculateExp(part)!)
+}
+
+const lvlPopUp = ref(false);
+const gainedMoney = ref(0);
+
+async function sleep(ms: number): Promise<void> {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function lvlWarning() {//POpup not working
+    lvlPopUp.value = true
+    gainedMoney.value = lvl.value * 20
+    money.value += gainedMoney.value
+    console.log("lvl up reward")
+    sleep(3000)
+    //lvlPopUp.value = false
 }
 
 function gainExp(amount: number) {
@@ -411,9 +426,11 @@ function gainExp(amount: number) {
     exp.value = 0
     lvl.value++
     expToNextLvl.value = Math.floor(expToNextLvl.value * 1.5)
+    lvlWarning()
   }
   localStorage.setItem("exp", exp.value.toString())
   localStorage.setItem("lvl", lvl.value.toString())
+  localStorage.setItem("money", money.value.toString())
   localStorage.setItem("expToNextLvl", expToNextLvl.value.toString())
 }
 
@@ -449,8 +466,47 @@ function buyUpgrade(upgrade: Upgrade) {
   }
 }
 
-function calculateIdle() {
-    let timer = Date.now()
+function formatNumber(value: number): string {
+  if (value < 1000) return value.toString()
+
+  const units = ["k", "M", "B", "T"]
+  let unitIndex = -1
+  let num = value
+
+  while (num >= 1000 && unitIndex < units.length - 1) {
+    num /= 1000
+    unitIndex++
+  }
+  return `${num.toFixed(num < 10 ? 1 : 0)}${units[unitIndex]}`
+}
+const formattedMoney = computed(() => formatNumber(money.value))
+
+function getIdleIncomePerSecond(): number {
+  // base income = value of current pattern / creation time
+  return currentPattern.value.baseValue / currentPattern.value.creationTime
+}
+
+function applyOfflineProgress() {
+  const lastOnline = localStorage.getItem("lastOnline")
+  if (!lastOnline) return
+
+  const now = Date.now()
+  const diffMs = now - parseInt(lastOnline)
+  const diffSeconds = Math.floor(diffMs / 1000)
+
+  if (diffSeconds <= 0) return
+
+  const incomePerSecond = getIdleIncomePerSecond()
+  const offlineMoney = Math.floor(diffSeconds * incomePerSecond)
+
+  if (offlineMoney > 0) {
+    money.value += offlineMoney
+    localStorage.setItem("money", money.value.toString())
+  }
+
+  console.log(
+    `Offline for ${diffSeconds}s → earned ${offlineMoney} IGM`
+  )
 }
 
 function setPattern(pattern: Pattern) {
@@ -458,7 +514,12 @@ function setPattern(pattern: Pattern) {
   localStorage.setItem("currentPattern", pattern.id)
 }
 
+window.addEventListener("beforeunload", () => {
+  localStorage.setItem("lastOnline", Date.now().toString())
+})
+
 let last = performance.now()
+
 
 //GAME LOOP
 setInterval(() => {
@@ -494,6 +555,8 @@ setInterval(() => {
         console.log(`Mouse X: ${event.clientX}, Mouse Y: ${event.clientY}`);
     });*/
 }, 50)
+
+applyOfflineProgress()
 
 //Todo: Level Up rewards
 </script>
