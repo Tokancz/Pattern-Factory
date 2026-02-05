@@ -305,7 +305,7 @@ body {
   flex-direction: column;
   justify-content: start;
   align-items: center;
-  gap: 20px;
+  gap: 10px;
   padding: 10px;
   border: var(--darkgray) 2px solid;
   border-radius: 8px;

@@ -276,7 +276,7 @@ body {
 
         .pattern, .upgrade{
           width: 100%;
-          @include flexColumn(20px, start);
+          @include flexColumn(10px, start);
           padding: 10px;
           border: var(--darkgray) 2px solid;
           border-radius: 8px;

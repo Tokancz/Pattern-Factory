@@ -26,7 +26,7 @@
             </section>
             <section>
                 <h3>Daily Pattern</h3>
-                <p>Price: {{ dailyPattern.baseValue }} IGM</p> <!-- NEEDS FIX -->
+                <p>Price: {{ getPatternValue(dailyPattern) }} IGM</p>
                 <svg viewBox="0 0 32 32" draggable="false" :style="{fill: dailyPattern.traits.color}">
                     <g transform="matrix(0.96875,0,0,0.96875,0.5,0.5)"><circle cx="16" cy="16" r="16"/></g>
                     <g><path d="M16,0C16.025,2.675 16,32 16,32"/></g>
@@ -112,12 +112,15 @@
                 <p @click="inventory = !inventory">X</p>
             </div>
             <div class="container">
-                <div class="pattern" v-for="pattern in patterns" :key="pattern.id" v-show="pattern.owned">
+                <div class="pattern" v-for="pattern in patternList" :key="pattern.id" v-show="pattern.owned">
                     <svg viewBox="0 0 32 32" draggable="false" :style="{fill: pattern.traits.color}">
                         <g transform="matrix(0.96875,0,0,0.96875,0.5,0.5)"><circle cx="16" cy="16" r="16"/></g>
                         <g><path d="M16,0C16.025,2.675 16,32 16,32"/></g>
                         <g transform="matrix(0.96875,0,0,1,0.5,0)"><path d="M32,16L0,16"/></g>
                     </svg>
+                    <p>Price: {{ pattern.baseValue }}</p>
+                    <p>Exp: {{ pattern.baseExp }}</p>
+                    <p>Creation time: {{ pattern.creationTime }}</p>
                     <button v-if="currentPattern.id !== pattern.id"  @click="setPattern(pattern)">Select</button>
                     <button v-if="currentPattern.id == pattern.id">Selected</button>
                 </div>
@@ -131,7 +134,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue"
+import { ref, computed } from "vue"
 
 //TYPES
 type Point = { x: number; y: number }
@@ -195,6 +198,10 @@ let partId = 0
 
 const creatingProgress = ref<number>(0);
 
+const ownedPatterns = ref<string[]>(
+  JSON.parse(localStorage.getItem("ownedPatterns") || "[]")
+)
+
 const partsSold = ref(localStorage.getItem("partsSold") ? parseInt(localStorage.getItem("partsSold")!) : 0);
 
 //CONVEYOR PATH (ANY SHAPE)
@@ -203,7 +210,7 @@ const conveyorPath: Point[] = [
     { x: 0, y: 500 },
 ]
 
-const colors: {} = {
+const colors: Record<string, string> = {
     basic: "#cdcdcd",
     redCircle: "#ff4d4d",
     blueCircle: "#bbceff",
@@ -224,6 +231,13 @@ const upgrades: Record<string, Upgrade> = {//Use Clicking Power.power as prev cl
         power: 1
     }
 }
+
+Object.values(upgrades).forEach(upgrade => {
+  const saved = localStorage.getItem(`upgrade_${upgrade.id}`)
+  if (saved) {
+    Object.assign(upgrade, JSON.parse(saved))
+  }
+})
 
 //PATTERNS (BLUEPRINTS) LIST OF ALL PATTERN TYPES
 const patterns: Record<string, Pattern> = {
@@ -282,12 +296,20 @@ const patterns: Record<string, Pattern> = {
 
 }
 
-let storagePattern = localStorage.getItem("currentPattern") //fix Later
-const currentPattern = ref<Pattern>(patterns.storagePattern ? false : patterns.basic);
-console.log(currentPattern.value.id)
-const dailyPattern = ref<Pattern>(patterns.greenCircle);
-dailyPattern.value.baseValue *= 1.5; // 50% price increase for daily pattern
+const patternList = computed(() => Object.values(patterns))
+Object.values(patterns).forEach(pattern => {
+  pattern.owned =
+    pattern.owned || ownedPatterns.value.includes(pattern.id)
+})
 
+const storagePattern = localStorage.getItem("currentPattern")
+const currentPattern = ref<Pattern>(
+    storagePattern && patterns[storagePattern]
+    ? patterns[storagePattern] : patterns.basic
+)
+
+const dailyPattern = ref<Pattern>({ ...patterns.greenCircle });
+dailyPattern.value.baseValue *= 1.5; // 50% price increase for daily pattern
 
 //MACHINES
 const machines: Machine[] = [
@@ -296,7 +318,7 @@ const machines: Machine[] = [
     apply(part) {
       return {
         ...part,
-        traits: { ...part.traits, color: currentPattern.value.traits.color }
+        traits: { ...part.traits, color: patterns[part.patternId].traits.color }
       }
     },
     owned: true,
@@ -307,7 +329,7 @@ const machines: Machine[] = [
     apply(part) {
       return {
         ...part,
-        traits: { ...part.traits, cut: currentPattern.value.traits.cut }
+        traits: { ...part.traits, color: patterns[part.patternId].traits.color }
       }
     },
     owned: false,
@@ -318,7 +340,7 @@ const machines: Machine[] = [
 function spawnPart() {
   parts.value.push({
     id: partId++,
-    patternId: "basic",
+    patternId: currentPattern.value.id,
     progress: 0,
     speed: 0.01,
     traits: {
@@ -334,6 +356,12 @@ function click() {
         spawnPart()
         creatingProgress.value = 0
     }
+}
+
+function getPatternValue(pattern: Pattern) {
+  return pattern.id === dailyPattern.value.id
+    ? dailyPattern.value.baseValue
+    : pattern.baseValue
 }
 
 //PATH INTERPOLATION (CORE FIX)
@@ -360,18 +388,12 @@ function partStyle(part: Part) {
   }
 }
 
-//VALUE CALCULATION AND EXP CALCULATION -- REMOVE SCHIZO LOGS
 function calculateValue(part: Part) {
-  let value = currentPattern.value.baseValue
-  if (currentPattern.value.id === dailyPattern.value.id) {
-    value = dailyPattern.value.baseValue
-    console.log("Daily !!")
-  }
-  console.log("Calculated Value:", value);
-  return value
+  const pattern = patterns[part.patternId]
+  return getPatternValue(pattern)
 }
 function calculateExp(part: Part) {
-  return currentPattern.value.baseExp
+  return patterns[part.patternId]?.baseExp
 }
 
 //SELL & LEVEL
@@ -396,34 +418,56 @@ function gainExp(amount: number) {
 }
 
 function buyPattern(pattern: Pattern) {
-    if (money.value >= pattern.price && !pattern.owned) {
-        money.value -= pattern.price;
-        pattern.owned = true;
-        localStorage.setItem("money", money.value.toString());
-        localStorage.setItem(`${pattern.id}_owned`, "true");
+  if (money.value >= pattern.price && !pattern.owned) {
+    money.value -= pattern.price
+    pattern.owned = true
+
+    if (!ownedPatterns.value.includes(pattern.id)) {
+      ownedPatterns.value.push(pattern.id)
     }
+
+    localStorage.setItem("money", money.value.toString())
+    localStorage.setItem(
+      "ownedPatterns",
+      JSON.stringify(ownedPatterns.value)
+    )
+  }
 }
-function buyUpgrade(upgrade: Upgrade){
-    if (money.value >= upgrade.value) {
-        money.value -= upgrade.value
-        upgrade.lvl ++
-        upgrade.power *= 1.2
-        upgrade.value *= 2
-    }
+
+function buyUpgrade(upgrade: Upgrade) {
+  if (money.value >= upgrade.value) {
+    money.value -= upgrade.value
+    upgrade.lvl++
+    upgrade.power *= 1.2
+    upgrade.value = Math.floor(upgrade.value * 2)
+
+    localStorage.setItem(
+      `upgrade_${upgrade.id}`,
+      JSON.stringify(upgrade)
+    )
+    localStorage.setItem("money", money.value.toString())
+  }
 }
 
 function calculateIdle() {
     let timer = Date.now()
 }
+
 function setPattern(pattern: Pattern) {
-    currentPattern.value = pattern
-    localStorage.setItem("currentPattern", pattern.id)
+  currentPattern.value = pattern
+  localStorage.setItem("currentPattern", pattern.id)
 }
+
+let last = performance.now()
 
 //GAME LOOP
 setInterval(() => {
+    const now = performance.now()
+    const delta = (now - last) / 50
+    last = now
+
     parts.value.forEach((part, index) => {
-        part.progress += part.speed
+        part.progress += part.speed * delta
         // apply machines
         machines.forEach(machine => {
         if (
@@ -450,4 +494,6 @@ setInterval(() => {
         console.log(`Mouse X: ${event.clientX}, Mouse Y: ${event.clientY}`);
     });*/
 }, 50)
+
+//Todo: Level Up rewards
 </script>
