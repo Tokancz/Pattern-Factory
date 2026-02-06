@@ -15,15 +15,14 @@
         <aside id="stats">
             <section>
                 <h3>Stats</h3>
-                <p>Income: 0 IGM/s</p>
-                <p>Idle: 0 IGM/h</p>
-                <p>Parts Sold: {{ partsSold }}</p>
+                <p>Idle: {{ formatNumber(Math.floor(idleIncomePerSecond * 100) / 100) }} IGM/s</p>
+                <p>Parts Sold: {{ formatNumber(partsSold) }}</p>
             </section>
             <section>
                 <h3>Progress</h3>
                 <p>Next Part: {{ Math.floor(creatingProgress / currentPattern.creationTime * 100) }} %</p>
                 <input type="range" min="0" :max="currentPattern.creationTime" class="slider" v-model="creatingProgress" disabled="true">
-                <p>Part Price: {{ currentPattern.baseValue }} IGM</p>
+                <p>Part Price: {{ getPatternValue(currentPattern) }} IGM</p>
             </section>
             <section>
                 <h3>Daily Pattern</h3>
@@ -127,6 +126,12 @@
                 </div>
             </div>
         </section>
+        <div v-if="showOfflinePopup" id="offlineReward">
+            <p @click="closeOfflinePopup" class="close">X</p>
+            <h3>Welocme back!</h3>
+            <p>While you were away you earned {{ formatNumber(offlineReward) }} IGM</p>
+        </div>
+
     </main>
     <footer>
         <img src="/img/Footer.png" alt="Footer" draggable="false">
@@ -407,26 +412,21 @@ function sellPart(part: Part) {
 const lvlPopUp = ref(false);
 const gainedMoney = ref(0);
 
-async function sleep(ms: number): Promise<void> {
-    return new Promise((resolve) => setTimeout(resolve, ms));
-}
+function gainExp(amount: number) {
+  exp.value += amount
 
-async function lvlWarning() {//POpup not working
+  if (exp.value >= expToNextLvl.value) {
+    exp.value = 0
+    expToNextLvl.value = Math.floor(expToNextLvl.value * 1.5)
+
+    lvl.value++
     lvlPopUp.value = true
     gainedMoney.value = lvl.value * 20
     money.value += gainedMoney.value
-    console.log("lvl up reward")
-    sleep(3000)
-    //lvlPopUp.value = false
-}
 
-function gainExp(amount: number) {
-  exp.value += amount
-  if (exp.value >= expToNextLvl.value) {
-    exp.value = 0
-    lvl.value++
-    expToNextLvl.value = Math.floor(expToNextLvl.value * 1.5)
-    lvlWarning()
+    setTimeout(() => {
+        lvlPopUp.value = false
+    }, 10000)
   }
   localStorage.setItem("exp", exp.value.toString())
   localStorage.setItem("lvl", lvl.value.toString())
@@ -479,34 +479,42 @@ function formatNumber(value: number): string {
   }
   return `${num.toFixed(num < 10 ? 1 : 0)}${units[unitIndex]}`
 }
+
 const formattedMoney = computed(() => formatNumber(money.value))
 
-function getIdleIncomePerSecond(): number {
-  // base income = value of current pattern / creation time
-  return currentPattern.value.baseValue / currentPattern.value.creationTime
-}
+const idleIncomePerSecond = computed(() => {
+  const partsPerSecond =
+    upgrades.creationSpeed.power / currentPattern.value.creationTime
+
+  return partsPerSecond * currentPattern.value.baseValue * speedController
+})
+
+const showOfflinePopup = ref(false)
+const offlineReward = ref(0)
 
 function applyOfflineProgress() {
-  const lastOnline = localStorage.getItem("lastOnline")
-  if (!lastOnline) return
+    const lastSeen = localStorage.getItem("lastSeen")
 
-  const now = Date.now()
-  const diffMs = now - parseInt(lastOnline)
-  const diffSeconds = Math.floor(diffMs / 1000)
+    if (lastSeen) {
+        const elapsedSeconds = (Date.now() - Number(lastSeen)) / 1000
+        const reward = elapsedSeconds * idleIncomePerSecond.value
 
-  if (diffSeconds <= 0) return
+        money.value += Math.floor(reward)
+        localStorage.setItem("money", money.value.toString())
+        
+        console.log(
+            `Offline for ${elapsedSeconds}s → earned ${reward} IGM`
+        )
 
-  const incomePerSecond = getIdleIncomePerSecond()
-  const offlineMoney = Math.floor(diffSeconds * incomePerSecond)
+        setTimeout(() => {
+            showOfflinePopup.value = false
+        }, 6000)
+    }
+}
 
-  if (offlineMoney > 0) {
-    money.value += offlineMoney
-    localStorage.setItem("money", money.value.toString())
-  }
-
-  console.log(
-    `Offline for ${diffSeconds}s → earned ${offlineMoney} IGM`
-  )
+function closeOfflinePopup() {
+  showOfflinePopup.value = false
+  offlineReward.value = 0
 }
 
 function setPattern(pattern: Pattern) {
@@ -518,42 +526,41 @@ window.addEventListener("beforeunload", () => {
   localStorage.setItem("lastOnline", Date.now().toString())
 })
 
-let last = performance.now()
+let lastTime = Date.now()
+let speedController = 20
 
-
-//GAME LOOP
 setInterval(() => {
-    const now = performance.now()
-    const delta = (now - last) / 50
-    last = now
+  const now = Date.now()
+  const deltaSeconds = (now - lastTime) / 1000
+  lastTime = now
 
-    parts.value.forEach((part, index) => {
-        part.progress += part.speed * delta
-        // apply machines
-        machines.forEach(machine => {
-        if (
-            part.progress >= machine.at &&
-            !(part as any)[`m_${machine.at}`]
-        ) {
-            Object.assign(part, machine.apply(part))
-            ;(part as any)[`m_${machine.at}`] = true
-        }
-        })
-        // sell
-        if (part.progress >= 1) {
-        sellPart(part)
-        parts.value.splice(index, 1)
-        }
+  // progress creation
+  creatingProgress.value += upgrades.creationSpeed.power * deltaSeconds * speedController
+
+  if (creatingProgress.value >= currentPattern.value.creationTime) {
+    spawnPart()
+    creatingProgress.value -= currentPattern.value.creationTime
+  }
+
+  // move parts
+  parts.value.forEach((part, index) => {
+    part.progress += part.speed * deltaSeconds * speedController
+
+    machines.forEach(machine => {
+      if (
+        part.progress >= machine.at &&
+        !(part as any)[`m_${machine.at}`]
+      ) {
+        Object.assign(part, machine.apply(part))
+        ;(part as any)[`m_${machine.at}`] = true
+      }
     })
-    creatingProgress.value += upgrades.creationSpeed?.power;
-    if (creatingProgress.value >= currentPattern.value.creationTime) {
-        spawnPart()
-        creatingProgress.value = 0
+
+    if (part.progress >= 1) {
+      sellPart(part)
+      parts.value.splice(index, 1)
     }
-    /*
-    document.addEventListener('mousemove', (event) => {
-        console.log(`Mouse X: ${event.clientX}, Mouse Y: ${event.clientY}`);
-    });*/
+  })
 }, 50)
 
 applyOfflineProgress()

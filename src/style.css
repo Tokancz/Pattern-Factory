@@ -107,6 +107,7 @@ body {
   color: var(--gray);
 }
 #app main {
+  position: relative;
   width: 100%;
   height: 100%;
   display: flex;
@@ -334,6 +335,34 @@ body {
 #app main section.shop div.container .pattern p, #app main section.shop div.container .upgrade p {
   font-size: 1.5em;
   color: var(--white);
+}
+#app main #offlineReward {
+  position: absolute;
+  left: 50%;
+  width: 500px;
+  height: 300px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+  background-color: var(--primary75);
+  z-index: 10;
+  transform: translateX(-50%);
+}
+#app main #offlineReward .close {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  cursor: pointer;
+}
+#app main #offlineReward h3 {
+  font-size: 3em;
+  color: var(--white);
+}
+#app main #offlineReward p {
+  font-size: 2.5em;
+  color: var(--lightgray);
 }
 #app footer {
   position: sticky;
