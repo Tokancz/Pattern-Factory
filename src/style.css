@@ -274,7 +274,9 @@ body {
   cursor: pointer;
 }
 #app main section.shop {
-  position: fixed;
+  position: absolute;
+  top: 50%;
+  left: 50%;
   width: 800px;
   height: 500px;
   display: flex;
@@ -284,7 +286,7 @@ body {
   gap: 20px;
   background-color: var(--primary);
   z-index: 10;
-  transform: translateX(50%);
+  transform: translateX(-50%) translateY(-50%);
   padding: 20px;
 }
 #app main section.shop div.shop_header {

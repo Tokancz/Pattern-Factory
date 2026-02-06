@@ -112,7 +112,7 @@
                 <p @click="openedShop = ''">X</p>
             </div>
             <div class="container">
-                <div class="pattern" v-for="pattern in patternList" :key="pattern.id" v-show="pattern.owned">
+                <div class="pattern" v-for="pattern in patternList" :key="pattern.id" v-show="pattern.owned" @click="setPattern(pattern)">
                     <svg viewBox="0 0 32 32" draggable="false" :style="{fill: pattern.traits.color}">
                         <g transform="matrix(0.96875,0,0,0.96875,0.5,0.5)"><circle cx="16" cy="16" r="16"/></g>
                         <g><path d="M16,0C16.025,2.675 16,32 16,32"/></g>
