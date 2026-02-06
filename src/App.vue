@@ -26,8 +26,9 @@
             </section>
             <section>
                 <h3>Daily Pattern</h3>
+                <p>1.5x mutliplier !!</p>
                 <p>Price: {{ getPatternValue(dailyPattern) }} IGM</p>
-                <svg viewBox="0 0 32 32" draggable="false" :style="{fill: dailyPattern.traits.color}">
+                <svg viewBox="0 0 32 32" draggable="false" :style="{fill: colors[dailyPattern.id]}">
                     <g transform="matrix(0.96875,0,0,0.96875,0.5,0.5)"><circle cx="16" cy="16" r="16"/></g>
                     <g><path d="M16,0C16.025,2.675 16,32 16,32"/></g>
                     <g transform="matrix(0.96875,0,0,1,0.5,0)"><path d="M32,16L0,16"/></g>
@@ -37,28 +38,33 @@
         <section id="simulation">
             <div @click="click" id="factory">
                 <img src="/img/Factory.png" alt="Factory" draggable="false">
-                <svg viewBox="0 0 32 32" draggable="false" :style="{fill: currentPattern.traits.color}">
+                <svg viewBox="0 0 32 32" :style="{fill: colors[currentPattern.id]}">
                     <g transform="matrix(0.96875,0,0,0.96875,0.5,0.5)"><circle cx="16" cy="16" r="16"/></g>
                     <g><path d="M16,0C16.025,2.675 16,32 16,32"/></g>
                     <g transform="matrix(0.96875,0,0,1,0.5,0)"><path d="M32,16L0,16"/></g>
                 </svg>
                 <p id="progress">Progress {{ Math.floor(creatingProgress / currentPattern.creationTime * 100) }} %</p>
             </div>
+
             <div id="belt"></div>
-            <img src="/img/ColorMachine.png" alt="color machine" id="color_machine">
+
+            <img v-for="machine in machines" v-show="machine.owned" 
+                :src="machine.src" 
+                :style="machinePos(machine)" 
+            alt="machine" class="machine">
+
             <img src="/img/Seller.png" alt="Seller" id="seller" draggable="false">
+
             <svg viewBox="0 0 32 32"
                 v-for="part in parts"
                 :key="part.id"
                 class="part"
-                :style="partStyle(part)"
-                draggable="false">
+                :style="partStyle(part)">
 
                 <g transform="matrix(0.96875,0,0,0.96875,0.5,0.5)"><circle cx="16" cy="16" r="16"/></g>
                 <g><path d="M16,0C16.025,2.675 16,32 16,32"/></g>
                 <g transform="matrix(0.96875,0,0,1,0.5,0)"><path d="M32,16L0,16"/></g>
             </svg>
-            <!-- PARTS -->
         </section>
         <section id="shopList">
             <img src="/img/Shop.png" alt="shopBG" draggable="false">
@@ -69,31 +75,45 @@
                 </div>
                 <div class="shop_buttons">
                     <button class="button" @click="openedShop = 'patterns'">Patterns</button>
-                    <button class="button">Tools</button>
+                    <button class="button" @click="openedShop = 'machines'">Machines</button>
                     <button class="button" @click="openedShop = 'upgrades'">Upgrades</button>
                     <button class="button">Prestige</button>
                 </div>
                 <button class="button" @click="openedShop = 'inventory'">Inventory</button>
             </aside>
         </section>
-        <section class="shop" v-if="openedShop === 'patterns'">
+        <section class="tab" v-if="openedShop === 'patterns'">
             <div class="shop_header">
                 <h4>Pattern Shop</h4>
                 <p @click="openedShop = ''">X</p>
             </div>
             <div class="container">
                 <div class="pattern" v-for="pattern in patterns" :key="pattern.id">
-                    <svg viewBox="0 0 32 32" draggable="false" :style="{fill: pattern.traits.color}">
+                    <svg viewBox="0 0 32 32" :style="{fill: colors[pattern.id]}">
                         <g transform="matrix(0.96875,0,0,0.96875,0.5,0.5)"><circle cx="16" cy="16" r="16"/></g>
                         <g><path d="M16,0C16.025,2.675 16,32 16,32"/></g>
                         <g transform="matrix(0.96875,0,0,1,0.5,0)"><path d="M32,16L0,16"/></g>
                     </svg>
-                    <button v-if="!pattern.owned" @click="buyPattern(pattern)">Price: {{ pattern.price }}</button>
+                    <button v-if="!pattern.owned" @click="buyPattern(pattern)">Price: {{ formatNumber(pattern.price) }} IGM</button>
                     <button v-else>Owned</button>
                 </div>
             </div>
         </section>
-        <section class="shop" v-if="openedShop === 'upgrades'">
+        <section class="tab" v-if="openedShop === 'machines'">
+            <div class="shop_header">
+                <h4>Machines Shop</h4>
+                <p @click="openedShop = ''">X</p>
+            </div>
+            <div class="container">
+                <div class="pattern" v-for="machine in machines" :key="machine.id">
+                    <p>{{ machine.description }}</p>
+                    <img :src="machine.src" alt="">
+                    <button v-if="!machine.owned" @click="buyMachine(machine)">Price: {{ formatNumber(machine.price) }} IGM</button>
+                    <button v-else>Owned</button>
+                </div>
+            </div>
+        </section>
+        <section class="tab" v-if="openedShop === 'upgrades'">
             <div class="shop_header">
                 <h4>Upgrade</h4>
                 <p @click="openedShop = ''">X</p>
@@ -106,14 +126,14 @@
                 </div>
             </div>
         </section>
-        <section class="shop" v-if="openedShop === 'inventory'">
+        <section class="tab" v-if="openedShop === 'inventory'">
             <div class="shop_header">
                 <h4>Inventory</h4>
                 <p @click="openedShop = ''">X</p>
             </div>
             <div class="container">
-                <div class="pattern" v-for="pattern in patternList" :key="pattern.id" v-show="pattern.owned" @click="setPattern(pattern)">
-                    <svg viewBox="0 0 32 32" draggable="false" :style="{fill: pattern.traits.color}">
+                <div class="pattern" v-for="pattern in patternList" :key="pattern.id" :disabled="!canProducePattern(pattern)" v-show="pattern.owned" @click="setPattern(pattern)">
+                    <svg viewBox="0 0 32 32" :style="{fill: colors[pattern.id]}">
                         <g transform="matrix(0.96875,0,0,0.96875,0.5,0.5)"><circle cx="16" cy="16" r="16"/></g>
                         <g><path d="M16,0C16.025,2.675 16,32 16,32"/></g>
                         <g transform="matrix(0.96875,0,0,1,0.5,0)"><path d="M32,16L0,16"/></g>
@@ -158,25 +178,30 @@ type Part = {
 }
 
 type Pattern = {
-    id: string
-    baseValue: number
-    baseExp: number
-    creationTime: number
-    price: number
-    owned: boolean
-    traits: {
-        color?: string
-        cut?: boolean
-        merged?: boolean
-    }
-    src?: string
+  id: string
+  baseValue: number
+  baseExp: number
+  creationTime: number
+  price: number
+  owned: boolean
+
+  requirements: {
+    color?: boolean
+    cut?: boolean
+    merged?: boolean
+  }
+
+  src?: string
 }
 
 type Machine = {
-    at: number // progress position (0–1)
-    apply(part: Part): Part
-    owned: boolean
-    src: string
+  id: string
+  description?: string
+  at: number
+  price: number
+  owned: boolean
+  src: string
+  apply(part: Part): Part
 }
 
 type Upgrade = {
@@ -187,11 +212,7 @@ type Upgrade = {
 }
 
 //STATE
-const factoryName = ref("Pattern Factory")
-const userName = ref("Player")
-
 const openedShop = ref("")
-
 const money = ref(localStorage.getItem("money") ? parseInt(localStorage.getItem("money")!) : 0)
 const lvl = ref(localStorage.getItem("lvl") ? parseInt(localStorage.getItem("lvl")!) : 1)
 const exp = ref(localStorage.getItem("exp") ? parseInt(localStorage.getItem("exp")!) : 0)
@@ -201,14 +222,13 @@ const parts = ref<Part[]>([])
 let partId = 0
 
 const creatingProgress = ref<number>(0);
-
-const ownedPatterns = ref<string[]>(
-  JSON.parse(localStorage.getItem("ownedPatterns") || "[]")
-)
-
 const partsSold = ref(localStorage.getItem("partsSold") ? parseInt(localStorage.getItem("partsSold")!) : 0);
 
-//CONVEYOR PATH (ANY SHAPE)
+const factoryName = ref(localStorage.getItem("factoryName"))
+const userName = ref(localStorage.getItem("userName"))
+
+const savedFactoryName = localStorage.getItem("factoryName")
+
 const conveyorPath: Point[] = [
     { x: 0, y: 120 },
     { x: 0, y: 500 },
@@ -217,8 +237,10 @@ const conveyorPath: Point[] = [
 const colors: Record<string, string> = {
     basic: "#cdcdcd",
     redCircle: "#ff4d4d",
-    blueCircle: "#bbceff",
-    greenCircle: "#4ddf88"
+    blueCircle: "#85a7ff",
+    greenCircle: "#4ddf88",
+    yellowCircle: "#ffd972",
+    purpleCircle: "#9858ed"
 }
 
 const upgrades: Record<string, Upgrade> = {//Use Clicking Power.power as prev clicking power
@@ -243,62 +265,107 @@ Object.values(upgrades).forEach(upgrade => {
   }
 })
 
-//PATTERNS (BLUEPRINTS) LIST OF ALL PATTERN TYPES
 const patterns: Record<string, Pattern> = {
-    basic: {
-        id: "basic",
-        baseValue: 1,
-        baseExp: 2,
-        creationTime: 100,
-        price: 0,
-        owned: true,
-        traits: {
-            color: colors.basic,
-            cut: false,
-            merged: false
-        }
-    },
-    redCircle: {
-        id: "redCircle",
-        baseValue: 5,
-        baseExp: 3,
-        creationTime: 150,
-        price: 100,
-        owned: localStorage.getItem("redCircle_owned") ? true : false,
-        traits: {
-            color: colors.redCircle,
-            cut: false,
-            merged: false
-        }
-    },
-    blueCircle: {
-        id: "blueCircle",
-        baseValue: 10,
-        baseExp: 8,
-        creationTime: 200,
-        price: 500,
-        owned: localStorage.getItem("blueCircle_owned") ? true : false,
-        traits: {
-            color: colors.blueCircle,
-            cut: false,
-            merged: false
-        }
-    },
-    greenCircle: {
-        id: "greenCircle",
-        baseValue: 25,
-        baseExp: 15,
-        creationTime: 300,
-        price: 5000,
-        owned: localStorage.getItem("greenCircle_owned") ? true : false,
-        traits: {
-            color: colors.greenCircle,
-            cut: false,
-            merged: false
-        }
-    }
-
+  basic: {
+    id: "basic",
+    baseValue: 1,
+    baseExp: 2,
+    creationTime: 100,
+    price: 0,
+    owned: true,
+    requirements: {}
+  },
+  redCircle: {
+    id: "redCircle",
+    baseValue: 5,
+    baseExp: 3,
+    creationTime: 150,
+    price: 100,
+    owned: false,
+    requirements: { color: true }
+  },
+  blueCircle: {
+    id: "blueCircle",
+    baseValue: 10,
+    baseExp: 8,
+    creationTime: 200,
+    price: 500,
+    owned: false,
+    requirements: { color: true }
+  },
+  greenCircle: {
+    id: "greenCircle",
+    baseValue: 25,
+    baseExp: 15,
+    creationTime: 300,
+    price: 5000,
+    owned: false,
+    requirements: { color: true }
+  },
+  yellowCircle: {
+    id: "yellowCircle",
+    baseValue: 100,
+    baseExp: 80,
+    creationTime: 500,
+    price: 12500,
+    owned: false,
+    requirements: { color: true }
+  },
+  purpleCircle: {
+    id: "purpleCircle",
+    baseValue: 300,
+    baseExp: 250,
+    creationTime: 1000,
+    price: 25000,
+    owned: false,
+    requirements: { color: true }
+  }
 }
+
+const machines: Machine[] = [
+  {
+    id: "color",
+    description: "Color Machine",
+    at: 0.4,
+    price: 50,
+    owned: false,
+    src: "/img/ColorMachine.png",
+    apply(part) {
+      return {
+        ...part,
+        traits: {
+          ...part.traits,
+          color: colors[part.patternId]
+        }
+      }
+    }
+  },
+
+  {
+    id: "cut",
+    description: "Cutting Machine",
+    at: 0.7,
+    price: 10000,
+    owned: false,
+    src: "/img/CutMachine.png",
+    apply(part) {
+      return {
+        ...part,
+        traits: {
+          ...part.traits,
+          cut: true
+        }
+      }
+    }
+  }
+]
+
+const ownedPatterns = ref<string[]>(
+  JSON.parse(localStorage.getItem("ownedPatterns") || "[]")
+)
+const ownedMachines = ref<string[]>(
+  JSON.parse(localStorage.getItem("ownedMachines") || "[]")
+)
 
 const patternList = computed(() => Object.values(patterns))
 Object.values(patterns).forEach(pattern => {
@@ -306,54 +373,35 @@ Object.values(patterns).forEach(pattern => {
     pattern.owned || ownedPatterns.value.includes(pattern.id)
 })
 
-const storagePattern = localStorage.getItem("currentPattern")
+const machineList = computed(() => Object.values(machines))
+Object.values(machines).forEach(machine => {
+  machine.owned =
+    machine.owned || ownedMachines.value.includes(machine.id)
+})
+
+const storeCurrentPattern = localStorage.getItem("currentPattern")
 const currentPattern = ref<Pattern>(
-    storagePattern && patterns[storagePattern]
-    ? patterns[storagePattern] : patterns.basic
+    storeCurrentPattern && patterns[storeCurrentPattern]
+    ? patterns[storeCurrentPattern] : patterns.basic
 )
 
 const dailyPattern = ref<Pattern>({ ...patterns.blueCircle });
 dailyPattern.value.baseValue *= 1.5; // 50% price increase for daily pattern
 
-//MACHINES
-const machines: Machine[] = [
-  {
-    at: 0.4, //COLOR MACHINE
-    apply(part) {
-      return {
-        ...part,
-        traits: { ...part.traits, color: patterns[part.patternId].traits.color }
-      }
-    },
-    owned: true,
-    src:"/img/ColorMachine.png"
-  },
-  {
-    at: 0.7, //CUTTING MACHINE
-    apply(part) {
-      return {
-        ...part,
-        traits: { ...part.traits, color: patterns[part.patternId].traits.color }
-      }
-    },
-    owned: false,
-    src:"/img/ColorMachine.png"//change sprite
+const ownedMachineCapabilities = computed(() => {
+  return {
+    color: machines.some(m => m.id === "color" && m.owned),
+    cut: machines.some(m => m.id === "cut" && m.owned),
+    merged: machines.some(m => m.id === "merge" && m.owned)
   }
-]
+})
 
-function spawnPart() {
-  parts.value.push({
-    id: partId++,
-    patternId: currentPattern.value.id,
-    progress: 0,
-    speed: 0.01,
-    traits: {
-        color: patterns.basic.traits.color,
-        cut: patterns.basic.traits.cut,
-        merged: patterns.basic.traits.merged
-    }
-  })
+function canProducePattern(pattern: Pattern) {
+  return Object.entries(pattern.requirements).every(
+    ([req, needed]) => !needed || (ownedMachineCapabilities.value as any)[req]
+  )
 }
+
 function click() {
     creatingProgress.value += upgrades.clickingPower?.power
     if (creatingProgress.value >= currentPattern.value.creationTime) {
@@ -362,13 +410,16 @@ function click() {
     }
 }
 
-function getPatternValue(pattern: Pattern) {
-  return pattern.id === dailyPattern.value.id
-    ? dailyPattern.value.baseValue
-    : pattern.baseValue
+function spawnPart() {
+  parts.value.push({
+    id: partId++,
+    patternId: currentPattern.value.id,
+    progress: 0,
+    speed: 0.01,
+    traits: {} // born blank
+  })
 }
 
-//PATH INTERPOLATION (CORE FIX)
 function getPositionOnPath(path: Point[], progress: number) {
   const segments = path.length - 1
   const segProgress = progress * segments
@@ -392,6 +443,45 @@ function partStyle(part: Part) {
   }
 }
 
+function machinePos(machine: Machine) {
+  const pos = getPositionOnPath(conveyorPath, machine.at)
+  return {
+    transform: `translate(${pos.x}px, ${pos.y}px)`,
+  }
+}
+
+function initFactoryName() {
+  const stored = localStorage.getItem("factoryName")
+  if (stored) {
+    factoryName.value = stored
+  } else {
+    const name = prompt("Enter name of your factory!")
+    if (name) {
+      factoryName.value = name
+      localStorage.setItem("factoryName", name)
+    }
+  }
+}
+function initUserName() {
+  const stored = localStorage.getItem("userName")
+  if (stored) {
+    userName.value = stored
+  } else {
+    const name = prompt("Enter your username!")
+    if (name) {
+      userName.value = name
+      localStorage.setItem("userName", name)
+    }
+  }
+}
+initFactoryName()
+initUserName()
+
+function getPatternValue(pattern: Pattern) {
+  return pattern.id === dailyPattern.value.id
+    ? dailyPattern.value.baseValue
+    : pattern.baseValue
+}
 function calculateValue(part: Part) {
   const pattern = patterns[part.patternId]
   return getPatternValue(pattern)
@@ -400,9 +490,25 @@ function calculateExp(part: Part) {
   return patterns[part.patternId]?.baseExp
 }
 
+function setPattern(pattern: Pattern) {
+  currentPattern.value = pattern
+  localStorage.setItem("currentPattern", pattern.id)
+}
+
+function isPartComplete(part: Part) {
+  const reqs = patterns[part.patternId].requirements
+  return Object.entries(reqs).every(
+    ([key, needed]) => !needed || (part.traits as any)[key]
+  )
+}
+
 //SELL & LEVEL
 function sellPart(part: Part) {
-    money.value += calculateValue(part)
+    if (!isPartComplete(part)) {
+        money.value += Math.floor(calculateValue(part) * 0.3) // scrap value
+    } else {
+        money.value += calculateValue(part)
+    }
     partsSold.value += 1;
     localStorage.setItem("money", money.value.toString())
     localStorage.setItem("partsSold", partsSold.value.toString())
@@ -447,6 +553,23 @@ function buyPattern(pattern: Pattern) {
     localStorage.setItem(
       "ownedPatterns",
       JSON.stringify(ownedPatterns.value)
+    )
+  }
+}
+
+function buyMachine(machine: Machine) {
+  if (money.value >= machine.price && !machine.owned) {
+    money.value -= machine.price
+    machine.owned = true
+
+    if (!ownedMachines.value.includes(machine.id)) {
+      ownedMachines.value.push(machine.id)
+    }
+
+    localStorage.setItem("money", money.value.toString())
+    localStorage.setItem(
+      "ownedMachines",
+      JSON.stringify(ownedMachines.value)
     )
   }
 }
@@ -517,11 +640,6 @@ function closeOfflinePopup() {
   offlineReward.value = 0
 }
 
-function setPattern(pattern: Pattern) {
-  currentPattern.value = pattern
-  localStorage.setItem("currentPattern", pattern.id)
-}
-
 window.addEventListener("beforeunload", () => {
   localStorage.setItem("lastOnline", Date.now().toString())
 })
@@ -547,14 +665,16 @@ setInterval(() => {
     part.progress += part.speed * deltaSeconds * speedController
 
     machines.forEach(machine => {
-      if (
+    if (
+        machine.owned &&
         part.progress >= machine.at &&
-        !(part as any)[`m_${machine.at}`]
-      ) {
+        !(part as any)[`machine_${machine.id}`]
+    ) {
         Object.assign(part, machine.apply(part))
-        ;(part as any)[`m_${machine.at}`] = true
-      }
+        ;(part as any)[`machine_${machine.id}`] = true
+    }
     })
+
 
     if (part.progress >= 1) {
       sellPart(part)

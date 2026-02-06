@@ -124,7 +124,7 @@ body {
   padding: 20px;
 }
 #app main aside#stats section {
-  width: 250px;
+  width: 300px;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -202,9 +202,8 @@ body {
   user-select: none;
   stroke: var(--black);
 }
-#app main section#simulation #color_machine {
+#app main section#simulation .machine {
   position: absolute;
-  top: 260px;
   width: 100px;
   z-index: 5;
 }
@@ -273,12 +272,11 @@ body {
   font-size: 2em;
   cursor: pointer;
 }
-#app main section.shop {
+#app main section.tab {
   position: absolute;
   top: 50%;
   left: 50%;
   width: 800px;
-  height: 500px;
   display: flex;
   flex-direction: column;
   justify-content: start;
@@ -289,28 +287,28 @@ body {
   transform: translateX(-50%) translateY(-50%);
   padding: 20px;
 }
-#app main section.shop div.shop_header {
+#app main section.tab div.shop_header {
   width: 100%;
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 0;
 }
-#app main section.shop div.shop_header h4 {
+#app main section.tab div.shop_header h4 {
   font-size: 3em;
 }
-#app main section.shop div.shop_header p {
+#app main section.tab div.shop_header p {
   font-size: 3em;
   cursor: pointer;
 }
-#app main section.shop div.container {
+#app main section.tab div.container {
   width: 100%;
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   align-items: start;
   gap: 20px;
 }
-#app main section.shop div.container .pattern, #app main section.shop div.container .upgrade {
+#app main section.tab div.container .pattern, #app main section.tab div.container .upgrade {
   width: 100%;
   display: flex;
   flex-direction: column;
@@ -323,18 +321,18 @@ body {
   cursor: pointer;
   background-color: var(--gray);
 }
-#app main section.shop div.container .pattern svg, #app main section.shop div.container .upgrade svg {
+#app main section.tab div.container .pattern svg, #app main section.tab div.container .upgrade svg {
   stroke: var(--black);
   fill: white;
 }
-#app main section.shop div.container .pattern button, #app main section.shop div.container .upgrade button {
+#app main section.tab div.container .pattern button, #app main section.tab div.container .upgrade button {
   background: var(--lightgray);
   border: 2px solid var(--darkgray);
   border-radius: 8px;
   padding: 5px;
   cursor: pointer;
 }
-#app main section.shop div.container .pattern p, #app main section.shop div.container .upgrade p {
+#app main section.tab div.container .pattern p, #app main section.tab div.container .upgrade p {
   font-size: 1.5em;
   color: var(--white);
 }

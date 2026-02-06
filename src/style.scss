@@ -123,7 +123,7 @@ body {
       padding: 20px;
 
       section {
-        width: 250px;
+        width: 300px;
         @include flexColumn(5px);
         background-color: var(--primary75);
         padding: 20px;
@@ -193,9 +193,8 @@ body {
         user-select: none;
         stroke: var(--black);
       }
-      #color_machine {
+      .machine {
         position: absolute;
-        top: 260px;
         width: 100px;
         z-index: 5;
       }
@@ -254,12 +253,11 @@ body {
         }
       }
     }
-    section.shop {
+    section.tab {
       position: absolute;
       top: 50%;
       left: 50%;
       width: 800px;
-      height: 500px;
       @include flexColumn(20px, start, start);
       background-color: var(--primary);
       z-index: 10;
