@@ -616,10 +616,11 @@ const showOfflinePopup = ref(false)
 const offlineReward = ref(0)
 
 function applyOfflineProgress() {
-    const lastSeen = localStorage.getItem("lastSeen")
+    const lastOnline = localStorage.getItem("lastOnline")
+    
 
-    if (lastSeen) {
-        const elapsedSeconds = (Date.now() - Number(lastSeen)) / 1000
+    if (lastOnline) {
+        const elapsedSeconds = (Date.now() - Number(lastOnline)) / 1000
         const reward = elapsedSeconds * idleIncomePerSecond.value
 
         money.value += Math.floor(reward)
@@ -645,36 +646,38 @@ window.addEventListener("beforeunload", () => {
 })
 
 let lastTime = Date.now()
-let speedController = 20
+const speedController = 20
+const MAX_DELTA = 0.2
 
 setInterval(() => {
   const now = Date.now()
-  const deltaSeconds = (now - lastTime) / 1000
+
+  let deltaSeconds = (now - lastTime) / 1000
   lastTime = now
 
-  // progress creation
-  creatingProgress.value += upgrades.creationSpeed.power * deltaSeconds * speedController
+  deltaSeconds = Math.min(deltaSeconds, MAX_DELTA)
 
-  if (creatingProgress.value >= currentPattern.value.creationTime) {
+  creatingProgress.value +=
+    upgrades.creationSpeed.power * deltaSeconds * speedController
+
+  while (creatingProgress.value >= currentPattern.value.creationTime) {
     spawnPart()
     creatingProgress.value -= currentPattern.value.creationTime
   }
 
-  // move parts
   parts.value.forEach((part, index) => {
     part.progress += part.speed * deltaSeconds * speedController
 
     machines.forEach(machine => {
-    if (
+      if (
         machine.owned &&
         part.progress >= machine.at &&
-        !(part as any)[`machine_${machine.id}`]
-    ) {
+        !(part as any)[`machine_${machine.at}`]
+      ) {
         Object.assign(part, machine.apply(part))
-        ;(part as any)[`machine_${machine.id}`] = true
-    }
+        ;(part as any)[`machine_${machine.at}`] = true
+      }
     })
-
 
     if (part.progress >= 1) {
       sellPart(part)
