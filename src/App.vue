@@ -6,7 +6,7 @@
             <div>
                 <p id="user">{{ userName }}</p>
                 <p>Level: {{ lvl }}</p>
-                <p>EXP: {{ exp }}/ {{ expToNextLvl }}</p>
+                <p>EXP: {{ formatNumber(exp) }}/ {{ formatNumber(expToNextLvl) }}</p>
             </div>
             <p v-if="lvlPopUp"> + {{ gainedMoney }} IGM</p>
         </div>
@@ -28,20 +28,18 @@
                 <h3>Daily Pattern</h3>
                 <p>1.5x mutliplier !!</p>
                 <p>Price: {{ getPatternValue(dailyPattern) }} IGM</p>
-                <svg viewBox="0 0 32 32" draggable="false" :style="{fill: colors[dailyPattern.id]}">
-                    <g transform="matrix(0.96875,0,0,0.96875,0.5,0.5)"><circle cx="16" cy="16" r="16"/></g>
-                    <g><path d="M16,0C16.025,2.675 16,32 16,32"/></g>
-                    <g transform="matrix(0.96875,0,0,1,0.5,0)"><path d="M32,16L0,16"/></g>
+                <svg viewBox="0 0 32 32" draggable="false" 
+                  :style="{fill: colors[dailyPattern.id]}"
+                  v-html="shapes[dailyPattern.shape]">
                 </svg>
             </section>
         </aside>
         <section id="simulation">
             <div @click="click" id="factory">
                 <img src="/img/Factory.png" alt="Factory" draggable="false">
-                <svg viewBox="0 0 32 32" :style="{fill: colors[currentPattern.id]}">
-                    <g transform="matrix(0.96875,0,0,0.96875,0.5,0.5)"><circle cx="16" cy="16" r="16"/></g>
-                    <g><path d="M16,0C16.025,2.675 16,32 16,32"/></g>
-                    <g transform="matrix(0.96875,0,0,1,0.5,0)"><path d="M32,16L0,16"/></g>
+                <svg viewBox="0 0 32 32" 
+                  :style="{fill: colors[currentPattern.id]}" 
+                  v-html="shapes[currentPattern.shape]">
                 </svg>
                 <p id="progress">Progress {{ Math.floor(creatingProgress / currentPattern.creationTime * 100) }} %</p>
             </div>
@@ -59,11 +57,8 @@
                 v-for="part in parts"
                 :key="part.id"
                 class="part"
-                :style="partStyle(part)">
-
-                <g transform="matrix(0.96875,0,0,0.96875,0.5,0.5)"><circle cx="16" cy="16" r="16"/></g>
-                <g><path d="M16,0C16.025,2.675 16,32 16,32"/></g>
-                <g transform="matrix(0.96875,0,0,1,0.5,0)"><path d="M32,16L0,16"/></g>
+                :style="partStyle(part)"
+                v-html="shapes[part.traits.cut!]">
             </svg>
         </section>
         <section id="shopList">
@@ -89,10 +84,9 @@
             </div>
             <div class="container">
                 <div class="pattern" v-for="pattern in patterns" :key="pattern.id">
-                    <svg viewBox="0 0 32 32" :style="{fill: colors[pattern.id]}">
-                        <g transform="matrix(0.96875,0,0,0.96875,0.5,0.5)"><circle cx="16" cy="16" r="16"/></g>
-                        <g><path d="M16,0C16.025,2.675 16,32 16,32"/></g>
-                        <g transform="matrix(0.96875,0,0,1,0.5,0)"><path d="M32,16L0,16"/></g>
+                    <svg viewBox="0 0 32 32" 
+                      :style="{fill: colors[pattern.id]}"
+                      v-html="shapes[pattern.shape]">
                     </svg>
                     <button v-if="!pattern.owned" @click="buyPattern(pattern)">Price: {{ formatNumber(pattern.price) }} IGM</button>
                     <button v-else>Owned</button>
@@ -133,10 +127,9 @@
             </div>
             <div class="container">
                 <div class="pattern" v-for="pattern in patternList" :key="pattern.id" :disabled="!canProducePattern(pattern)" v-show="pattern.owned" @click="setPattern(pattern)">
-                    <svg viewBox="0 0 32 32" :style="{fill: colors[pattern.id]}">
-                        <g transform="matrix(0.96875,0,0,0.96875,0.5,0.5)"><circle cx="16" cy="16" r="16"/></g>
-                        <g><path d="M16,0C16.025,2.675 16,32 16,32"/></g>
-                        <g transform="matrix(0.96875,0,0,1,0.5,0)"><path d="M32,16L0,16"/></g>
+                    <svg viewBox="0 0 32 32" 
+                      :style="{fill: colors[pattern.id]}"
+                      v-html="shapes[pattern.shape]">
                     </svg>
                     <p>Price: {{ pattern.baseValue }}</p>
                     <p>Exp: {{ pattern.baseExp }}</p>
@@ -162,36 +155,33 @@
 <script setup lang="ts">
 import { ref, computed } from "vue"
 
-//TYPES
 type Point = { x: number; y: number }
 
 type Part = {
-    id: number
-    patternId: string
-    progress: number
-    speed: number
-    traits: {
-        color?: string
-        cut?: boolean
-        merged?: boolean
-    }
+  id: number
+  patternId: string
+  progress: number
+  speed: number
+  traits: {
+    color?: string
+    cut?: string
+    merged?: boolean
+  }
 }
 
 type Pattern = {
   id: string
+  shape: string
   baseValue: number
   baseExp: number
   creationTime: number
   price: number
   owned: boolean
-
   requirements: {
     color?: boolean
     cut?: boolean
     merged?: boolean
   }
-
-  src?: string
 }
 
 type Machine = {
@@ -211,7 +201,6 @@ type Upgrade = {
     power: number
 }
 
-//STATE
 const openedShop = ref("")
 const money = ref(localStorage.getItem("money") ? parseInt(localStorage.getItem("money")!) : 0)
 const lvl = ref(localStorage.getItem("lvl") ? parseInt(localStorage.getItem("lvl")!) : 1)
@@ -227,35 +216,50 @@ const partsSold = ref(localStorage.getItem("partsSold") ? parseInt(localStorage.
 const factoryName = ref(localStorage.getItem("factoryName"))
 const userName = ref(localStorage.getItem("userName"))
 
-const savedFactoryName = localStorage.getItem("factoryName")
-
 const conveyorPath: Point[] = [
-    { x: 0, y: 120 },
-    { x: 0, y: 500 },
+  { x: 0, y: 120 },
+  { x: 0, y: 500 },
 ]
 
 const colors: Record<string, string> = {
-    basic: "#cdcdcd",
-    redCircle: "#ff4d4d",
-    blueCircle: "#85a7ff",
-    greenCircle: "#4ddf88",
-    yellowCircle: "#ffd972",
-    purpleCircle: "#9858ed"
+  basic: "#cdcdcd",
+  redCircle: "#ff4d4d",
+  blueCircle: "#85a7ff",
+  greenCircle: "#4ddf88",
+  yellowCircle: "#ffd972",
+  purpleCircle: "#9858ed",
+  basicHalf: "#cdcdcd"
 }
 
-const upgrades: Record<string, Upgrade> = {//Use Clicking Power.power as prev clicking power
-    clickingPower: {
-        id: "Clicking Power",
-        lvl: 1,
-        value: 50,
-        power: 25
-    },
-    creationSpeed: {
-        id: "Creation Speed",
-        lvl: 1,
-        value: 100,
-        power: 1
-    }
+const shapes: Record<string, string> = {
+  circle: `
+    <g transform="matrix(0.96875,0,0,0.96875,0.5,0.5)"><circle cx="16" cy="16" r="16"/></g>
+    <g><path d="M16,0C16.025,2.675 16,32 16,32"/></g>
+    <g transform="matrix(0.96875,0,0,1,0.5,0)"><path d="M32,16L0,16"/></g>
+  `,
+  circleHalf: `
+    <g>
+      <g transform="matrix(0.969044,0,0,0.937337,1.002611,1.065274)">
+      <path d="M15.52,0L15.52,32C6.954,32 0,24.831 0,16C0,7.169 6.954,0 15.52,0Z"/>
+      </g>
+      <path d="M1.003,16L16,16.063"/>
+    </g>
+  `
+}
+
+const upgrades: Record<string, Upgrade> = {
+  clickingPower: {
+    id: "Clicking Power",
+    lvl: 1,
+    value: 50,
+    power: 25
+  },
+  creationSpeed: {
+    id: "Creation Speed",
+    lvl: 1,
+    value: 100,
+    power: 1
+  }
 }
 
 Object.values(upgrades).forEach(upgrade => {
@@ -268,6 +272,7 @@ Object.values(upgrades).forEach(upgrade => {
 const patterns: Record<string, Pattern> = {
   basic: {
     id: "basic",
+    shape: "circle",
     baseValue: 1,
     baseExp: 2,
     creationTime: 100,
@@ -277,6 +282,7 @@ const patterns: Record<string, Pattern> = {
   },
   redCircle: {
     id: "redCircle",
+    shape: "circle",
     baseValue: 5,
     baseExp: 3,
     creationTime: 150,
@@ -286,6 +292,7 @@ const patterns: Record<string, Pattern> = {
   },
   blueCircle: {
     id: "blueCircle",
+    shape: "circle",
     baseValue: 10,
     baseExp: 8,
     creationTime: 200,
@@ -295,6 +302,7 @@ const patterns: Record<string, Pattern> = {
   },
   greenCircle: {
     id: "greenCircle",
+    shape: "circle",
     baseValue: 25,
     baseExp: 15,
     creationTime: 300,
@@ -304,6 +312,7 @@ const patterns: Record<string, Pattern> = {
   },
   yellowCircle: {
     id: "yellowCircle",
+    shape: "circle",
     baseValue: 100,
     baseExp: 80,
     creationTime: 500,
@@ -313,12 +322,23 @@ const patterns: Record<string, Pattern> = {
   },
   purpleCircle: {
     id: "purpleCircle",
+    shape: "circle",
     baseValue: 300,
     baseExp: 250,
     creationTime: 1000,
     price: 25000,
     owned: false,
     requirements: { color: true }
+  },
+  basicHalf: {
+    id: "basicHalf",
+    shape: "circleHalf",
+    baseValue: 300,
+    baseExp: 250,
+    creationTime: 1000,
+    price: 25000,
+    owned: false,
+    requirements: { cut: true }
   }
 }
 
@@ -326,7 +346,7 @@ const machines: Machine[] = [
   {
     id: "color",
     description: "Color Machine",
-    at: 0.4,
+    at: 0.3,
     price: 50,
     owned: false,
     src: "/img/ColorMachine.png",
@@ -340,11 +360,10 @@ const machines: Machine[] = [
       }
     }
   },
-
   {
     id: "cut",
     description: "Cutting Machine",
-    at: 0.7,
+    at: 0.65,
     price: 10000,
     owned: false,
     src: "/img/CutMachine.png",
@@ -353,7 +372,7 @@ const machines: Machine[] = [
         ...part,
         traits: {
           ...part.traits,
-          cut: true
+          cut: patterns[part.patternId]?.shape
         }
       }
     }
@@ -416,7 +435,9 @@ function spawnPart() {
     patternId: currentPattern.value.id,
     progress: 0,
     speed: 0.01,
-    traits: {} // born blank
+    traits: {
+      cut: "circle"
+    }
   })
 }
 
@@ -616,24 +637,26 @@ const showOfflinePopup = ref(false)
 const offlineReward = ref(0)
 
 function applyOfflineProgress() {
-    const lastOnline = localStorage.getItem("lastOnline")
+  const lastOnline = localStorage.getItem("lastOnline")
+  
+  if (lastOnline) {
+    const elapsedSeconds = (Date.now() - Number(lastOnline)) / 1000
+    const reward = elapsedSeconds * idleIncomePerSecond.value
+
+    money.value += Math.floor(reward)
+    localStorage.setItem("money", money.value.toString())
+    offlineReward.value = Math.floor(reward)
+    showOfflinePopup.value = true
+    localStorage.setItem("lastOnline", Date.now().toString())
     
+    console.log(
+      `Offline for ${elapsedSeconds}s → earned ${reward} IGM`
+    )
 
-    if (lastOnline) {
-        const elapsedSeconds = (Date.now() - Number(lastOnline)) / 1000
-        const reward = elapsedSeconds * idleIncomePerSecond.value
-
-        money.value += Math.floor(reward)
-        localStorage.setItem("money", money.value.toString())
-        
-        console.log(
-            `Offline for ${elapsedSeconds}s → earned ${reward} IGM`
-        )
-
-        setTimeout(() => {
-            showOfflinePopup.value = false
-        }, 6000)
-    }
+    setTimeout(() => {
+      closeOfflinePopup()
+    }, 6000)
+  }
 }
 
 function closeOfflinePopup() {
