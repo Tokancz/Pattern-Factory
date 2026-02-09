@@ -347,10 +347,10 @@ const BASE = {
   price: 0
 }
 const SCALE = {
-  value: 1.8,
+  value: 2.5,
   exp: 1.6,
-  creationTime: 1.8,
-  price: 5
+  creationTime: 1.5,
+  price: 3
 }
 
 function generatePatterns(): Record<string, Pattern> {
