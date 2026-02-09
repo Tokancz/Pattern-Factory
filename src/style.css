@@ -47,10 +47,13 @@ body {
   align-items: center;
   gap: 0px;
   text-align: center;
-  overflow: hidden;
+  overflow-x: hidden;
 }
 #app header {
+  position: fixed;
   width: 100%;
+  max-width: 1440px;
+  z-index: 10;
   display: flex;
   justify-content: space-between;
   align-items: start;
@@ -92,6 +95,7 @@ body {
   gap: 10px;
   z-index: 1;
   padding: 0 10px;
+  overflow: hidden;
 }
 #app header div#header_info div p {
   color: var(--lightgray);
@@ -138,11 +142,11 @@ body {
 }
 #app main aside#stats section h3 {
   width: 100%;
-  font-size: 2.5em;
+  font-size: 2em;
 }
 #app main aside#stats section p {
   width: 100%;
-  font-size: 1.5em;
+  font-size: 1.3em;
   color: var(--lightgray);
 }
 #app main aside#stats section svg {
@@ -219,11 +223,14 @@ body {
 }
 #app main section#shopList {
   position: relative;
-  width: 250px;
+  width: 340px;
 }
 #app main section#shopList > img {
   position: absolute;
   top: -30px;
+  left: 20px;
+  width: 300px;
+  height: 500px;
   filter: opacity(0.8);
   user-select: none;
 }
@@ -365,7 +372,7 @@ body {
   color: var(--lightgray);
 }
 #app footer {
-  position: sticky;
+  position: fixed;
   bottom: 0;
   width: 100%;
   display: flex;

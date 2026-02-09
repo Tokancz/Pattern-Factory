@@ -59,10 +59,13 @@ body {
   height: 100dvh;
   @include flexColumn(0px, start);
   text-align: center;
-  overflow: hidden;
+  overflow-x: hidden;
 
   header {
+    position: fixed;
     width: 100%;
+    max-width: 1440px;
+    z-index: 10;
     @include flexRow(0px,space-between, start);
 
     div#header_info {
@@ -94,6 +97,7 @@ body {
         @include flexRow(10px);
         z-index: 1;
         padding: 0 10px;
+        overflow: hidden;
 
         p {
           color: var(--lightgray);
@@ -133,11 +137,11 @@ body {
 
         h3 {
           width: 100%;
-          font-size: 2.5em;
+          font-size: 2em;
         }
         p {
           width: 100%;
-          font-size: 1.5em;
+          font-size: 1.3em;
           color: var(--lightgray);
         }
         svg {
@@ -211,11 +215,14 @@ body {
     }
     section#shopList {
       position: relative;
-      width: 250px;
+      width: 340px;
 
       >img {
         position: absolute;
         top: -30px;
+        left: 20px;
+        width: 300px;
+        height: 500px;
         filter: opacity(.8);
         user-select: none;
       }
@@ -337,7 +344,7 @@ body {
     }
   }
   footer {
-    position: sticky;
+    position: fixed;
     bottom: 0;
     width: 100%;
     @include flexRow();

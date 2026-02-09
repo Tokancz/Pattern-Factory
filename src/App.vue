@@ -22,12 +22,13 @@
                 <h3>Progress</h3>
                 <p>Next Part: {{ Math.floor(creatingProgress / currentPattern.creationTime * 100) }} %</p>
                 <input type="range" min="0" :max="currentPattern.creationTime" class="slider" v-model="creatingProgress" disabled="true">
-                <p>Part Price: {{ getPatternValue(currentPattern) }} IGM</p>
+                <p>Initial Price: {{ formatNumber(currentPattern.baseValue) }} IGM</p>
+                <p>Current Price: {{ displayValue(currentPattern) }} IGM</p>
             </section>
             <section>
                 <h3>Daily Pattern</h3>
                 <p>1.5x mutliplier !!</p>
-                <p>Price: {{ getPatternValue(dailyPattern) }} IGM</p>
+                <p>Price: {{ displayValue(dailyPattern) }} IGM</p>
                 <svg viewBox="0 0 32 32" draggable="false" 
                   :style="{fill: colors[dailyPattern.id]}"
                   v-html="shapes[dailyPattern.shape]">
@@ -83,7 +84,7 @@
                 <p @click="openedShop = ''">X</p>
             </div>
             <div class="container">
-                <div class="pattern" v-for="pattern in patterns" :key="pattern.id">
+                <div class="pattern" v-for="pattern in patterns" :key="pattern.id" v-show="canProducePattern(pattern)">
                     <svg viewBox="0 0 32 32" 
                       :style="{fill: colors[pattern.id]}"
                       v-html="shapes[pattern.shape]">
@@ -144,7 +145,6 @@
             <h3>Welocme back!</h3>
             <p>While you were away you earned {{ formatNumber(offlineReward) }} IGM</p>
         </div>
-
     </main>
     <footer>
         <img src="/img/Footer.png" alt="Footer" draggable="false">
@@ -201,6 +201,12 @@ type Upgrade = {
     power: number
 }
 
+type Upgrades = {
+  clickingPower: Upgrade
+  creationSpeed: Upgrade
+  sellMultiplier: Upgrade
+}
+
 const openedShop = ref("")
 const money = ref(localStorage.getItem("money") ? parseInt(localStorage.getItem("money")!) : 0)
 const lvl = ref(localStorage.getItem("lvl") ? parseInt(localStorage.getItem("lvl")!) : 1)
@@ -221,14 +227,16 @@ const conveyorPath: Point[] = [
   { x: 0, y: 500 },
 ]
 
-const colors: Record<string, string> = {
+const colors: Record<string, string> = {//Optimize for 1 color per color variation
   basic: "#cdcdcd",
   redCircle: "#ff4d4d",
   blueCircle: "#85a7ff",
   greenCircle: "#4ddf88",
   yellowCircle: "#ffd972",
   purpleCircle: "#9858ed",
-  basicHalf: "#cdcdcd"
+  basicHalf: "#cdcdcd",
+  redHalf: "#ff4d4d",
+  blueHalf: "#85a7ff"
 }
 
 const shapes: Record<string, string> = {
@@ -247,7 +255,7 @@ const shapes: Record<string, string> = {
   `
 }
 
-const upgrades: Record<string, Upgrade> = {
+const upgrades: Upgrades = {
   clickingPower: {
     id: "Clicking Power",
     lvl: 1,
@@ -259,21 +267,20 @@ const upgrades: Record<string, Upgrade> = {
     lvl: 1,
     value: 100,
     power: 1
+  },
+  sellMultiplier: {
+    id: "sellMutliplier",
+    lvl: 1,
+    value: 100,
+    power: 1
   }
 }
-
-Object.values(upgrades).forEach(upgrade => {
-  const saved = localStorage.getItem(`upgrade_${upgrade.id}`)
-  if (saved) {
-    Object.assign(upgrade, JSON.parse(saved))
-  }
-})
 
 const patterns: Record<string, Pattern> = {
   basic: {
     id: "basic",
     shape: "circle",
-    baseValue: 1,
+    baseValue: 2,
     baseExp: 2,
     creationTime: 100,
     price: 0,
@@ -293,7 +300,7 @@ const patterns: Record<string, Pattern> = {
   blueCircle: {
     id: "blueCircle",
     shape: "circle",
-    baseValue: 10,
+    baseValue: 15,
     baseExp: 8,
     creationTime: 200,
     price: 500,
@@ -303,7 +310,7 @@ const patterns: Record<string, Pattern> = {
   greenCircle: {
     id: "greenCircle",
     shape: "circle",
-    baseValue: 25,
+    baseValue: 50,
     baseExp: 15,
     creationTime: 300,
     price: 5000,
@@ -333,12 +340,32 @@ const patterns: Record<string, Pattern> = {
   basicHalf: {
     id: "basicHalf",
     shape: "circleHalf",
-    baseValue: 300,
-    baseExp: 250,
-    creationTime: 1000,
-    price: 25000,
+    baseValue: 1000,
+    baseExp: 750,
+    creationTime: 2000,
+    price: 40000,
     owned: false,
     requirements: { cut: true }
+  },
+  redHalf: {
+    id: "redHalf",
+    shape: "circleHalf",
+    baseValue: 2500,
+    baseExp: 2000,
+    creationTime: 5000,
+    price: 100000,
+    owned: false,
+    requirements: { color: true, cut: true }
+  },
+  blueHalf: {
+    id: "blueHalf",
+    shape: "circleHalf",
+    baseValue: 7500,
+    baseExp: 5000,
+    creationTime: 10000,
+    price: 250000,
+    owned: false,
+    requirements: { color: true, cut: true }
   }
 }
 
@@ -364,7 +391,7 @@ const machines: Machine[] = [
     id: "cut",
     description: "Cutting Machine",
     at: 0.65,
-    price: 10000,
+    price: 25000,
     owned: false,
     src: "/img/CutMachine.png",
     apply(part) {
@@ -379,6 +406,12 @@ const machines: Machine[] = [
   }
 ]
 
+Object.values(upgrades).forEach(upgrade => {
+  const saved = localStorage.getItem(`upgrade_${upgrade.id}`)
+  if (saved) {
+    Object.assign(upgrade, JSON.parse(saved))
+  }
+})
 const ownedPatterns = ref<string[]>(
   JSON.parse(localStorage.getItem("ownedPatterns") || "[]")
 )
@@ -500,8 +533,11 @@ initUserName()
 
 function getPatternValue(pattern: Pattern) {
   return pattern.id === dailyPattern.value.id
-    ? dailyPattern.value.baseValue
-    : pattern.baseValue
+    ? dailyPattern.value.baseValue * upgrades.sellMultiplier.power
+    : pattern.baseValue * upgrades.sellMultiplier.power
+}
+function displayValue(pattern: Pattern) {
+  return formatNumber(Math.floor(getPatternValue(pattern) * 100) / 100)
 }
 function calculateValue(part: Part) {
   const pattern = patterns[part.patternId]
@@ -523,7 +559,6 @@ function isPartComplete(part: Part) {
   )
 }
 
-//SELL & LEVEL
 function sellPart(part: Part) {
     if (!isPartComplete(part)) {
         money.value += Math.floor(calculateValue(part) * 0.3) // scrap value
@@ -592,6 +627,7 @@ function buyMachine(machine: Machine) {
       "ownedMachines",
       JSON.stringify(ownedMachines.value)
     )
+    location.reload()
   }
 }
 
@@ -641,21 +677,24 @@ function applyOfflineProgress() {
   
   if (lastOnline) {
     const elapsedSeconds = (Date.now() - Number(lastOnline)) / 1000
-    const reward = elapsedSeconds * idleIncomePerSecond.value
 
-    money.value += Math.floor(reward)
-    localStorage.setItem("money", money.value.toString())
-    offlineReward.value = Math.floor(reward)
-    showOfflinePopup.value = true
-    localStorage.setItem("lastOnline", Date.now().toString())
-    
-    console.log(
-      `Offline for ${elapsedSeconds}s → earned ${reward} IGM`
-    )
+    if (elapsedSeconds > 5) {
+        const reward = elapsedSeconds * idleIncomePerSecond.value
 
-    setTimeout(() => {
-      closeOfflinePopup()
-    }, 6000)
+        money.value += Math.floor(reward)
+        localStorage.setItem("money", money.value.toString())
+        offlineReward.value = Math.floor(reward)
+        showOfflinePopup.value = true
+        localStorage.setItem("lastOnline", Date.now().toString())
+        
+        console.log(
+        `Offline for ${elapsedSeconds}s → earned ${reward} IGM`
+        )
+
+        setTimeout(() => {
+        closeOfflinePopup()
+        }, 6000)
+    }
   }
 }
 
@@ -710,6 +749,4 @@ setInterval(() => {
 }, 50)
 
 applyOfflineProgress()
-
-//Todo: Level Up rewards
 </script>
