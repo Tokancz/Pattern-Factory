@@ -149,7 +149,8 @@
     </main>
     <footer>
         <img src="/img/Footer.png" alt="Footer" draggable="false">
-        <p>Money: {{ formattedMoney }} IGM</p>
+        <p id="money">Money: {{ formattedMoney }} IGM</p>
+        <p id="dc">DC: {{ formatNumber(dc) }}</p>
     </footer>
 </template>
 
@@ -221,6 +222,7 @@ type Colors = {
 
 const openedShop = ref("")
 const money = ref(localStorage.getItem("money") ? parseInt(localStorage.getItem("money")!) : 0)
+const dc = ref(localStorage.getItem("dc") ? parseInt(localStorage.getItem("dc")!) : 0)
 const lvl = ref(localStorage.getItem("lvl") ? parseInt(localStorage.getItem("lvl")!) : 1)
 const exp = ref(localStorage.getItem("exp") ? parseInt(localStorage.getItem("exp")!) : 0)
 const expToNextLvl = ref(localStorage.getItem("expToNextLvl") ? parseInt(localStorage.getItem("expToNextLvl")!) : 100)
@@ -285,6 +287,9 @@ const upgrades: Upgrades = {
   }
 }
 
+import ColorMachine from "./assets/img/ColorMachine.png"
+import CutMachine from "./assets/img/CutMachine.png"
+
 const machines: Machine[] = [
   {
     id: "color",
@@ -292,7 +297,7 @@ const machines: Machine[] = [
     at: 0.3,
     price: 50,
     owned: false,
-    src: "/img/ColorMachine.png",
+    src: ColorMachine,
     apply(part) {
       return {
         ...part,
@@ -309,7 +314,7 @@ const machines: Machine[] = [
     at: 0.65,
     price: 25000,
     owned: false,
-    src: "/img/CutMachine.png",
+    src: CutMachine,
     apply(part) {
       return {
         ...part,
@@ -331,19 +336,16 @@ const colorDefs = [
   { key: "yellow", requiresColor: true },
   { key: "purple", requiresColor: true }
 ] as const
-
 const shapeDefs = [
   { key: "circle", requiresCut: false, valueMul: 1 },
   { key: "circleHalf", requiresCut: true, valueMul: 5 }
 ] as const
-
 const BASE = {
   value: 2,
   exp: 2,
   creationTime: 100,
   price: 0
 }
-
 const SCALE = {
   value: 1.8,
   exp: 1.6,
@@ -401,7 +403,6 @@ function generatePatterns(): Record<string, Pattern> {
 
   return patterns
 }
-
 const patterns: Record<string, Pattern> = generatePatterns()
 
 Object.values(upgrades).forEach(upgrade => {
@@ -444,8 +445,32 @@ const currentPattern = ref<Pattern>(
   getStoredPattern(storeCurrentPattern, patterns)
 )
 
-const dailyPattern = ref<Pattern>({ ...patterns.blueCircle! });
-dailyPattern.value.baseValue *= 1.5; // 50% price increase for daily pattern
+const DAILY_INTERVAL = 30 * 60 * 1000 // 30 minutes
+
+function getEligiblePatterns(): Pattern[] {
+  return Object.values(patterns).filter(p => p.id !== "basic")
+}
+function getDailyPattern(): Pattern {
+  const now = Date.now()
+
+  const saved = localStorage.getItem("dailyPattern")
+  const savedTime = Number(localStorage.getItem("dailyPatternTime"))
+
+  if (saved && savedTime && now - savedTime < DAILY_INTERVAL) {
+    return { ...patterns[saved]! }
+  }
+
+  const pool = getEligiblePatterns()
+  const random = pool[Math.floor(Math.random() * pool.length)]
+
+  localStorage.setItem("dailyPattern", random!.id)
+  localStorage.setItem("dailyPatternTime", now.toString())
+
+  return { ...random! }
+}
+
+const dailyPattern = ref<Pattern>(getDailyPattern());
+dailyPattern.value.baseValue *= 1.5;
 
 const ownedMachineCapabilities = computed(() => {
   return {
@@ -569,12 +594,17 @@ function isPartComplete(part: Part) {
 
 function sellPart(part: Part) {
     if (!isPartComplete(part)) {
-        money.value += Math.floor(calculateValue(part) * 0.3) // scrap value
+      money.value += Math.floor(calculateValue(part) * 0.3) // scrap value
     } else {
-        money.value += calculateValue(part)
+      money.value += calculateValue(part)
+
+      if(part.patternId === dailyPattern.value.id) {
+        dc.value += 10
+      }
     }
     partsSold.value += 1;
     localStorage.setItem("money", money.value.toString())
+    localStorage.setItem("dc", dc.value.toString())
     localStorage.setItem("partsSold", partsSold.value.toString())
     gainExp(calculateExp(part)!)
 }
@@ -591,7 +621,7 @@ function gainExp(amount: number) {
 
     lvl.value++
     lvlPopUp.value = true
-    gainedMoney.value = lvl.value * 20
+    gainedMoney.value = Math.pow(lvl.value, 2)
     money.value += gainedMoney.value
 
     setTimeout(() => {
@@ -655,6 +685,7 @@ function buyUpgrade(upgrade: Upgrade) {
 }
 
 function formatNumber(value: number): string {
+  value = Math.floor(value)
   if (value < 1000) return value.toString()
 
   const units = ["k", "M", "B", "T"]

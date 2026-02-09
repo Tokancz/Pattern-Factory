@@ -383,10 +383,12 @@ body {
   position: fixed;
   bottom: 0;
   width: 100%;
+  padding: 20px;
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
-  gap: 0px;
+  gap: 10px;
 }
 #app footer img {
   position: absolute;
@@ -396,9 +398,12 @@ body {
 }
 #app footer p {
   z-index: 1;
-  padding: 20px;
   color: var(--darkgray);
   font-size: 2em;
+}
+#app footer p#dc {
+  font-size: 1.5em;
+  color: var(--lightgray);
 }
 
 /*# sourceMappingURL=style.css.map */
