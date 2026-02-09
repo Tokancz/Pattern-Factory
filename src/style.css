@@ -284,6 +284,7 @@ body {
   top: 50%;
   left: 50%;
   width: 800px;
+  max-height: 90dvh;
   display: flex;
   flex-direction: column;
   justify-content: start;
@@ -313,7 +314,9 @@ body {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   align-items: start;
+  overflow-y: scroll;
   gap: 20px;
+  padding: 0 20px;
 }
 #app main section.tab div.container .pattern, #app main section.tab div.container .upgrade {
   width: 100%;
@@ -342,6 +345,11 @@ body {
 #app main section.tab div.container .pattern p, #app main section.tab div.container .upgrade p {
   font-size: 1.5em;
   color: var(--white);
+}
+#app main section.tab > p {
+  width: 100%;
+  color: var(--white);
+  font-size: 2em;
 }
 #app main #offlineReward {
   position: absolute;

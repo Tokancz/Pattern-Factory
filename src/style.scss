@@ -265,6 +265,7 @@ body {
       top: 50%;
       left: 50%;
       width: 800px;
+      max-height: 90dvh;
       @include flexColumn(20px, start, start);
       background-color: var(--primary);
       z-index: 10;
@@ -288,7 +289,9 @@ body {
         display: grid;
         grid-template-columns: repeat(4, 1fr);
         align-items: start;
+        overflow-y: scroll;
         gap: 20px;
+        padding: 0 20px;
 
         .pattern, .upgrade{
           width: 100%;
@@ -315,6 +318,11 @@ body {
             color: var(--white);
           }
         }
+      }
+      >p {
+        width: 100%;
+        color: var(--white);
+        font-size: 2em;
       }
     }
     #offlineReward {

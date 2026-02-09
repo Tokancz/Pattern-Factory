@@ -30,8 +30,8 @@
                 <p>1.5x mutliplier !!</p>
                 <p>Price: {{ displayValue(dailyPattern) }} IGM</p>
                 <svg viewBox="0 0 32 32" draggable="false" 
-                  :style="{fill: colors[dailyPattern.id]}"
-                  v-html="shapes[dailyPattern.shape]">
+                  :style="{fill: dailyPattern.traits.color}"
+                  v-html="shapes[dailyPattern.traits.shape]">
                 </svg>
             </section>
         </aside>
@@ -39,8 +39,8 @@
             <div @click="click" id="factory">
                 <img src="/img/Factory.png" alt="Factory" draggable="false">
                 <svg viewBox="0 0 32 32" 
-                  :style="{fill: colors[currentPattern.id]}" 
-                  v-html="shapes[currentPattern.shape]">
+                  :style="{fill: currentPattern.traits.color}" 
+                  v-html="shapes[currentPattern.traits.shape]">
                 </svg>
                 <p id="progress">Progress {{ Math.floor(creatingProgress / currentPattern.creationTime * 100) }} %</p>
             </div>
@@ -84,15 +84,16 @@
                 <p @click="openedShop = ''">X</p>
             </div>
             <div class="container">
-                <div class="pattern" v-for="pattern in patterns" :key="pattern.id" v-show="canProducePattern(pattern)">
+                <div class="pattern" v-for="pattern in patterns" :key="pattern.id" v-show="canProducePattern(pattern) && !pattern.owned">
                     <svg viewBox="0 0 32 32" 
-                      :style="{fill: colors[pattern.id]}"
-                      v-html="shapes[pattern.shape]">
+                      :style="{fill: pattern.traits.color}"
+                      v-html="shapes[pattern.traits.shape]">
                     </svg>
                     <button v-if="!pattern.owned" @click="buyPattern(pattern)">Price: {{ formatNumber(pattern.price) }} IGM</button>
                     <button v-else>Owned</button>
                 </div>
             </div>
+            <p v-if="ownedPatterns.length % Object.keys(colors).length === 0">Nothing else to buy. Try buying a new machine</p><!--Fix-->
         </section>
         <section class="tab" v-if="openedShop === 'machines'">
             <div class="shop_header">
@@ -116,7 +117,7 @@
             <div class="container">
                 <div class="upgrade" v-for="upgrade in upgrades">
                     <p>{{ upgrade.id + " lvl: " + upgrade.lvl}}</p>
-                    <p>Cost: {{ upgrade.value }}</p>
+                    <p>Cost: {{ formatNumber(upgrade.value) }}</p>
                     <button class="buy_button" @click="buyUpgrade(upgrade)">Buy</button>
                 </div>
             </div>
@@ -129,12 +130,12 @@
             <div class="container">
                 <div class="pattern" v-for="pattern in patternList" :key="pattern.id" :disabled="!canProducePattern(pattern)" v-show="pattern.owned" @click="setPattern(pattern)">
                     <svg viewBox="0 0 32 32" 
-                      :style="{fill: colors[pattern.id]}"
-                      v-html="shapes[pattern.shape]">
+                      :style="{fill: pattern.traits.color}"
+                      v-html="shapes[pattern.traits.shape]">
                     </svg>
-                    <p>Price: {{ pattern.baseValue }}</p>
-                    <p>Exp: {{ pattern.baseExp }}</p>
-                    <p>Creation time: {{ pattern.creationTime }}</p>
+                    <p>Price: {{ formatNumber(pattern.baseValue) }}</p>
+                    <p>Exp: {{ formatNumber(pattern.baseExp) }}</p>
+                    <p>Creation time: {{ formatNumber(pattern.creationTime) }}</p>
                     <button v-if="currentPattern.id !== pattern.id"  @click="setPattern(pattern)">Select</button>
                     <button v-if="currentPattern.id == pattern.id">Selected</button>
                 </div>
@@ -171,7 +172,6 @@ type Part = {
 
 type Pattern = {
   id: string
-  shape: string
   baseValue: number
   baseExp: number
   creationTime: number
@@ -181,6 +181,10 @@ type Pattern = {
     color?: boolean
     cut?: boolean
     merged?: boolean
+  }
+  traits: {
+    color: string
+    shape: string
   }
 }
 
@@ -206,6 +210,14 @@ type Upgrades = {
   creationSpeed: Upgrade
   sellMultiplier: Upgrade
 }
+type Colors = {
+  gray: string
+  red: string
+  blue: string
+  green: string
+  yellow: string
+  purple: string
+}
 
 const openedShop = ref("")
 const money = ref(localStorage.getItem("money") ? parseInt(localStorage.getItem("money")!) : 0)
@@ -227,16 +239,13 @@ const conveyorPath: Point[] = [
   { x: 0, y: 500 },
 ]
 
-const colors: Record<string, string> = {//Optimize for 1 color per color variation
-  basic: "#cdcdcd",
-  redCircle: "#ff4d4d",
-  blueCircle: "#85a7ff",
-  greenCircle: "#4ddf88",
-  yellowCircle: "#ffd972",
-  purpleCircle: "#9858ed",
-  basicHalf: "#cdcdcd",
-  redHalf: "#ff4d4d",
-  blueHalf: "#85a7ff"
+const colors: Colors = {
+  gray: "#cdcdcd",
+  red: "#ff4d4d",
+  blue: "#85a7ff",
+  green: "#4ddf88",
+  yellow: "#ffd972",
+  purple: "#9858ed"
 }
 
 const shapes: Record<string, string> = {
@@ -276,96 +285,136 @@ const upgrades: Upgrades = {
   }
 }
 
-const patterns: Record<string, Pattern> = {
+const patterns: Record<string, Pattern> = {//automate to infinity or 100x
   basic: {
     id: "basic",
-    shape: "circle",
     baseValue: 2,
     baseExp: 2,
     creationTime: 100,
     price: 0,
     owned: true,
-    requirements: {}
+    requirements: {},
+    traits: {
+      color: colors.gray,
+      shape: "circle"
+    }
   },
   redCircle: {
     id: "redCircle",
-    shape: "circle",
     baseValue: 5,
     baseExp: 3,
     creationTime: 150,
     price: 100,
     owned: false,
-    requirements: { color: true }
+    requirements: { color: true },
+    traits: {
+      color: colors.red,
+      shape: "circle"
+    }
   },
   blueCircle: {
     id: "blueCircle",
-    shape: "circle",
     baseValue: 15,
     baseExp: 8,
     creationTime: 200,
     price: 500,
     owned: false,
-    requirements: { color: true }
+    requirements: { color: true },
+    traits: {
+      color: colors.blue,
+      shape: "circle"
+    }
   },
   greenCircle: {
     id: "greenCircle",
-    shape: "circle",
     baseValue: 50,
     baseExp: 15,
     creationTime: 300,
     price: 5000,
     owned: false,
-    requirements: { color: true }
+    requirements: { color: true },
+    traits: {
+      color: colors.green,
+      shape: "circle"
+    }
   },
   yellowCircle: {
     id: "yellowCircle",
-    shape: "circle",
     baseValue: 100,
     baseExp: 80,
     creationTime: 500,
     price: 12500,
     owned: false,
-    requirements: { color: true }
+    requirements: { color: true },
+    traits: {
+      color: colors.yellow,
+      shape: "circle"
+    }
   },
   purpleCircle: {
     id: "purpleCircle",
-    shape: "circle",
     baseValue: 300,
     baseExp: 250,
     creationTime: 1000,
     price: 25000,
     owned: false,
-    requirements: { color: true }
+    requirements: { color: true },
+    traits: {
+      color: colors.purple,
+      shape: "circle"
+    }
   },
   basicHalf: {
     id: "basicHalf",
-    shape: "circleHalf",
     baseValue: 1000,
     baseExp: 750,
     creationTime: 2000,
     price: 40000,
     owned: false,
-    requirements: { cut: true }
+    requirements: { cut: true },
+    traits: {
+      color: colors.gray,
+      shape: "circleHalf"
+    }
   },
   redHalf: {
     id: "redHalf",
-    shape: "circleHalf",
     baseValue: 2500,
     baseExp: 2000,
     creationTime: 5000,
     price: 100000,
     owned: false,
-    requirements: { color: true, cut: true }
+    requirements: { color: true, cut: true },
+    traits: {
+      color: colors.red,
+      shape: "circleHalf"
+    }
   },
   blueHalf: {
     id: "blueHalf",
-    shape: "circleHalf",
     baseValue: 7500,
     baseExp: 5000,
     creationTime: 10000,
     price: 250000,
     owned: false,
-    requirements: { color: true, cut: true }
+    requirements: { color: true, cut: true },
+    traits: {
+      color: colors.blue,
+      shape: "circleHalf"
+    }
+  },
+  greenHalf: {
+    id: "greenHalf",
+    baseValue: 15000,
+    baseExp: 8000,
+    creationTime: 10000,
+    price: 1000000,
+    owned: false,
+    requirements: { color: true, cut: true },
+    traits: {
+      color: colors.green,
+      shape: "circleHalf"
+    }
   }
 }
 
@@ -382,7 +431,7 @@ const machines: Machine[] = [
         ...part,
         traits: {
           ...part.traits,
-          color: colors[part.patternId]
+          color: patterns[part.patternId]?.traits.color
         }
       }
     }
@@ -399,7 +448,7 @@ const machines: Machine[] = [
         ...part,
         traits: {
           ...part.traits,
-          cut: patterns[part.patternId]?.shape
+          cut: patterns[part.patternId]?.traits.shape
         }
       }
     }
@@ -469,6 +518,7 @@ function spawnPart() {
     progress: 0,
     speed: 0.01,
     traits: {
+      color: colors.gray,
       cut: "circle"
     }
   })
