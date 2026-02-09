@@ -285,139 +285,6 @@ const upgrades: Upgrades = {
   }
 }
 
-const patterns: Record<string, Pattern> = {//automate to infinity or 100x
-  basic: {
-    id: "basic",
-    baseValue: 2,
-    baseExp: 2,
-    creationTime: 100,
-    price: 0,
-    owned: true,
-    requirements: {},
-    traits: {
-      color: colors.gray,
-      shape: "circle"
-    }
-  },
-  redCircle: {
-    id: "redCircle",
-    baseValue: 5,
-    baseExp: 3,
-    creationTime: 150,
-    price: 100,
-    owned: false,
-    requirements: { color: true },
-    traits: {
-      color: colors.red,
-      shape: "circle"
-    }
-  },
-  blueCircle: {
-    id: "blueCircle",
-    baseValue: 15,
-    baseExp: 8,
-    creationTime: 200,
-    price: 500,
-    owned: false,
-    requirements: { color: true },
-    traits: {
-      color: colors.blue,
-      shape: "circle"
-    }
-  },
-  greenCircle: {
-    id: "greenCircle",
-    baseValue: 50,
-    baseExp: 15,
-    creationTime: 300,
-    price: 5000,
-    owned: false,
-    requirements: { color: true },
-    traits: {
-      color: colors.green,
-      shape: "circle"
-    }
-  },
-  yellowCircle: {
-    id: "yellowCircle",
-    baseValue: 100,
-    baseExp: 80,
-    creationTime: 500,
-    price: 12500,
-    owned: false,
-    requirements: { color: true },
-    traits: {
-      color: colors.yellow,
-      shape: "circle"
-    }
-  },
-  purpleCircle: {
-    id: "purpleCircle",
-    baseValue: 300,
-    baseExp: 250,
-    creationTime: 1000,
-    price: 25000,
-    owned: false,
-    requirements: { color: true },
-    traits: {
-      color: colors.purple,
-      shape: "circle"
-    }
-  },
-  basicHalf: {
-    id: "basicHalf",
-    baseValue: 1000,
-    baseExp: 750,
-    creationTime: 2000,
-    price: 40000,
-    owned: false,
-    requirements: { cut: true },
-    traits: {
-      color: colors.gray,
-      shape: "circleHalf"
-    }
-  },
-  redHalf: {
-    id: "redHalf",
-    baseValue: 2500,
-    baseExp: 2000,
-    creationTime: 5000,
-    price: 100000,
-    owned: false,
-    requirements: { color: true, cut: true },
-    traits: {
-      color: colors.red,
-      shape: "circleHalf"
-    }
-  },
-  blueHalf: {
-    id: "blueHalf",
-    baseValue: 7500,
-    baseExp: 5000,
-    creationTime: 10000,
-    price: 250000,
-    owned: false,
-    requirements: { color: true, cut: true },
-    traits: {
-      color: colors.blue,
-      shape: "circleHalf"
-    }
-  },
-  greenHalf: {
-    id: "greenHalf",
-    baseValue: 15000,
-    baseExp: 8000,
-    creationTime: 10000,
-    price: 1000000,
-    owned: false,
-    requirements: { color: true, cut: true },
-    traits: {
-      color: colors.green,
-      shape: "circleHalf"
-    }
-  }
-}
-
 const machines: Machine[] = [
   {
     id: "color",
@@ -455,6 +322,88 @@ const machines: Machine[] = [
   }
 ]
 
+//Procedural Patterns:
+const colorDefs = [
+  { key: "gray", requiresColor: false },
+  { key: "red", requiresColor: true },
+  { key: "blue", requiresColor: true },
+  { key: "green", requiresColor: true },
+  { key: "yellow", requiresColor: true },
+  { key: "purple", requiresColor: true }
+] as const
+
+const shapeDefs = [
+  { key: "circle", requiresCut: false, valueMul: 1 },
+  { key: "circleHalf", requiresCut: true, valueMul: 5 }
+] as const
+
+const BASE = {
+  value: 2,
+  exp: 2,
+  creationTime: 100,
+  price: 0
+}
+
+const SCALE = {
+  value: 1.8,
+  exp: 1.6,
+  creationTime: 1.8,
+  price: 5
+}
+
+function generatePatterns(): Record<string, Pattern> {
+  const patterns: Record<string, Pattern> = {}
+  let tier = 0
+
+  for (const shape of shapeDefs) {
+    for (const color of colorDefs) {
+      const id =
+        color.key === "gray"
+          ? `basic${shape.key === "circle" ? "" : "Half"}`
+          : `${color.key}${shape.key[0]!.toUpperCase()}${shape.key.slice(1)}`
+
+      const isBasic = id === "basic"
+
+      const baseValue = Math.floor(
+        BASE.value * Math.pow(SCALE.value, tier) * shape.valueMul
+      )
+      const baseExp = Math.floor(
+        BASE.exp * Math.pow(SCALE.exp, tier)
+      )
+      const creationTime = Math.floor(
+        BASE.creationTime * Math.pow(SCALE.creationTime, tier)
+      )
+
+      const price = isBasic
+        ? 0
+        : Math.floor(BASE.price + Math.pow(SCALE.price, tier) * 100)
+
+      patterns[id] = {
+        id,
+        baseValue,
+        baseExp,
+        creationTime,
+        price,
+        owned: isBasic,
+        requirements: {
+          ...(color.requiresColor ? { color: true } : {}),
+          ...(shape.requiresCut ? { cut: true } : {})
+        },
+        traits: {
+          color: colors[color.key],
+          shape: shape.key
+        }
+      }
+
+      tier++
+    }
+  }
+
+  return patterns
+}
+
+const patterns: Record<string, Pattern> = generatePatterns()
+
 Object.values(upgrades).forEach(upgrade => {
   const saved = localStorage.getItem(`upgrade_${upgrade.id}`)
   if (saved) {
@@ -474,19 +423,28 @@ Object.values(patterns).forEach(pattern => {
     pattern.owned || ownedPatterns.value.includes(pattern.id)
 })
 
-const machineList = computed(() => Object.values(machines))
 Object.values(machines).forEach(machine => {
   machine.owned =
     machine.owned || ownedMachines.value.includes(machine.id)
 })
 
+function getStoredPattern(
+  key: string | null,
+  patterns: Record<string, Pattern>
+): Pattern {
+  if (key && key in patterns) {
+    return patterns[key]!
+  }
+  return patterns.basic!
+}
+
 const storeCurrentPattern = localStorage.getItem("currentPattern")
+
 const currentPattern = ref<Pattern>(
-    storeCurrentPattern && patterns[storeCurrentPattern]
-    ? patterns[storeCurrentPattern] : patterns.basic
+  getStoredPattern(storeCurrentPattern, patterns)
 )
 
-const dailyPattern = ref<Pattern>({ ...patterns.blueCircle });
+const dailyPattern = ref<Pattern>({ ...patterns.blueCircle! });
 dailyPattern.value.baseValue *= 1.5; // 50% price increase for daily pattern
 
 const ownedMachineCapabilities = computed(() => {
@@ -534,8 +492,8 @@ function getPositionOnPath(path: Point[], progress: number) {
   const p2 = path[index + 1] ?? p1
 
   return {
-    x: p1.x + (p2.x - p1.x) * t,
-    y: p1.y + (p2.y - p1.y) * t
+    x: p1!.x + (p2!.x - p1!.x) * t,
+    y: p1!.y + (p2!.y - p1!.y) * t
   }
 }
 
@@ -543,7 +501,7 @@ function partStyle(part: Part) {
   const pos = getPositionOnPath(conveyorPath, part.progress)
   return {
     transform: `translate(${pos.x}px, ${pos.y}px)`,
-    fill: part.traits.color || colors.basic
+    fill: part.traits.color || colors.gray
   }
 }
 
@@ -591,7 +549,7 @@ function displayValue(pattern: Pattern) {
 }
 function calculateValue(part: Part) {
   const pattern = patterns[part.patternId]
-  return getPatternValue(pattern)
+  return getPatternValue(pattern!)
 }
 function calculateExp(part: Part) {
   return patterns[part.patternId]?.baseExp
@@ -603,7 +561,7 @@ function setPattern(pattern: Pattern) {
 }
 
 function isPartComplete(part: Part) {
-  const reqs = patterns[part.patternId].requirements
+  const reqs = patterns[part.patternId]!.requirements
   return Object.entries(reqs).every(
     ([key, needed]) => !needed || (part.traits as any)[key]
   )
