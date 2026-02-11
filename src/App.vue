@@ -29,6 +29,7 @@
                 <h3>Daily Pattern</h3>
                 <p>1.5x mutliplier !!</p>
                 <p>Price: {{ displayValue(dailyPattern) }} IGM</p>
+                <p>DC: 10 DC</p>
                 <svg viewBox="0 0 32 32" draggable="false" 
                   :style="{fill: dailyPattern.traits.color}"
                   v-html="shapes[dailyPattern.traits.shape]">
@@ -89,8 +90,11 @@
                       :style="{fill: pattern.traits.color}"
                       v-html="shapes[pattern.traits.shape]">
                     </svg>
+                    <p>Value: {{ displayValue(pattern) }}</p>
+                    <p>Exp:  {{ formatNumber(pattern.baseExp) }}</p>
+                    <p>Creation time:  {{ formatNumber(pattern.creationTime) }}</p>
                     <button v-if="!pattern.owned" @click="buyPattern(pattern)">Price: {{ formatNumber(pattern.price) }} IGM</button>
-                    <button v-else>Owned</button>
+                     <button v-else>Owned</button>
                 </div>
             </div>
             <p v-if="ownedPatterns.length % Object.keys(colors).length === 0">Nothing else to buy. Try buying a new machine</p><!--Fix-->
@@ -133,7 +137,7 @@
                       :style="{fill: pattern.traits.color}"
                       v-html="shapes[pattern.traits.shape]">
                     </svg>
-                    <p>Price: {{ formatNumber(pattern.baseValue) }}</p>
+                    <p>Price: {{ displayValue(pattern) }}</p>
                     <p>Exp: {{ formatNumber(pattern.baseExp) }}</p>
                     <p>Creation time: {{ formatNumber(pattern.creationTime) }}</p>
                     <button v-if="currentPattern.id !== pattern.id"  @click="setPattern(pattern)">Select</button>
@@ -280,7 +284,7 @@ const upgrades: Upgrades = {
     power: 1
   },
   sellMultiplier: {
-    id: "sellMutliplier",
+    id: "Sell Mutliplier",
     lvl: 1,
     value: 100,
     power: 1
@@ -347,10 +351,10 @@ const BASE = {
   price: 0
 }
 const SCALE = {
-  value: 2.5,
-  exp: 1.6,
+  value: 2.25,
+  exp: 2,
   creationTime: 1.5,
-  price: 3
+  price: 3.5
 }
 
 function generatePatterns(): Record<string, Pattern> {
@@ -621,7 +625,7 @@ function gainExp(amount: number) {
 
     lvl.value++
     lvlPopUp.value = true
-    gainedMoney.value = Math.pow(lvl.value, 2)
+    gainedMoney.value = Math.pow(lvl.value, 4)
     money.value += gainedMoney.value
 
     setTimeout(() => {
@@ -673,7 +677,7 @@ function buyUpgrade(upgrade: Upgrade) {
   if (money.value >= upgrade.value) {
     money.value -= upgrade.value
     upgrade.lvl++
-    upgrade.power *= 1.2
+    upgrade.power *= 1.1
     upgrade.value = Math.floor(upgrade.value * 2)
 
     localStorage.setItem(

@@ -343,7 +343,7 @@ body {
   cursor: pointer;
 }
 #app main section.tab div.container .pattern p, #app main section.tab div.container .upgrade p {
-  font-size: 1.5em;
+  font-size: 1.3em;
   color: var(--white);
 }
 #app main section.tab > p {
