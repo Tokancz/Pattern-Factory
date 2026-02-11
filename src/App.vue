@@ -373,7 +373,7 @@ const BASE = {
   price: 0
 }
 const SCALE = {
-  value: 2.25,
+  value: 2.5,
   exp: 2,
   creationTime: 1.5,
   price: 3.5
