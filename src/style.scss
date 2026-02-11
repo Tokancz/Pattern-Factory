@@ -88,7 +88,7 @@ body {
       > p {
         position: absolute;
         z-index: 1;
-        right: 0;
+        right: -20px;
         bottom: 0;
         color: var(--black);
         font-size: 1.5em;
@@ -266,7 +266,7 @@ body {
       left: 50%;
       width: 800px;
       max-height: 90dvh;
-      @include flexColumn(20px, start, start);
+      @include flexColumn(20px, start);
       background-color: var(--primary);
       z-index: 10;
       transform: translateX(-50%) translateY(-50%);
@@ -322,6 +322,11 @@ body {
       >p {
         width: 100%;
         color: var(--white);
+        font-size: 2em;
+      }
+      >button {
+        padding: 10px;
+        border-radius: 8px;
         font-size: 2em;
       }
     }

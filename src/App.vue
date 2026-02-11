@@ -30,8 +30,10 @@
                 <p>1.5x mutliplier !!</p>
                 <p>Price: {{ displayValue(dailyPattern) }} IGM</p>
                 <p>DC: 10 DC</p>
-                <svg viewBox="0 0 32 32" draggable="false" 
-                  :style="{fill: dailyPattern.traits.color}"
+                <svg v-if="dailyPattern?.traits"
+                  viewBox="0 0 32 32"
+                  draggable="false"
+                  :style="{ fill: dailyPattern.traits.color }"
                   v-html="shapes[dailyPattern.traits.shape]">
                 </svg>
             </section>
@@ -74,7 +76,7 @@
                     <button class="button" @click="openedShop = 'patterns'">Patterns</button>
                     <button class="button" @click="openedShop = 'machines'">Machines</button>
                     <button class="button" @click="openedShop = 'upgrades'">Upgrades</button>
-                    <button class="button">Prestige</button>
+                    <button class="button" @click="openedShop = 'prestige'">Prestige</button>
                 </div>
                 <button class="button" @click="openedShop = 'inventory'">Inventory</button>
             </aside>
@@ -97,7 +99,7 @@
                      <button v-else>Owned</button>
                 </div>
             </div>
-            <p v-if="ownedPatterns.length % Object.keys(colors).length === 0">Nothing else to buy. Try buying a new machine</p><!--Fix-->
+            <p v-if="ownedPatterns.length % Object.keys(colors).length === 0">Nothing else to buy. Try buying a new machine or upgrade</p><!--Fix-->
         </section>
         <section class="tab" v-if="openedShop === 'machines'">
             <div class="shop_header">
@@ -125,6 +127,14 @@
                     <button class="buy_button" @click="buyUpgrade(upgrade)">Buy</button>
                 </div>
             </div>
+        </section>
+        <section class="tab" v-if="openedShop === 'prestige'">
+            <div class="shop_header">
+                <h4>Prestige</h4>
+                <p @click="openedShop = ''">X</p>
+            </div>
+            <p>Prestige will remove your current money, patterns and machines but will grant you permanent bonuses!!</p>
+            <button v-if="calculatePrestigeReward() > 1" @click="prestige">Prestige (Gain {{ calculatePrestigeReward() }} PP)</button>
         </section>
         <section class="tab" v-if="openedShop === 'inventory'">
             <div class="shop_header">
@@ -174,7 +184,6 @@ type Part = {
     merged?: boolean
   }
 }
-
 type Pattern = {
   id: string
   baseValue: number
@@ -192,7 +201,6 @@ type Pattern = {
     shape: string
   }
 }
-
 type Machine = {
   id: string
   description?: string
@@ -202,14 +210,12 @@ type Machine = {
   src: string
   apply(part: Part): Part
 }
-
 type Upgrade = {
     id: string
     lvl: number
     value: number
     power: number
 }
-
 type Upgrades = {
   clickingPower: Upgrade
   creationSpeed: Upgrade
@@ -222,11 +228,16 @@ type Colors = {
   green: string
   yellow: string
   purple: string
+  brown: string
 }
 
 const openedShop = ref("")
 const money = ref(localStorage.getItem("money") ? parseInt(localStorage.getItem("money")!) : 0)
 const dc = ref(localStorage.getItem("dc") ? parseInt(localStorage.getItem("dc")!) : 0)
+const prestigePoints = ref<number>(Number(localStorage.getItem("prestigePoints")) || 0)
+
+const prestigeMultiplier = ref<number>(Number(localStorage.getItem("prestigeMultiplier")) || 1)
+
 const lvl = ref(localStorage.getItem("lvl") ? parseInt(localStorage.getItem("lvl")!) : 1)
 const exp = ref(localStorage.getItem("exp") ? parseInt(localStorage.getItem("exp")!) : 0)
 const expToNextLvl = ref(localStorage.getItem("expToNextLvl") ? parseInt(localStorage.getItem("expToNextLvl")!) : 100)
@@ -251,7 +262,8 @@ const colors: Colors = {
   blue: "#85a7ff",
   green: "#4ddf88",
   yellow: "#ffd972",
-  purple: "#9858ed"
+  purple: "#9858ed",
+  brown: "#7a5901"
 }
 
 const shapes: Record<string, string> = {
@@ -261,12 +273,17 @@ const shapes: Record<string, string> = {
     <g transform="matrix(0.96875,0,0,1,0.5,0)"><path d="M32,16L0,16"/></g>
   `,
   circleHalf: `
-    <g>
-      <g transform="matrix(0.969044,0,0,0.937337,1.002611,1.065274)">
-      <path d="M15.52,0L15.52,32C6.954,32 0,24.831 0,16C0,7.169 6.954,0 15.52,0Z"/>
-      </g>
-      <path d="M1.003,16L16,16.063"/>
-    </g>
+    <g transform="matrix(0.969044,0,0,0.937337,1.002611,1.065274)"><path d="M15.52,0L15.52,32C6.954,32 0,24.831 0,16C0,7.169 6.954,0 15.52,0Z"/></g>
+    <path d="M1.003,16L16,16.063"/>
+  `,
+  diagonal: `
+    <g transform="matrix(0.466943,0.466943,-0.466943,0.466943,16.057836,1.057122)"><rect x="1.003" y="1.065" width="29.872" height="29.995"/></g>
+    <g transform="matrix(1.818334,0.003438,0.003438,1.000014,0.48632,-0.003679)"><path d="M1.003,16L16,16.063"/></g>
+    <g transform="matrix(-0.004201,-1.818333,0.999991,-0.007639,0.004355,31.581012)"><path d="M1.003,16L16,16.063"/></g>
+  `,
+  diagonalHalf: `
+    <path d="M16.029,2.023L16,29.977L2.023,16L16.029,2.023Z"/>
+    <g transform="matrix(0.909176,-0.000382,-0.000382,0.999998,1.459314,0.000408)"><path d="M1.003,16L16,16.063"/></g>
   `
 }
 
@@ -338,12 +355,17 @@ const colorDefs = [
   { key: "blue", requiresColor: true },
   { key: "green", requiresColor: true },
   { key: "yellow", requiresColor: true },
-  { key: "purple", requiresColor: true }
-] as const
+  { key: "purple", requiresColor: true },
+  { key: "brown", requiresColor: true }
+] as const //remove Brown_!!!!
+
 const shapeDefs = [
   { key: "circle", requiresCut: false, valueMul: 1 },
-  { key: "circleHalf", requiresCut: true, valueMul: 5 }
+  { key: "circleHalf", requiresCut: true, valueMul: 3 },
+  { key: "diagonal", requiresCut: false, valueMul: 5 },
+  { key: "diagonalHalf", requiresCut: true, valueMul: 7 }
 ] as const
+
 const BASE = {
   value: 2,
   exp: 2,
@@ -357,32 +379,37 @@ const SCALE = {
   price: 3.5
 }
 
+function capitalize(str: string) {
+  return str.charAt(0).toUpperCase() + str.slice(1)
+}
+
 function generatePatterns(): Record<string, Pattern> {
   const patterns: Record<string, Pattern> = {}
   let tier = 0
 
   for (const shape of shapeDefs) {
     for (const color of colorDefs) {
-      const id =
-        color.key === "gray"
-          ? `basic${shape.key === "circle" ? "" : "Half"}`
-          : `${color.key}${shape.key[0]!.toUpperCase()}${shape.key.slice(1)}`
 
-      const isBasic = id === "basic"
+      // --- ID generation ---
+      const isBasic = color.key === "gray" && shape.key === "circle"
 
-      const baseValue = Math.floor(
-        BASE.value * Math.pow(SCALE.value, tier) * shape.valueMul
-      )
-      const baseExp = Math.floor(
-        BASE.exp * Math.pow(SCALE.exp, tier)
-      )
-      const creationTime = Math.floor(
-        BASE.creationTime * Math.pow(SCALE.creationTime, tier)
-      )
+      const id = isBasic
+        ? "basic"
+        : `${color.key}${capitalize(shape.key)}`
+
+      // --- scaling ---
+      const valueTier = Math.pow(SCALE.value, tier)
+      const expTier = Math.pow(SCALE.exp, tier)
+      const timeTier = Math.pow(SCALE.creationTime, tier)
+      const priceTier = Math.pow(SCALE.price, tier)
+
+      const baseValue = Math.floor(BASE.value * valueTier * shape.valueMul)
+      const baseExp = Math.floor(BASE.exp * expTier)
+      const creationTime = Math.floor(BASE.creationTime * timeTier)
 
       const price = isBasic
         ? 0
-        : Math.floor(BASE.price + Math.pow(SCALE.price, tier) * 100)
+        : Math.floor(priceTier * 100)
 
       patterns[id] = {
         id,
@@ -400,13 +427,12 @@ function generatePatterns(): Record<string, Pattern> {
           shape: shape.key
         }
       }
-
       tier++
     }
   }
-
   return patterns
 }
+
 const patterns: Record<string, Pattern> = generatePatterns()
 
 Object.values(upgrades).forEach(upgrade => {
@@ -454,27 +480,81 @@ const DAILY_INTERVAL = 30 * 60 * 1000 // 30 minutes
 function getEligiblePatterns(): Pattern[] {
   return Object.values(patterns).filter(p => p.id !== "basic")
 }
+
 function getDailyPattern(): Pattern {
   const now = Date.now()
 
   const saved = localStorage.getItem("dailyPattern")
   const savedTime = Number(localStorage.getItem("dailyPatternTime"))
 
-  if (saved && savedTime && now - savedTime < DAILY_INTERVAL) {
-    return { ...patterns[saved]! }
+  if (
+    saved &&
+    savedTime &&
+    now - savedTime < DAILY_INTERVAL &&
+    patterns[saved]
+  ) {
+    return structuredClone(patterns[saved])
   }
 
   const pool = getEligiblePatterns()
+
+  if (pool.length === 0) {
+    return structuredClone(patterns.basic)!
+  }
+
   const random = pool[Math.floor(Math.random() * pool.length)]
 
   localStorage.setItem("dailyPattern", random!.id)
   localStorage.setItem("dailyPatternTime", now.toString())
 
-  return { ...random! }
+  return structuredClone(random)!
 }
 
 const dailyPattern = ref<Pattern>(getDailyPattern());
 dailyPattern.value.baseValue *= 1.5;
+
+function calculatePrestigeReward(): number {
+  return Math.floor(Math.sqrt(money.value / 1000000000))//Point Per Trillion
+}
+
+function prestige() {
+  const reward = calculatePrestigeReward()
+  if (reward <= 0) return
+
+  prestigePoints.value += reward
+  prestigeMultiplier.value = 1 + prestigePoints.value * 0.05
+  //MONEY
+  money.value = 0
+  localStorage.setItem("money", "0")
+  //PATTERNS
+  ownedPatterns.value = ["basic"]
+  localStorage.setItem("ownedPatterns", JSON.stringify(ownedPatterns.value))
+  Object.values(patterns).forEach(p => {
+    p.owned = p.id === "basic"
+  })
+  //UPGRADES
+  Object.values(upgrades).forEach(upgrade => {
+    upgrade.lvl = 1
+    upgrade.power = 1
+    upgrade.value = 100
+    localStorage.removeItem(`upgrade_${upgrade.id}`)
+  })
+  //MACHINES
+  ownedMachines.value = []
+  localStorage.setItem("ownedMachines", JSON.stringify([]))
+  machines.forEach(m => {
+    m.owned = false
+  })
+  //RESET
+  parts.value = []
+  creatingProgress.value = 0
+  currentPattern.value = patterns.basic!
+
+  localStorage.setItem("prestigePoints", prestigePoints.value.toString())
+  localStorage.setItem("prestigeMultiplier", prestigeMultiplier.value.toString())
+
+  alert(`Prestiged! You gained ${reward} prestige points.`)
+}
 
 const ownedMachineCapabilities = computed(() => {
   return {
@@ -570,8 +650,8 @@ initUserName()
 
 function getPatternValue(pattern: Pattern) {
   return pattern.id === dailyPattern.value.id
-    ? dailyPattern.value.baseValue * upgrades.sellMultiplier.power
-    : pattern.baseValue * upgrades.sellMultiplier.power
+    ? dailyPattern.value.baseValue * upgrades.sellMultiplier.power * prestigeMultiplier.value
+    : pattern.baseValue * upgrades.sellMultiplier.power * prestigeMultiplier.value
 }
 function displayValue(pattern: Pattern) {
   return formatNumber(Math.floor(getPatternValue(pattern) * 100) / 100)
@@ -763,7 +843,10 @@ setInterval(() => {
   deltaSeconds = Math.min(deltaSeconds, MAX_DELTA)
 
   creatingProgress.value +=
-    upgrades.creationSpeed.power * deltaSeconds * speedController
+    upgrades.creationSpeed.power *
+    prestigeMultiplier.value *
+    deltaSeconds *
+    speedController
 
   while (creatingProgress.value >= currentPattern.value.creationTime) {
     spawnPart()

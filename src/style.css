@@ -83,7 +83,7 @@ body {
 #app header div#header_info > p {
   position: absolute;
   z-index: 1;
-  right: 0;
+  right: -20px;
   bottom: 0;
   color: var(--black);
   font-size: 1.5em;
@@ -288,7 +288,7 @@ body {
   display: flex;
   flex-direction: column;
   justify-content: start;
-  align-items: start;
+  align-items: center;
   gap: 20px;
   background-color: var(--primary);
   z-index: 10;
@@ -349,6 +349,11 @@ body {
 #app main section.tab > p {
   width: 100%;
   color: var(--white);
+  font-size: 2em;
+}
+#app main section.tab > button {
+  padding: 10px;
+  border-radius: 8px;
   font-size: 2em;
 }
 #app main #offlineReward {
