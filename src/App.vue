@@ -757,7 +757,7 @@ function buyUpgrade(upgrade: Upgrade) {
   if (money.value >= upgrade.value) {
     money.value -= upgrade.value
     upgrade.lvl++
-    upgrade.power *= 1.1
+    upgrade.power *= 1.15
     upgrade.value = Math.floor(upgrade.value * 2)
 
     localStorage.setItem(
@@ -789,7 +789,7 @@ const idleIncomePerSecond = computed(() => {
   const partsPerSecond =
     upgrades.creationSpeed.power / currentPattern.value.creationTime
 
-  return partsPerSecond * currentPattern.value.baseValue * speedController
+  return partsPerSecond * currentPattern.value.baseValue * speedController * upgrades.sellMultiplier.power
 })
 
 const showOfflinePopup = ref(false)
