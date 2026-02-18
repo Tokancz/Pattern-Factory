@@ -5,11 +5,12 @@
             <h1>{{ factoryName }}</h1>
             <div>
                 <p id="user">{{ userName }}</p>
-                <p>Level: {{ lvl }}</p>
-                <p>EXP: {{ formatNumber(exp) }}/ {{ formatNumber(expToNextLvl) }}</p>
+                <p>Lvl: {{ lvl }}</p>
+                <p>XP: {{ formatNumber(exp) }}/{{ formatNumber(expToNextLvl) }}</p>
             </div>
             <p v-if="lvlPopUp"> + {{ gainedMoney }} IGM</p>
         </div>
+        <i @click="mobileMenu = true" v-if="!mobileMenu && openedShop === ``" id="menu" class="fa-solid fa-bars" aria-hidden="true"></i>
     </header>
     <main>
         <aside id="stats">
@@ -155,6 +156,35 @@
                 </div>
             </div>
         </section>
+        <section id="mobileMenu" v-if="mobileMenu">
+            <img src="/img/Shop.png" alt="shopBG" draggable="false">
+            <aside>
+                <div class="shop_header">
+                    <h2>MENU</h2>
+                    <i  @click="mobileMenu = false" class="fa-solid fa-chevron-up" aria-hidden="true"></i>
+                </div>
+                <div class="shop_buttons">
+                    <button class="button" @click="mobileOpen(`patterns`)">Patterns</button>
+                    <button class="button" @click="mobileOpen(`machines`)">Machines</button>
+                    <button class="button" @click="mobileOpen(`upgrades`)">Upgrades</button>
+                    <button class="button" @click="mobileOpen(`prestige`)">Prestige</button>
+                    <button class="button" @click="mobileOpen(`inventory`)">Inventory</button>
+                    <button class="button">Stats</button>
+                </div>
+                <section>
+                  <h3>Daily Pattern</h3>
+                  <p>1.5x mutliplier !!</p>
+                  <p>Price: {{ displayValue(dailyPattern) }} IGM</p>
+                  <p>DC: 10 DC</p>
+                  <svg v-if="dailyPattern?.traits"
+                    viewBox="0 0 32 32"
+                    draggable="false"
+                    :style="{ fill: dailyPattern.traits.color }"
+                    v-html="shapes[dailyPattern.traits.shape]">
+                  </svg>
+                </section>
+            </aside>
+        </section>
         <div v-if="showOfflinePopup" id="offlineReward">
             <p @click="closeOfflinePopup" class="close">X</p>
             <h3>Welocme back!</h3>
@@ -228,10 +258,12 @@ type Colors = {
   green: string
   yellow: string
   purple: string
-  brown: string
+  cyan: string
 }
 
 const openedShop = ref("")
+const mobileMenu = ref(false)
+
 const money = ref(localStorage.getItem("money") ? parseInt(localStorage.getItem("money")!) : 0)
 const dc = ref(localStorage.getItem("dc") ? parseInt(localStorage.getItem("dc")!) : 0)
 const prestigePoints = ref<number>(Number(localStorage.getItem("prestigePoints")) || 0)
@@ -263,7 +295,7 @@ const colors: Colors = {
   green: "#4ddf88",
   yellow: "#ffd972",
   purple: "#9858ed",
-  brown: "#7a5901"
+  cyan: "#4dd2df"
 }
 
 const shapes: Record<string, string> = {
@@ -356,8 +388,8 @@ const colorDefs = [
   { key: "green", requiresColor: true },
   { key: "yellow", requiresColor: true },
   { key: "purple", requiresColor: true },
-  { key: "brown", requiresColor: true }
-] as const //remove Brown_!!!!
+  { key: "cyan", requiresColor: true }
+] as const
 
 const shapeDefs = [
   { key: "circle", requiresCut: false, valueMul: 1 },
@@ -824,6 +856,11 @@ function applyOfflineProgress() {
 function closeOfflinePopup() {
   showOfflinePopup.value = false
   offlineReward.value = 0
+}
+
+function mobileOpen(target: string) {
+  mobileMenu.value = false
+  openedShop.value = target
 }
 
 window.addEventListener("beforeunload", () => {
