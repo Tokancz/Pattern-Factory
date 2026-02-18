@@ -394,7 +394,7 @@ const colorDefs = [
 const shapeDefs = [
   { key: "circle", requiresCut: false, valueMul: 1 },
   { key: "circleHalf", requiresCut: true, valueMul: 3 },
-  { key: "diagonal", requiresCut: false, valueMul: 5 },
+  { key: "diagonal", requiresCut: true, valueMul: 5 },
   { key: "diagonalHalf", requiresCut: true, valueMul: 7 }
 ] as const
 
