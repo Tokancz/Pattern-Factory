@@ -5,10 +5,10 @@
             <h1>{{ factoryName }}</h1>
             <div>
                 <p id="user">{{ userName }}</p>
-                <p>Lvl: {{ lvl }}</p>
+                <p>Lvl:{{ lvl }}</p>
                 <p>XP: {{ formatNumber(exp) }}/{{ formatNumber(expToNextLvl) }}</p>
             </div>
-            <p v-if="lvlPopUp"> + {{ gainedMoney }} IGM</p>
+            <p v-if="lvlPopUp"> + {{ formatNumber(gainedMoney) }} IGM</p>
         </div>
         <i @click="mobileMenu = true" v-if="!mobileMenu && openedShop === ``" id="menu" class="fa-solid fa-bars" aria-hidden="true"></i>
     </header>
@@ -737,7 +737,7 @@ function gainExp(amount: number) {
 
     lvl.value++
     lvlPopUp.value = true
-    gainedMoney.value = Math.pow(lvl.value, 4)
+    gainedMoney.value = Math.pow(lvl.value, 6)
     money.value += gainedMoney.value
 
     setTimeout(() => {
@@ -912,4 +912,9 @@ setInterval(() => {
 }, 50)
 
 applyOfflineProgress()
+
+//computed na multipliery
+//Components ( parts, smth )
+//watch na eventy
+//dailt only avaible
 </script>
