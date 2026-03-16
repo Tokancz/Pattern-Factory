@@ -12,8 +12,6 @@ export function usePatterns(
   const ownedPatterns = ref<string[]>(JSON.parse(localStorage.getItem("ownedPatterns") || "[]"))
   const patternList = computed(() => Object.values(patterns))
   const currentPattern = ref(patterns[ownedPatterns.value[0]!] || patterns.basic)
-  const dailyPattern = ref<Pattern>(getDailyPattern())
-  dailyPattern.value.baseValue *= 1.5
 
   // ---------- Helpers ----------
   function capitalize(str: string) {
@@ -71,7 +69,7 @@ export function usePatterns(
   }
 
   const DAILY_INTERVAL = 30 * 60 * 1000
-  
+
   function getEligiblePatterns(): Pattern[] {
     return Object.values(patterns).filter(p => p.id !== "basic")
   }
@@ -90,6 +88,9 @@ export function usePatterns(
     localStorage.setItem("dailyPatternTime", now.toString())
     return structuredClone(random)!
   }
+
+  const dailyPattern = ref<Pattern>(getDailyPattern())
+  dailyPattern.value.baseValue *= 1.5
 
   // ---------- API ----------
   function setPattern(pattern: Pattern) {
