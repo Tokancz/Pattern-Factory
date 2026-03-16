@@ -918,3 +918,7 @@ applyOfflineProgress()
 //watch na eventy
 //dailt only avaible
 </script>
+
+<style lang="scss">
+  @use "@/styles/main.scss" as *;
+</style>
