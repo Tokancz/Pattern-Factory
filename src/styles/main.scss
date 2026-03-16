@@ -73,71 +73,6 @@ body {
     --asideWidth: 250px;
   }
 
-  header {
-    width: 100%;
-    max-width: 1440px;
-    z-index: 10;
-    @include flexRow(0px,space-between);
-
-    div#header_info {
-      position: relative;
-      width: 600px;
-      @include flexColumn(0, center, start);
-      color: var(--white);
-      padding: 20px 0;
-
-      @media (width <= 425px) {
-        width: 280px;
-        font-size: .7em;
-      }
-
-      img {
-        position: absolute;
-        height: 100%;
-        user-select: none;
-      }
-      h1 {
-        font-size: 3em;
-        z-index: 1;
-        padding: 0 10px;
-      }
-      > p {
-        position: absolute;
-        z-index: 1;
-        right: -20px;
-        bottom: 0;
-        color: var(--black);
-        font-size: 1.5em;
-      }
-      div{
-        @include flexRow(10px);
-        z-index: 1;
-        padding: 0 10px;
-        overflow: hidden;
-
-        p {
-          color: var(--lightgray);
-          font-size: 1.5em;
-
-          &#user {
-            color: var(--white);
-            font-size: 2em;
-          }
-        }
-      }
-    }
-    i#menu {
-      display: none;
-      font-size: 4.5em;
-      cursor: pointer;
-      color: var(--black);
-      
-      @media (width < 768px) {
-        display: inline;
-        padding-right: 20px;
-      }
-    }
-  }
   main {
     position: relative;
     width: 100%;
@@ -185,56 +120,6 @@ body {
           height: 10px;
           accent-color: var(--primary);
         }
-      }
-    }
-    section#simulation {
-      position: relative;
-      top: -30px;
-      height: 600px;
-      @include flexColumn(0px, space-between);
-
-      #factory {
-        position: relative;
-        width: 200px;
-        @include flexColumn();
-        user-select: none;
-        z-index: 1;
-        cursor: pointer;
-
-        svg {
-          position: absolute;
-          left: 58px;
-          top: 58px;
-          width: 80px;
-        }
-        #progress {
-          position: absolute;
-          top: 150px;
-          color: var(--white);
-        }
-      }
-      #belt {
-        position: absolute;
-        top: 180px;
-        width: 60px;
-        height: 350px;
-        background-image: url(/img/Belt.png);
-        background-size: contain;
-      }
-      .part {
-        width: 60px;
-        position: absolute;
-      }
-      .machine {
-        position: absolute;
-        user-select: none;
-        width: 100px;
-        z-index: 5;
-      }
-      #seller {
-        width: 120px;
-        user-select: none;
-        z-index: 1;
       }
     }
     section#shopList {
@@ -365,6 +250,7 @@ body {
       top: 50%;
       left: 50%;
       width: 60%;
+      min-height: 30vh;
       max-height: 80dvh;
       @include flexColumn(20px, start);
       background-color: var(--primary);
@@ -372,6 +258,10 @@ body {
       transform: translateX(-50%) translateY(-50%);
       padding: 20px;
       border-radius: 4px;
+
+      @media (width <= 1024px) {
+        width: 80%;
+      }
 
       div.shop_header {
         width: 100%;
@@ -393,7 +283,7 @@ body {
         display: grid;
         grid-template-columns: repeat(4, 1fr);
         align-items: start;
-        overflow-y: scroll;
+        overflow-y: auto;
         gap: 20px;
         padding: 0 20px;
 
