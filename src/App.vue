@@ -913,11 +913,22 @@ setInterval(() => {
 
 applyOfflineProgress()
 
+//Todo: 
 //computed na multipliery
 //Components ( parts, smth )
 //watch na eventy
 //dailt only avaible
+//prestige format
+//Prestige cur pattern reset
+//Fx sfx ui - lobbby hudba + mute/volume butun
+//watch from cajty website
+//idle Cap - upgrade to idle cap
+//stat idle cap
+//vicestrankova app
+//?Admin page???
+
 </script>
+
 
 <style lang="scss">
   @use "@/styles/main.scss" as *;
