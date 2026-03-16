@@ -203,6 +203,13 @@ import type { Pattern } from '@/types/Pattern'
 
 export default defineComponent({
   name: 'App',
+  components: {
+    HeaderBar,
+    FactorySimulation,
+    PatternCard,
+    MachineCard,
+    UpgradeCard
+  },
   setup() {
     // ---------- COLORS ----------
     const colors = {
@@ -262,7 +269,12 @@ export default defineComponent({
     const mobileMenu = ref(false)
     const factoryName = ref('Pattern Factory')
     const userName = ref('Player')
-    const shapes: Record<string, string> = {}
+    const shapes = [
+      { key: "circle", requiresCut: false, valueMul: 1 },
+      { key: "circleHalf", requiresCut: true, valueMul: 3 },
+      { key: "diagonal", requiresCut: true, valueMul: 5 },
+      { key: "diagonalHalf", requiresCut: true, valueMul: 7 }
+    ]
 
     function closeOfflinePopup() { showOfflinePopup.value = false }
     function clickFactory() { click() }
