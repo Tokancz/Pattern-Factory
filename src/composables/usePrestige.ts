@@ -1,15 +1,15 @@
 import { ref } from "vue"
+import { gameStore } from '@/stores/useGameStore'
+import { useSaveSystem } from "@/composables/useSaveSystem"
+
+const { saveGame } = useSaveSystem()
+const { money, ownedPatterns,upgrades, currentPattern, machines} = gameStore
 
 export function usePrestige(
-  money: any,
-  ownedPatterns: any,
   patterns: any,
-  upgrades: any,
   ownedMachines: any,
-  machines: any,
   parts: any,
   creatingProgress: any,
-  currentPattern: any
 ) {
   const prestigePoints = ref(Number(localStorage.getItem("prestigePoints")) || 0)
   const prestigeMultiplier = ref(Number(localStorage.getItem("prestigeMultiplier")) || 1)
@@ -28,7 +28,7 @@ export function usePrestige(
     money.value = 0
     ownedPatterns.value = ["basic"]
     localStorage.setItem("ownedPatterns", JSON.stringify(ownedPatterns.value))
-    Object.values(patterns).forEach(p => { p.owned = p.id === "basic" })
+    Object.values(patterns).forEach((p: any) => { p.owned = p.id === "basic" })
 
     Object.values(upgrades).forEach(upgrade => {
       upgrade.lvl = 1
@@ -38,19 +38,19 @@ export function usePrestige(
     })
 
     ownedMachines.value = []
+
     localStorage.setItem("ownedMachines", JSON.stringify([]))
+
     machines.forEach(m => m.owned = false)
 
     parts.value = []
     creatingProgress.value = 0
     currentPattern.value = patterns.basic!
 
-    localStorage.setItem("prestigePoints", prestigePoints.value.toString())
-    localStorage.setItem("prestigeMultiplier", prestigeMultiplier.value.toString())
-    localStorage.setItem("money", "0")
+    saveGame()
 
     alert(`Prestiged! You gained ${reward} prestige points.`)
   }
 
-  return { prestigePoints, prestigeMultiplier, calculatePrestigeReward, prestige }
+  return { prestigePoints, calculatePrestigeReward, prestige }
 }

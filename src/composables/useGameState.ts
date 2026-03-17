@@ -1,13 +1,9 @@
 import { ref, computed } from "vue"
+import { gameStore } from '@/stores/useGameStore'
+
+const { money, lvl, exp, expToNextLvl, partsSold } = gameStore
 
 export function useGameState() {
-  const money = ref(localStorage.getItem("money") ? parseInt(localStorage.getItem("money")!) : 0)
-  const dc = ref(localStorage.getItem("dc") ? parseInt(localStorage.getItem("dc")!) : 0)
-  const lvl = ref(localStorage.getItem("lvl") ? parseInt(localStorage.getItem("lvl")!) : 1)
-  const exp = ref(localStorage.getItem("exp") ? parseInt(localStorage.getItem("exp")!) : 0)
-  const expToNextLvl = ref(localStorage.getItem("expToNextLvl") ? parseInt(localStorage.getItem("expToNextLvl")!) : 100)
-  const partsSold = ref(localStorage.getItem("partsSold") ? parseInt(localStorage.getItem("partsSold")!) : 0)
-
   const formattedMoney = computed(() => formatNumber(money.value))
   const formattedPartsSold = computed(() => formatNumber(partsSold.value))
 
@@ -19,9 +15,6 @@ export function useGameState() {
       expToNextLvl.value = Math.floor(expToNextLvl.value * 1.5)
       money.value += Math.pow(lvl.value, 6)
     }
-    localStorage.setItem("exp", exp.value.toString())
-    localStorage.setItem("lvl", lvl.value.toString())
-    localStorage.setItem("money", money.value.toString())
   }
 
   function formatNumber(value: number): string {
@@ -37,5 +30,5 @@ export function useGameState() {
     return `${num.toFixed(num < 10 ? 1 : 0)}${units[unit]}`
   }
 
-  return { money, dc, lvl, exp, expToNextLvl, formattedMoney, gainExp, formatNumber, partsSold, formattedPartsSold }
+  return { formattedMoney, gainExp, formatNumber, formattedPartsSold }
 }

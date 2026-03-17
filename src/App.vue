@@ -82,6 +82,7 @@
           :formatNumber="formatNumber"
           :displayValue="displayValue"
           @buy="buyPattern"
+          v-show="canProducePattern(pattern) && !pattern.owned"
         />
       </div>
       <p v-if="ownedPatterns.length % Object.keys(colors).length === 0">
@@ -140,7 +141,7 @@
       <div class="container">
         <div
           class="pattern"
-          v-for="pattern in patternList"
+          v-for="pattern in patterns"
           :key="pattern.id"
           v-show="pattern.owned"
           @click="setPattern(pattern)"
@@ -188,12 +189,14 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, onMounted } from 'vue'
+import { defineComponent, ref, onMounted, watch, computed, type Ref} from 'vue'
 import { useGameState } from '@/composables/useGameState'
 import { usePatterns } from '@/composables/usePatterns'
 import { useFactory } from '@/composables/useFactory'
 import { usePrestige } from '@/composables/usePrestige'
 import { useOffline } from '@/composables/useOffline'
+import { useSaveSystem } from '@/composables/useSaveSystem'
+import { gameStore } from '@/stores/useGameStore'
 import HeaderBar from '@/components/HeaderBar.vue'
 import FactorySimulation from '@/components/FactorySimulation.vue'
 import PatternCard from '@/components/PatternCard.vue'
@@ -230,36 +233,27 @@ export default defineComponent({
     }
 
     // ---------- GAME STATE ----------
-    const {
-      money, dc, lvl, exp, expToNextLvl, formattedMoney,
-      formattedPartsSold, gainExp, partsSold, formatNumber
-    } = useGameState()
+    const { money, dc, lvl, exp, expToNextLvl, partsSold, prestigeMultiplier } = gameStore
+
+    const { formattedMoney, formattedPartsSold, gainExp, formatNumber } = useGameState()
 
     // ---------- PATTERNS ----------
     const {
-      patterns,
-      patternList,
-      ownedPatterns,
-      currentPattern,
-      setPattern,
-      buyPattern,
-      dailyPattern,
-      displayValue: patternDisplayValue
+      patterns, patternList, ownedPatterns, currentPattern,
+      setPattern, buyPattern, dailyPattern,
+      displayValue: patternDisplayValue, shapes
     } = usePatterns(upgrades, ref(1), formatNumber, colors)
 
     // ---------- FACTORY ----------
-    const {
-      machines, parts, creatingProgress, spawnPart, click,
-      startFactoryLoop, machinePos, partStyle
-    } = useFactory(currentPattern, upgrades, ref(1), dailyPattern, money, dc, partsSold, gainExp, colors)
+    const { machines, parts, creatingProgress, spawnPart, click, startFactoryLoop, machinePos, partStyle } = useFactory( gainExp, colors )
 
     // ---------- PRESTIGE ----------
-    const {
-      prestigePoints, prestigeMultiplier, prestige, calculatePrestigeReward
-    } = usePrestige(money, ownedPatterns, patterns, upgrades, ref([]), machines, parts, creatingProgress, currentPattern)
+    const { prestigePoints, prestige, calculatePrestigeReward } = usePrestige(patterns, ref([]), parts, creatingProgress)
 
     // ---------- OFFLINE ----------
-    const { showOfflinePopup, offlineReward, applyOfflineProgress } = useOffline(money, currentPattern, upgrades, prestigeMultiplier)
+    const { showOfflinePopup, offlineReward, applyOfflineProgress } = useOffline()
+
+   const { saveGame, loadGame } = useSaveSystem()
 
     // ---------- EXTRA STATE ----------
     const gainedMoney = ref(0)
@@ -269,15 +263,10 @@ export default defineComponent({
     const mobileMenu = ref(false)
     const factoryName = ref('Pattern Factory')
     const userName = ref('Player')
-    const shapes = [
-      { key: "circle", requiresCut: false, valueMul: 1 },
-      { key: "circleHalf", requiresCut: true, valueMul: 3 },
-      { key: "diagonal", requiresCut: true, valueMul: 5 },
-      { key: "diagonalHalf", requiresCut: true, valueMul: 7 }
-    ]
 
     function closeOfflinePopup() { showOfflinePopup.value = false }
     function clickFactory() { click() }
+
     function buyMachine(machine: any) {
       if (money.value >= machine.price && !machine.owned) {
         money.value -= machine.price
@@ -290,19 +279,40 @@ export default defineComponent({
         upgrade.lvl += 1
       }
     }
-    function canProducePattern(pattern: any) { return ownedPatterns.value.includes(pattern.id) }
+
+    Object.values(patterns).forEach(pattern => {
+      pattern.owned =
+        pattern.owned || ownedPatterns.value.includes(pattern.id)
+    })
+
+    const ownedMachineCapabilities = computed(() => {
+      return {
+        color: machines.some(m => m.id === "color" && m.owned),
+        cut: machines.some(m => m.id === "cut" && m.owned),
+        merged: machines.some(m => m.id === "merge" && m.owned)
+      }
+    })
+
+    function canProducePattern(pattern: Pattern) {
+      return Object.entries(pattern.requirements).every(
+        ([req, needed]) => !needed || (ownedMachineCapabilities.value as any)[req]
+      )
+    }
+
     function mobileOpen(tab: string) { openedShop.value = tab }
 
     onMounted(() => {
-      startFactoryLoop()
+      loadGame(patterns)
       applyOfflineProgress()
+      startFactoryLoop()
+      saveGame()
       localStorage.setItem('lastOnline', Date.now().toString())
     })
 
     return {
       money, dc, lvl, exp, expToNextLvl, formattedMoney, formattedPartsSold,
       gainExp, partsSold, formatNumber,
-      currentPattern, patternList, ownedPatterns, dailyPattern, setPattern, buyPattern: (p: Pattern) => buyPattern(p, money),
+      patterns, currentPattern, patternList, ownedPatterns, dailyPattern, setPattern, buyPattern: (p: Pattern) => buyPattern(p, money),
       machines, parts, creatingProgress, spawnPart, clickFactory,
       machinePos, partStyle, prestigePoints, prestigeMultiplier, prestige,
       calculatePrestigeReward, showOfflinePopup, offlineReward, closeOfflinePopup,

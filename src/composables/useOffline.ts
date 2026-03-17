@@ -1,22 +1,22 @@
 import { ref, computed } from "vue"
+import { gameStore } from '@/stores/useGameStore'
+import { useSaveSystem } from "./useSaveSystem"
 
-export function useOffline(
-  money: any,
-  currentPattern: any,
-  upgrades: any,
-  prestigeMultiplier: any
-) {
+const { money } = gameStore
+const { saveGame } = useSaveSystem()
+
+export function useOffline() {
   const showOfflinePopup = ref(false)
   const offlineReward = ref(0)
   const speedController = 20
 
   const idleIncomePerSecond = computed(() => {
-    const partsPerSecond = upgrades.creationSpeed.power / currentPattern.value!.creationTime
-    return partsPerSecond * currentPattern.value!.baseValue * speedController * upgrades.sellMultiplier.power * prestigeMultiplier.value
+    const partsPerSecond = gameStore.upgrades.creationSpeed.power / gameStore.currentPattern.value!.creationTime
+    return partsPerSecond * gameStore.currentPattern.value!.baseValue * speedController * gameStore.upgrades.sellMultiplier.power * gameStore.prestigeMultiplier.value
   })
 
   function applyOfflineProgress() {
-    const lastOnline = localStorage.getItem("lastOnline")
+    const lastOnline = gameStore.lastOnline.value
     if (!lastOnline) return
 
     const elapsedSeconds = (Date.now() - Number(lastOnline)) / 1000
@@ -25,8 +25,8 @@ export function useOffline(
       money.value += Math.floor(reward)
       offlineReward.value = Math.floor(reward)
       showOfflinePopup.value = true
-      localStorage.setItem("money", money.value.toString())
-      localStorage.setItem("lastOnline", Date.now().toString())
+      
+      saveGame()
 
       setTimeout(closeOfflinePopup, 6000)
     }

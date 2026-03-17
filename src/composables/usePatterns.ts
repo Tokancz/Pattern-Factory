@@ -1,6 +1,8 @@
 import { ref, computed, type Ref } from "vue"
 import type { Pattern } from "@/types/Pattern"
 import type { Upgrades } from "@/types/Upgrade"
+import { useSaveSystem } from "./useSaveSystem"
+import { gameStore } from '@/stores/useGameStore'
 
 export function usePatterns(
   upgrades: Upgrades,
@@ -8,25 +10,35 @@ export function usePatterns(
   formatNumber: (n: number) => string,
   colors: Record<string, string>
 ) {
-  const patterns: Record<string, Pattern> = generatePatterns()
-  const ownedPatterns = ref<string[]>(JSON.parse(localStorage.getItem("ownedPatterns") || "[]"))
-  const patternList = computed(() => Object.values(patterns))
-  const currentPattern = ref(patterns[ownedPatterns.value[0]!] || patterns.basic)
+  const { saveGame, loadGame } = useSaveSystem()
+  const { ownedPatterns, dailyPattern, dailyPatternTime, currentPattern, machines: machinesStore, upgrades: upgradesStore } = gameStore
 
-  // ---------- Helpers ----------
+  // ---------- PATTERNS ----------
+  const patterns: Record<string, Pattern> = generatePatterns()
+  const patternList = computed(() => Object.values(patterns))
+
+  // ---------- SHAPES ----------
+  const shapes: Record<string, string> = {
+    circle: `<g transform="matrix(0.96875,0,0,0.96875,0.5,0.5)"><circle cx="16" cy="16" r="16"/></g><g><path d="M16,0C16.025,2.675 16,32 16,32"/></g><g transform="matrix(0.96875,0,0,1,0.5,0)"><path d="M32,16L0,16"/></g>`,
+    circleHalf: `<g transform="matrix(0.969044,0,0,0.937337,1.002611,1.065274)"><path d="M15.52,0L15.52,32C6.954,32 0,24.831 0,16C0,7.169 6.954,0 15.52,0Z"/></g><path d="M1.003,16L16,16.063"/>`,
+    diagonal: `<g transform="matrix(0.466943,0.466943,-0.466943,0.466943,16.057836,1.057122)"><rect x="1.003" y="1.065" width="29.872" height="29.995"/></g><g transform="matrix(1.818334,0.003438,0.003438,1.000014,0.48632,-0.003679)"><path d="M1.003,16L16,16.063"/></g><g transform="matrix(-0.004201,-1.818333,0.999991,-0.007639,0.004355,31.581012)"><path d="M1.003,16L16,16.063"/></g>`,
+    diagonalHalf: `<path d="M16.029,2.023L16,29.977L2.023,16L16.029,2.023Z"/><g transform="matrix(0.909176,-0.000382,-0.000382,0.999998,1.459314,0.000408)"><path d="M1.003,16L16,16.063"/></g>`
+  }
+
+  // ---------- GENERATE PATTERNS ----------
   function capitalize(str: string) {
     return str.charAt(0).toUpperCase() + str.slice(1)
   }
 
   function generatePatterns(): Record<string, Pattern> {
-    const shapes = [
+    const shapeDefs = [
       { key: "circle", requiresCut: false, valueMul: 1 },
       { key: "circleHalf", requiresCut: true, valueMul: 3 },
       { key: "diagonal", requiresCut: true, valueMul: 5 },
       { key: "diagonalHalf", requiresCut: true, valueMul: 7 }
     ] as const
 
-    const colorsDef = [
+    const colorsDefs = [
       { key: "gray", requiresColor: false },
       { key: "red", requiresColor: true },
       { key: "blue", requiresColor: true },
@@ -41,20 +53,16 @@ export function usePatterns(
 
     const patterns: Record<string, Pattern> = {}
     let tier = 0
-    for (const shape of shapes) {
-      for (const color of colorsDef) {
+    for (const shape of shapeDefs) {
+      for (const color of colorsDefs) {
         const isBasic = color.key === "gray" && shape.key === "circle"
         const id = isBasic ? "basic" : `${color.key}${capitalize(shape.key)}`
-        const valueTier = Math.pow(SCALE.value, tier)
-        const expTier = Math.pow(SCALE.exp, tier)
-        const timeTier = Math.pow(SCALE.creationTime, tier)
-        const priceTier = Math.pow(SCALE.price, tier)
         patterns[id] = {
           id,
-          baseValue: Math.floor(BASE.value * valueTier * shape.valueMul),
-          baseExp: Math.floor(BASE.exp * expTier),
-          creationTime: Math.floor(BASE.creationTime * timeTier),
-          price: isBasic ? 0 : Math.floor(priceTier * 100),
+          baseValue: Math.floor(BASE.value * Math.pow(SCALE.value, tier) * shape.valueMul),
+          baseExp: Math.floor(BASE.exp * Math.pow(SCALE.exp, tier)),
+          creationTime: Math.floor(BASE.creationTime * Math.pow(SCALE.creationTime, tier)),
+          price: isBasic ? 0 : Math.floor(Math.pow(SCALE.price, tier) * 100),
           owned: isBasic,
           requirements: {
             ...(color.requiresColor ? { color: true } : {}),
@@ -68,6 +76,7 @@ export function usePatterns(
     return patterns
   }
 
+  // ---------- DAILY PATTERN ----------
   const DAILY_INTERVAL = 30 * 60 * 1000
 
   function getEligiblePatterns(): Pattern[] {
@@ -76,26 +85,47 @@ export function usePatterns(
 
   function getDailyPattern(): Pattern {
     const now = Date.now()
-    const saved = localStorage.getItem("dailyPattern")
-    const savedTime = Number(localStorage.getItem("dailyPatternTime"))
-    if (saved && savedTime && now - savedTime < DAILY_INTERVAL && patterns[saved]) {
-      return structuredClone(patterns[saved])
+    const savedId = dailyPattern.value?.id
+    const savedTime = dailyPatternTime.value
+
+    if (savedId && savedTime && now - savedTime < DAILY_INTERVAL && patterns[savedId]) {
+      return structuredClone(patterns[savedId])
     }
+
     const pool = getEligiblePatterns()
-    if (pool.length === 0) return structuredClone(patterns.basic)!
-    const random = pool[Math.floor(Math.random() * pool.length)]
-    localStorage.setItem("dailyPattern", random!.id)
-    localStorage.setItem("dailyPatternTime", now.toString())
-    return structuredClone(random)!
+    const random = pool.length ? pool[Math.floor(Math.random() * pool.length)] : patterns.basic
+    dailyPattern.value = structuredClone(random)
+    dailyPatternTime.value = now
+    saveGame()
+    return structuredClone(random)
   }
 
-  const dailyPattern = ref<Pattern>(getDailyPattern())
+  if (!dailyPattern.value) getDailyPattern()
   dailyPattern.value.baseValue *= 1.5
+
+  // ---------- LOAD GAME ----------
+  loadGame(patterns)
+
+  // ---------- DEFAULT UPGRADES ----------
+  if (!Object.keys(upgradesStore.value).length) {
+    upgradesStore.value = {
+      clickingPower: { id: 'Clicking Power', lvl: 1, value: 50, power: 25 },
+      creationSpeed: { id: 'Creation Speed', lvl: 1, value: 100, power: 1 },
+      sellMultiplier: { id: 'Sell Multiplier', lvl: 1, value: 100, power: 1 }
+    }
+    saveGame()
+  }
+
+  // ---------- DEFAULT MACHINES ----------
+  if (!machinesStore.value.length) {
+    machinesStore.value = []
+    saveGame()
+  }
 
   // ---------- API ----------
   function setPattern(pattern: Pattern) {
     currentPattern.value = pattern
-    localStorage.setItem("currentPattern", pattern.id)
+    saveGame()
   }
 
   function buyPattern(pattern: Pattern, moneyRef: Ref<number>) {
@@ -103,8 +133,7 @@ export function usePatterns(
       moneyRef.value -= pattern.price
       pattern.owned = true
       if (!ownedPatterns.value.includes(pattern.id)) ownedPatterns.value.push(pattern.id)
-      localStorage.setItem("ownedPatterns", JSON.stringify(ownedPatterns.value))
-      localStorage.setItem("money", moneyRef.value.toString())
+      saveGame()
     }
   }
 
@@ -118,5 +147,16 @@ export function usePatterns(
     return formatNumber(Math.floor(getPatternValue(pattern) * 100) / 100)
   }
 
-  return { patterns, patternList, ownedPatterns, currentPattern, setPattern, buyPattern, dailyPattern, displayValue, getPatternValue }
+  return {
+    patterns,
+    patternList,
+    ownedPatterns,
+    currentPattern,
+    setPattern,
+    buyPattern,
+    dailyPattern,
+    displayValue,
+    getPatternValue,
+    shapes
+  }
 }
