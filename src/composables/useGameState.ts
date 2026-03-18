@@ -1,4 +1,4 @@
-import { ref, computed } from "vue"
+import { computed } from "vue"
 import { gameStore } from '@/stores/useGameStore'
 
 const { money, lvl, exp, expToNextLvl, partsSold } = gameStore

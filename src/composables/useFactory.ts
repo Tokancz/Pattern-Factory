@@ -1,4 +1,4 @@
-import { ref, type Ref } from "vue"
+import { ref } from "vue"
 import type { Part } from "@/types/Part"
 import type { Machine } from "@/types/Machine"
 import { useSaveSystem } from "./useSaveSystem"
@@ -15,6 +15,8 @@ export function useFactory(
   const speedController = 20
   const MAX_DELTA = 0.2
 
+  const { upgrades, prestigeMultiplier, currentPattern, dailyPattern, money, partsSold, dc } = gameStore
+
   type Point = { x: number; y: number }
   const conveyorPath: Point[] = [{ x: 0, y: 120 }, { x: 0, y: 500 }]
 
@@ -27,7 +29,7 @@ export function useFactory(
       owned: false,
       src: "@assets/machines/ColorMachine.png",
       apply(part) {
-        return { ...part, traits: { ...part.traits, color: gameStore.currentPattern.value?.traits.color } }
+        return { ...part, traits: { ...part.traits, color: currentPattern.value?.traits.color } }
       }
     },
     {
@@ -38,7 +40,7 @@ export function useFactory(
       owned: false,
       src: "@assets/machines/CutMachine.png",
       apply(part) {
-        return { ...part, traits: { ...part.traits, cut: gameStore.currentPattern.value?.traits.shape } }
+        return { ...part, traits: { ...part.traits, cut: currentPattern.value?.traits.shape } }
       }
     }
   ]
@@ -47,7 +49,7 @@ export function useFactory(
   function spawnPart() {
     parts.value.push({
       id: partId++,
-      patternId: gameStore.currentPattern.value.id,
+      patternId: currentPattern.value.id,
       progress: 0,
       speed: 0.01,
       traits: { color: colors.gray, cut: "circle" }
@@ -55,8 +57,8 @@ export function useFactory(
   }
 
   function click() {
-    creatingProgress.value += gameStore.upgrades.clickingPower?.power
-    if (creatingProgress.value >= gameStore.currentPattern.value.creationTime) {
+    creatingProgress.value += upgrades.value.clickingPower?.power
+    if (creatingProgress.value >= currentPattern.value.creationTime) {
       spawnPart()
       creatingProgress.value = 0
     }
@@ -83,28 +85,28 @@ export function useFactory(
   }
 
   function calculateValue(part: Part) {
-    return part.patternId === gameStore.dailyPattern.value.id
-      ? gameStore.dailyPattern.value.baseValue * gameStore.upgrades.sellMultiplier.power * prestigeMultiplier.value
-      : gameStore.currentPattern.value.baseValue * gameStore.upgrades.sellMultiplier.power * prestigeMultiplier.value
+    return part.patternId === dailyPattern.value.id
+      ? dailyPattern.value.baseValue * upgrades.value.sellMultiplier.power * prestigeMultiplier.value
+      : currentPattern.value.baseValue * upgrades.value.sellMultiplier.power * prestigeMultiplier.value
   }
 
   function calculateExp(part: Part) {
-    return gameStore.currentPattern.value?.baseExp
+    return currentPattern.value?.baseExp
   }
 
   function isPartComplete(part: Part) {
-    const reqs = gameStore.currentPattern.value.requirements
+    const reqs = currentPattern.value.requirements
     return Object.entries(reqs).every(([key, needed]) => !needed || (part.traits as any)[key])
   }
 
   function sellPart(part: Part) {
     if (!isPartComplete(part)) {
-      gameStore.money.value += Math.floor(calculateValue(part) * 0.3)
+      money.value += Math.floor(calculateValue(part) * 0.3)
     } else {
-      gameStore.money.value += calculateValue(part)
-      if (part.patternId === gameStore.dailyPattern.value.id) gameStore.dc.value += 10
+      money.value += calculateValue(part)
+      if (part.patternId === dailyPattern.value.id) dc.value += 10
     }
-    gameStore.partsSold.value += 1
+    partsSold.value += 1
     gainExp(calculateExp(part)!)
     saveGame()
   }
@@ -117,11 +119,11 @@ export function useFactory(
       let deltaSeconds = (now - lastTime) / 1000
       lastTime = now
       deltaSeconds = Math.min(deltaSeconds, MAX_DELTA)
-      creatingProgress.value += gameStore.upgrades.creationSpeed.power * gameStore.prestigeMultiplier.value * deltaSeconds * speedController
+      creatingProgress.value += upgrades.value.creationSpeed.power * prestigeMultiplier.value * deltaSeconds * speedController
 
-      while (creatingProgress.value >= gameStore.currentPattern.value.creationTime) {
+      while (creatingProgress.value >= currentPattern.value.creationTime) {
         spawnPart()
-        creatingProgress.value -= gameStore.currentPattern.value.creationTime
+        creatingProgress.value -= currentPattern.value.creationTime
       }
 
       parts.value.forEach((part, index) => {

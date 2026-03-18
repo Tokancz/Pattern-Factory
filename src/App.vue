@@ -303,7 +303,7 @@ export default defineComponent({
     })
 
     return {
-      money, dc, lvl, exp, expToNextLvl, formattedMoney, formattedPartsSold,
+      formattedMoney, formattedPartsSold,
       gainExp, partsSold, formatNumber,
       patterns, currentPattern, patternList, ownedPatterns, dailyPattern, setPattern, buyPattern: (p: Pattern) => buyPattern(p, money),
       machines, parts, creatingProgress, spawnPart, clickFactory,

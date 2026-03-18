@@ -2,7 +2,7 @@ import { ref, computed } from "vue"
 import { gameStore } from '@/stores/useGameStore'
 import { useSaveSystem } from "./useSaveSystem"
 
-const { money } = gameStore
+const { money, upgrades, currentPattern } = gameStore
 const { saveGame } = useSaveSystem()
 
 export function useOffline() {
@@ -11,8 +11,8 @@ export function useOffline() {
   const speedController = 20
 
   const idleIncomePerSecond = computed(() => {
-    const partsPerSecond = gameStore.upgrades.creationSpeed.power / gameStore.currentPattern.value!.creationTime
-    return partsPerSecond * gameStore.currentPattern.value!.baseValue * speedController * gameStore.upgrades.sellMultiplier.power * gameStore.prestigeMultiplier.value
+    const partsPerSecond = upgrades.value?.creationSpeed?.power || 0 / currentPattern.value!.creationTime
+    return partsPerSecond * currentPattern.value!.baseValue * speedController * upgrades.value?.sellMultiplier?.power || 0 * gameStore.prestigeMultiplier.value
   })
 
   function applyOfflineProgress() {

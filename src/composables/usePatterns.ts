@@ -1,8 +1,7 @@
-import { ref, computed, type Ref } from "vue"
+import { computed, type Ref } from "vue"
 import type { Pattern } from "@/types/Pattern"
-import type { Upgrades } from "@/types/Upgrade"
 import { useSaveSystem } from "./useSaveSystem"
-import { gameStore } from '@/stores/useGameStore'
+import { gameStore, getDefaultUpgrades } from '@/stores/useGameStore'
 
 export function usePatterns(
   prestigeMultiplier: Ref<number>,
@@ -96,6 +95,7 @@ export function usePatterns(
     dailyPattern.value = structuredClone(random)
     dailyPatternTime.value = now
     saveGame()
+
     return structuredClone(random)
   }
 
@@ -106,12 +106,8 @@ export function usePatterns(
   loadGame(patterns)
 
   // ---------- DEFAULT UPGRADES ----------
-  if (!Object.keys(upgrades.value).length) {
-    upgrades.value = {
-      clickingPower: { id: 'Clicking Power', lvl: 1, value: 50, power: 25 },
-      creationSpeed: { id: 'Creation Speed', lvl: 1, value: 100, power: 1 },
-      sellMultiplier: { id: 'Sell Multiplier', lvl: 1, value: 100, power: 1 }
-    }
+  if (!upgrades.value || !upgrades.value.clickingPower) {
+    upgrades.value = getDefaultUpgrades()
     saveGame()
   }
 
@@ -138,8 +134,8 @@ export function usePatterns(
 
   function getPatternValue(pattern: Pattern) {
     return pattern.id === dailyPattern.value.id
-      ? dailyPattern.value.baseValue * upgrades.sellMultiplier.power * prestigeMultiplier.value
-      : pattern.baseValue * upgrades.sellMultiplier.power * prestigeMultiplier.value
+      ? dailyPattern.value.baseValue * upgrades.value.sellMultiplier.power * prestigeMultiplier.value
+      : pattern.baseValue * upgrades.value.sellMultiplier.power * prestigeMultiplier.value
   }
 
   function displayValue(pattern: Pattern) {
