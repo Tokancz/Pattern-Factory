@@ -225,15 +225,8 @@ export default defineComponent({
       cyan: '#4dd2df'
     }
 
-    // ---------- UPGRADES ----------
-    const upgrades = {
-      clickingPower: { id: 'Clicking Power', lvl: 1, value: 50, power: 25 },
-      creationSpeed: { id: 'Creation Speed', lvl: 1, value: 100, power: 1 },
-      sellMultiplier: { id: 'Sell Multiplier', lvl: 1, value: 100, power: 1 }
-    }
-
     // ---------- GAME STATE ----------
-    const { money, dc, lvl, exp, expToNextLvl, partsSold, prestigeMultiplier } = gameStore
+    const { money, dc, lvl, exp, expToNextLvl, partsSold, prestigeMultiplier, upgrades } = gameStore
 
     const { formattedMoney, formattedPartsSold, gainExp, formatNumber } = useGameState()
 
@@ -242,7 +235,7 @@ export default defineComponent({
       patterns, patternList, ownedPatterns, currentPattern,
       setPattern, buyPattern, dailyPattern,
       displayValue: patternDisplayValue, shapes
-    } = usePatterns(upgrades, ref(1), formatNumber, colors)
+    } = usePatterns(ref(1), formatNumber, colors)
 
     // ---------- FACTORY ----------
     const { machines, parts, creatingProgress, spawnPart, click, startFactoryLoop, machinePos, partStyle } = useFactory( gainExp, colors )

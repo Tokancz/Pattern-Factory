@@ -1,4 +1,6 @@
 import { ref } from "vue"
+import type { Upgrade, Upgrades } from "@/types/Upgrade"
+import type { Machine } from "@/types/Machine"
 
 export const gameStore = {
   // --- BASIC ---
@@ -16,8 +18,8 @@ export const gameStore = {
   dailyPatternTime: ref<number>(0),
 
   // --- SYSTEMS ---
-  machines: ref<any[]>([]),
-  upgrades: ref<any>({}),
+  machines: ref<Machine[]>([]),
+  upgrades: ref<Upgrades>({}),
 
   // --- META ---
   lastOnline: ref(Date.now()),

@@ -5,13 +5,12 @@ import { useSaveSystem } from "./useSaveSystem"
 import { gameStore } from '@/stores/useGameStore'
 
 export function usePatterns(
-  upgrades: Upgrades,
   prestigeMultiplier: Ref<number>,
   formatNumber: (n: number) => string,
   colors: Record<string, string>
 ) {
   const { saveGame, loadGame } = useSaveSystem()
-  const { ownedPatterns, dailyPattern, dailyPatternTime, currentPattern, machines: machinesStore, upgrades: upgradesStore } = gameStore
+  const { ownedPatterns, dailyPattern, dailyPatternTime, currentPattern, machines, upgrades} = gameStore
 
   // ---------- PATTERNS ----------
   const patterns: Record<string, Pattern> = generatePatterns()
@@ -107,8 +106,8 @@ export function usePatterns(
   loadGame(patterns)
 
   // ---------- DEFAULT UPGRADES ----------
-  if (!Object.keys(upgradesStore.value).length) {
-    upgradesStore.value = {
+  if (!Object.keys(upgrades.value).length) {
+    upgrades.value = {
       clickingPower: { id: 'Clicking Power', lvl: 1, value: 50, power: 25 },
       creationSpeed: { id: 'Creation Speed', lvl: 1, value: 100, power: 1 },
       sellMultiplier: { id: 'Sell Multiplier', lvl: 1, value: 100, power: 1 }
@@ -117,8 +116,8 @@ export function usePatterns(
   }
 
   // ---------- DEFAULT MACHINES ----------
-  if (!machinesStore.value.length) {
-    machinesStore.value = []
+  if (!machines.value.length) {
+    machines.value = []
     saveGame()
   }
 

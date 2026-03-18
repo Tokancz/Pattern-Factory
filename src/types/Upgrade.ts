@@ -1,8 +1,8 @@
 export type Upgrade = {
-    id: string
-    lvl: number
-    value: number
-    power: number
+  id: string
+  lvl: number
+  value: number
+  power: number
 }
 export type Upgrades = {
   clickingPower: Upgrade
