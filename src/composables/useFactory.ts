@@ -9,41 +9,17 @@ const { saveGame } = useSaveSystem()
 export function useFactory(
   gainExp: (amount: number) => void,
   colors: Record<string, string>
+
 ) {
   const parts = ref<Part[]>([])
   const creatingProgress = ref(0)
   const speedController = 20
   const MAX_DELTA = 0.2
 
-  const { upgrades, prestigeMultiplier, currentPattern, dailyPattern, money, partsSold, dc } = gameStore
+  const { upgrades, prestigeMultiplier, currentPattern, dailyPattern, money, partsSold, dc, machines } = gameStore
 
   type Point = { x: number; y: number }
   const conveyorPath: Point[] = [{ x: 0, y: 120 }, { x: 0, y: 500 }]
-
-  const machines: Machine[] = [
-    {
-      id: "color",
-      description: "Color Machine",
-      at: 0.3,
-      price: 50,
-      owned: false,
-      src: "@assets/machines/ColorMachine.png",
-      apply(part) {
-        return { ...part, traits: { ...part.traits, color: currentPattern.value?.traits.color } }
-      }
-    },
-    {
-      id: "cut",
-      description: "Cutting Machine",
-      at: 0.65,
-      price: 25000,
-      owned: false,
-      src: "@assets/machines/CutMachine.png",
-      apply(part) {
-        return { ...part, traits: { ...part.traits, cut: currentPattern.value?.traits.shape } }
-      }
-    }
-  ]
 
   let partId = 0
   function spawnPart() {
@@ -90,7 +66,7 @@ export function useFactory(
       : currentPattern.value.baseValue * upgrades.value.sellMultiplier.power * prestigeMultiplier.value
   }
 
-  function calculateExp(part: Part) {
+  function calculateExp() {
     return currentPattern.value?.baseExp
   }
 
@@ -107,7 +83,7 @@ export function useFactory(
       if (part.patternId === dailyPattern.value.id) dc.value += 10
     }
     partsSold.value += 1
-    gainExp(calculateExp(part)!)
+    gainExp(calculateExp())
     saveGame()
   }
 
@@ -128,17 +104,24 @@ export function useFactory(
 
       parts.value.forEach((part, index) => {
         part.progress += part.speed * deltaSeconds * speedController
-        machines.forEach(machine => {
-          if (machine.owned && part.progress >= machine.at && !(part as any)[`machine_${machine.at}`]) {
+
+        machines.value.forEach(machine => {
+          if (
+            machine.owned &&
+            part.progress >= machine.at &&
+            !(part as any)[`machine_${machine.at}`]
+          ) {
             Object.assign(part, machine.apply(part))
             ;(part as any)[`machine_${machine.at}`] = true
           }
         })
+
         if (part.progress >= 1) {
           sellPart(part)
           parts.value.splice(index, 1)
         }
       })
+
     }, 50)
   }
 

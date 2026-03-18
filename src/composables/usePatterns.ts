@@ -9,7 +9,7 @@ export function usePatterns(
   colors: Record<string, string>
 ) {
   const { saveGame, loadGame } = useSaveSystem()
-  const { ownedPatterns, dailyPattern, dailyPatternTime, currentPattern, machines, upgrades} = gameStore
+  const { ownedPatterns, dailyPattern, dailyPatternTime, currentPattern, machines, upgrades, money} = gameStore
 
   // ---------- PATTERNS ----------
   const patterns: Record<string, Pattern> = generatePatterns()
@@ -66,7 +66,7 @@ export function usePatterns(
             ...(color.requiresColor ? { color: true } : {}),
             ...(shape.requiresCut ? { cut: true } : {})
           },
-          traits: { color: colors[color.key], shape: shape.key }
+          traits: { color: colors[color.key]!, shape: shape.key }
         }
         tier++
       }
@@ -81,17 +81,29 @@ export function usePatterns(
     return Object.values(patterns).filter(p => p.id !== "basic")
   }
 
+  // ---------- DAILY PATTERN ----------
   function getDailyPattern(): Pattern {
     const now = Date.now()
     const savedId = dailyPattern.value?.id
     const savedTime = dailyPatternTime.value
 
-    if (savedId && savedTime && now - savedTime < DAILY_INTERVAL && patterns[savedId]) {
-      return structuredClone(patterns[savedId])
+    if (
+      savedId &&
+      savedTime &&
+      now - savedTime < DAILY_INTERVAL &&
+      patterns[savedId]
+    ) {
+      return structuredClone(patterns[savedId]!)
     }
 
     const pool = getEligiblePatterns()
-    const random = pool.length ? pool[Math.floor(Math.random() * pool.length)] : patterns.basic
+    let random: Pattern
+    if (pool.length > 0) {
+      random = pool[Math.floor(Math.random() * pool.length)]!
+    } else {
+      random = patterns.basic!
+    }
+
     dailyPattern.value = structuredClone(random)
     dailyPatternTime.value = now
     saveGame()
@@ -99,23 +111,17 @@ export function usePatterns(
     return structuredClone(random)
   }
 
-  if (!dailyPattern.value) getDailyPattern()
-  dailyPattern.value.baseValue *= 1.5
-
-  // ---------- LOAD GAME ----------
   loadGame(patterns)
 
-  // ---------- DEFAULT UPGRADES ----------
   if (!upgrades.value || !upgrades.value.clickingPower) {
     upgrades.value = getDefaultUpgrades()
-    saveGame()
   }
 
-  // ---------- DEFAULT MACHINES ----------
   if (!machines.value.length) {
     machines.value = []
-    saveGame()
   }
+
+  saveGame()
 
   // ---------- API ----------
   function setPattern(pattern: Pattern) {
@@ -123,19 +129,25 @@ export function usePatterns(
     saveGame()
   }
 
-  function buyPattern(pattern: Pattern, moneyRef: Ref<number>) {
-    if (moneyRef.value >= pattern.price && !pattern.owned) {
-      moneyRef.value -= pattern.price
+  function buyPattern(pattern: Pattern) {
+    if (money.value >= pattern.price && !pattern.owned) {
+      money.value -= pattern.price
       pattern.owned = true
-      if (!ownedPatterns.value.includes(pattern.id)) ownedPatterns.value.push(pattern.id)
-      saveGame()
+
+      if (!ownedPatterns.value.includes(pattern.id)) {
+        ownedPatterns.value.push(pattern.id)
+        saveGame()
+      }
     }
   }
 
   function getPatternValue(pattern: Pattern) {
-    return pattern.id === dailyPattern.value.id
-      ? dailyPattern.value.baseValue * upgrades.value.sellMultiplier.power * prestigeMultiplier.value
-      : pattern.baseValue * upgrades.value.sellMultiplier.power * prestigeMultiplier.value
+    const base =
+      pattern.id === dailyPattern.value.id
+        ? pattern.baseValue * 1.5
+        : pattern.baseValue
+
+    return base * upgrades.value.sellMultiplier.power * prestigeMultiplier.value
   }
 
   function displayValue(pattern: Pattern) {
@@ -152,6 +164,7 @@ export function usePatterns(
     dailyPattern,
     displayValue,
     getPatternValue,
+    getDailyPattern,
     shapes
   }
 }

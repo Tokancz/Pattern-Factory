@@ -31,15 +31,27 @@ export const gameStore = {
 export function getDefaultMachines(): Machine[] {
   return [
     {
-      id: "cutter",
-      description: "Cuts parts",
-      at: 1,
-      price: 100,
+      id: "color",
+      description: "Color Machine",
+      at: 0.3,
+      price: 50,
       owned: false,
-      src: "cutter.png",
-      apply: (part) => part
+      src: "@assets/machines/ColorMachine.png",
+      apply(part) {
+        return { ...part, traits: { ...part.traits, color: gameStore.currentPattern.value?.traits.color } }
+      }
     },
-    // more machines...
+    {
+      id: "cut",
+      description: "Cutting Machine",
+      at: 0.65,
+      price: 25000,
+      owned: false,
+      src: "@assets/machines/CutMachine.png",
+      apply(part) {
+        return { ...part, traits: { ...part.traits, cut: gameStore.currentPattern.value?.traits.shape } }
+      }
+    }
   ]
 }
 

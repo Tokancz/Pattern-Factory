@@ -21,10 +21,10 @@
       </section>
       <section>
         <h3>Progress</h3>
-        <p>Next Part: {{ Math.floor(creatingProgress / currentPattern!.creationTime * 100) }} %</p>
-        <input type="range" min="0" :max="currentPattern!.creationTime" class="slider" v-model="creatingProgress" disabled>
-        <p>Initial Price: {{ formatNumber(currentPattern!.baseValue) }} IGM</p>
-        <p>Current Price: {{ displayValue(currentPattern!) }} IGM</p>
+        <p>Next Part: {{ Math.floor(creatingProgress / currentPattern.creationTime * 100) }} %</p>
+        <input type="range" min="0" :max="currentPattern.creationTime" class="slider" v-model="creatingProgress" disabled>
+        <p>Initial Price: {{ formatNumber(currentPattern.baseValue) }} IGM</p>
+        <p>Current Price: {{ displayValue(currentPattern) }} IGM</p>
       </section>
       <section>
         <h3>Daily Pattern</h3>
@@ -81,7 +81,7 @@
           :shapes="shapes"
           :formatNumber="formatNumber"
           :displayValue="displayValue"
-          @buy="buyPattern"
+          @buy="buyPattern(pattern)"
           v-show="canProducePattern(pattern) && !pattern.owned"
         />
       </div>
@@ -188,8 +188,8 @@
   </footer>
 </template>
 
-<script lang="ts">
-import { defineComponent, ref, onMounted, watch, computed, type Ref} from 'vue'
+<script setup lang="ts">
+import { ref, onMounted, computed } from 'vue'
 import { useGameState } from '@/composables/useGameState'
 import { usePatterns } from '@/composables/usePatterns'
 import { useFactory } from '@/composables/useFactory'
@@ -204,117 +204,94 @@ import MachineCard from '@/components/MachineCard.vue'
 import UpgradeCard from '@/components/UpgradeCard.vue'
 import type { Pattern } from '@/types/Pattern'
 
-export default defineComponent({
-  name: 'App',
-  components: {
-    HeaderBar,
-    FactorySimulation,
-    PatternCard,
-    MachineCard,
-    UpgradeCard
-  },
-  setup() {
-    // ---------- COLORS ----------
-    const colors = {
-      gray: '#cdcdcd',
-      red: '#ff4d4d',
-      blue: '#85a7ff',
-      green: '#4ddf88',
-      yellow: '#ffd972',
-      purple: '#9858ed',
-      cyan: '#4dd2df'
-    }
+// ---------- COLORS ----------
+const colors = {
+  gray: '#cdcdcd',
+  red: '#ff4d4d',
+  blue: '#85a7ff',
+  green: '#4ddf88',
+  yellow: '#ffd972',
+  purple: '#9858ed',
+  cyan: '#4dd2df'
+} as const
 
-    // ---------- GAME STATE ----------
-    const { money, dc, lvl, exp, expToNextLvl, partsSold, prestigeMultiplier, upgrades } = gameStore
+// ---------- GAME STATE ----------
+const { money, dc, lvl, exp, expToNextLvl, prestigeMultiplier, upgrades } = gameStore
 
-    const { formattedMoney, formattedPartsSold, gainExp, formatNumber } = useGameState()
+const { formattedMoney, formattedPartsSold, gainExp, formatNumber } = useGameState()
 
-    // ---------- PATTERNS ----------
-    const {
-      patterns, patternList, ownedPatterns, currentPattern,
-      setPattern, buyPattern, dailyPattern,
-      displayValue: patternDisplayValue, shapes
-    } = usePatterns(ref(1), formatNumber, colors)
+// ---------- PATTERNS ----------
+const {
+  patterns, patternList, ownedPatterns, currentPattern,
+  setPattern, buyPattern, dailyPattern,
+  displayValue, shapes
+} = usePatterns(ref(1), formatNumber, colors)
 
-    // ---------- FACTORY ----------
-    const { machines, parts, creatingProgress, spawnPart, click, startFactoryLoop, machinePos, partStyle } = useFactory( gainExp, colors )
+// ---------- FACTORY ----------
+const { machines, parts, creatingProgress, click, startFactoryLoop, machinePos, partStyle } = useFactory( gainExp, colors )
 
-    // ---------- PRESTIGE ----------
-    const { prestigePoints, prestige, calculatePrestigeReward } = usePrestige(patterns, ref([]), parts, creatingProgress)
+// ---------- PRESTIGE ----------
+const { prestigePoints, prestige, calculatePrestigeReward } = usePrestige(patterns, ref([]), parts, creatingProgress)
 
-    // ---------- OFFLINE ----------
-    const { showOfflinePopup, offlineReward, applyOfflineProgress } = useOffline()
+// ---------- OFFLINE ----------
+const { showOfflinePopup, offlineReward, applyOfflineProgress } = useOffline()
 
-   const { saveGame, loadGame } = useSaveSystem()
+const { saveGame, loadGame } = useSaveSystem()
 
-    // ---------- EXTRA STATE ----------
-    const gainedMoney = ref(0)
-    const lvlPopUp = ref(false)
-    const idleIncomePerSecond = ref(0)
-    const openedShop = ref('')
-    const mobileMenu = ref(false)
-    const factoryName = ref('Pattern Factory')
-    const userName = ref('Player')
+// ---------- EXTRA STATE ----------
+const gainedMoney = ref(0)
+const lvlPopUp = ref(false)
+const idleIncomePerSecond = ref(0)
+const openedShop = ref('')
+const mobileMenu = ref(false)
+const factoryName = ref('Pattern Factory')
+const userName = ref('Player')
 
-    function closeOfflinePopup() { showOfflinePopup.value = false }
-    function clickFactory() { click() }
+function closeOfflinePopup() { showOfflinePopup.value = false }
+function clickFactory() { click() }
 
-    function buyMachine(machine: any) {
-      if (money.value >= machine.price && !machine.owned) {
-        money.value -= machine.price
-        machine.owned = true
-      }
-    }
-    function buyUpgrade(upgrade: any) {
-      if (money.value >= upgrade.value && upgrade.lvl) {
-        money.value -= upgrade.value
-        upgrade.lvl += 1
-      }
-    }
+function buyMachine(machine: any) {
+  if (money.value >= machine.price && !machine.owned) {
+    money.value -= machine.price
+    machine.owned = true
+  }
+}
+function buyUpgrade(upgrade: any) {
+  if (money.value >= upgrade.value && upgrade.lvl) {
+    money.value -= upgrade.value
+    upgrade.lvl += 1
+  }
+}
 
-    Object.values(patterns).forEach(pattern => {
-      pattern.owned =
-        pattern.owned || ownedPatterns.value.includes(pattern.id)
-    })
+Object.values(patterns).forEach(pattern => {
+  pattern.owned =
+    pattern.owned || ownedPatterns.value.includes(pattern.id)
+})
 
-    const ownedMachineCapabilities = computed(() => {
-      return {
-        color: machines.some(m => m.id === "color" && m.owned),
-        cut: machines.some(m => m.id === "cut" && m.owned),
-        merged: machines.some(m => m.id === "merge" && m.owned)
-      }
-    })
-
-    function canProducePattern(pattern: Pattern) {
-      return Object.entries(pattern.requirements).every(
-        ([req, needed]) => !needed || (ownedMachineCapabilities.value as any)[req]
-      )
-    }
-
-    function mobileOpen(tab: string) { openedShop.value = tab }
-
-    onMounted(() => {
-      loadGame(patterns)
-      applyOfflineProgress()
-      startFactoryLoop()
-      saveGame()
-      localStorage.setItem('lastOnline', Date.now().toString())
-    })
-
-    return {
-      formattedMoney, formattedPartsSold,
-      gainExp, partsSold, formatNumber,
-      patterns, currentPattern, patternList, ownedPatterns, dailyPattern, setPattern, buyPattern: (p: Pattern) => buyPattern(p, money),
-      machines, parts, creatingProgress, spawnPart, clickFactory,
-      machinePos, partStyle, prestigePoints, prestigeMultiplier, prestige,
-      calculatePrestigeReward, showOfflinePopup, offlineReward, closeOfflinePopup,
-      openedShop, mobileMenu, colors, upgrades, buyMachine, buyUpgrade, mobileOpen,
-      displayValue: patternDisplayValue, gainedMoney, lvlPopUp, idleIncomePerSecond,
-      canProducePattern, factoryName, userName, shapes
-    }
+const ownedMachineCapabilities = computed(() => {
+  return {
+    color: machines.value.some(m => m.id === "color" && m.owned),
+    cut: machines.value.some(m => m.id === "cut" && m.owned),
+    merged: machines.value.some(m => m.id === "merge" && m.owned)
   }
 })
+
+function canProducePattern(pattern: Pattern) {
+  return Object.entries(pattern.requirements).every(
+    ([req, needed]) => !needed || (ownedMachineCapabilities.value as any)[req]
+  )
+}
+
+function mobileOpen(tab: string) { openedShop.value = tab }
+
+onMounted(() => {
+  loadGame(patterns)
+  applyOfflineProgress()
+  startFactoryLoop()
+  saveGame()
+  localStorage.setItem('lastOnline', Date.now().toString())
+})
+
 </script>
 
 <style lang="scss">
