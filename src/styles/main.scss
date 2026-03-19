@@ -83,45 +83,6 @@ body {
       justify-content: center;
     }
 
-    aside#stats {
-      @include flexColumn(20px, center, start);
-      padding: 20px;
-      width: var(--asideWidth);
-      height: 100%;
-
-      @media (width < 768px) {
-        display: none;
-      }
-
-      section {
-        width: 100%;
-        @include flexColumn(5px);
-        background-color: var(--primary75);
-        padding: 20px;
-        color: var(--darkgray);
-        text-align: start;
-        border: var(--primary) 3px solid;
-
-        h3 {
-          width: 100%;
-          font-size: 2em;
-        }
-        p {
-          width: 100%;
-          font-size: 1.3em;
-          color: var(--lightgray);
-        }
-        svg {
-          width: 100px;
-          user-select: none;
-        }
-        .slider {
-          width: 100%;
-          height: 10px;
-          accent-color: var(--primary);
-        }
-      }
-    }
     section#shopList {
       position: relative;
       width: var(--asideWidth);
@@ -245,98 +206,7 @@ body {
         }
       }
     }
-    section.tab {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      width: 60%;
-      min-height: 30vh;
-      max-height: 80dvh;
-      @include flexColumn(20px, start);
-      background-color: var(--primary);
-      z-index: 10;
-      transform: translateX(-50%) translateY(-50%);
-      padding: 20px;
-      border-radius: 4px;
 
-      @media (width <= 1024px) {
-        width: 80%;
-      }
-
-      div.shop_header {
-        width: 100%;
-        @include flexRow(0, space-between);
-
-        h4 {
-          font-size: 3em;
-          @media (width <= 375px) {
-            font-size: 2.5em;
-          }
-        }
-        p {
-          font-size: 3em;
-          cursor: pointer;
-        }
-      }
-      div.container {
-        width: 100%;
-        display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        align-items: start;
-        overflow-y: auto;
-        gap: 20px;
-        padding: 0 20px;
-
-        @media (width <= 768px) {
-          grid-template-columns: repeat(3, 1fr);
-        }
-        @media (width <= 425px) {
-          grid-template-columns: repeat(2, 1fr);
-          font-size: .9em;
-          padding: 0px;
-        }
-        .pattern, .upgrade{
-          width: 100%;
-          @include flexColumn(10px, start);
-          padding: 10px;
-          border: var(--darkgray) 2px solid;
-          border-radius: 8px;
-          cursor: pointer;
-          background-color: var(--gray);
-
-          @media (width <= 425px) {
-            gap: 5px;
-          }
-
-          svg {
-            @media (width <= 768px) {
-              width: 80px;
-            }
-          }
-          button {
-            background: var(--lightgray);
-            border: 2px solid var(--darkgray);
-            border-radius: 8px;
-            padding: 5px;
-            cursor: pointer;
-          }
-          p {
-            font-size: 1.3em;
-            color: var(--white);
-          }
-        }
-      }
-      >p {
-        width: 100%;
-        color: var(--white);
-        font-size: 2em;
-      }
-      >button {
-        padding: 10px;
-        border-radius: 8px;
-        font-size: 2em;
-      }
-    }
     #offlineReward {
       position: absolute;
       left: 50%;

@@ -37,5 +37,5 @@ export function useOffline() {
     offlineReward.value = 0
   }
 
-  return { showOfflinePopup, offlineReward, applyOfflineProgress }
+  return { showOfflinePopup, offlineReward, applyOfflineProgress, idleIncomePerSecond }
 }

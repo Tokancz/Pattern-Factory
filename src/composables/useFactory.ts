@@ -22,13 +22,14 @@ export function useFactory(
   const conveyorPath: Point[] = [{ x: 0, y: 120 }, { x: 0, y: 500 }]
 
   let partId = 0
+
   function spawnPart() {
     parts.value.push({
       id: partId++,
       patternId: currentPattern.value.id,
       progress: 0,
       speed: 0.01,
-      traits: { color: colors.gray, cut: "circle" }
+      traits: { color: colors.gray, cut: "circle", shape: "circle" }
     })
   }
 
@@ -83,6 +84,8 @@ export function useFactory(
       if (part.patternId === dailyPattern.value.id) dc.value += 10
     }
     partsSold.value += 1
+
+    console.log(`Sold part for ${calculateValue(part)} money and ${calculateExp()} exp`)
     gainExp(calculateExp())
     saveGame()
   }

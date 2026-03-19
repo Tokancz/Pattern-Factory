@@ -2,7 +2,7 @@ import { gameStore } from '@/stores/useGameStore'
 import { useSaveSystem } from "@/composables/useSaveSystem"
 
 const { saveGame, prestigeReset } = useSaveSystem()
-const { money, prestigePoints, prestigeMultiplier } = gameStore
+const { money, prestigePoints } = gameStore
 
 export function usePrestige(
   patterns: any,

@@ -8,10 +8,10 @@
     <div>
       <p id="user">{{ userName }}</p>
       <p>Lvl: {{ lvl }}</p>
-      <p>XP: {{ formatNumber(exp) }}/{{ formatNumber(expToNextLvl) }}</p>
+      <p>XP: {{ formatNumber!(exp) }}/{{ formatNumber!(expToNextLvl) }}</p>
     </div>
 
-    <p v-if="lvlPopUp"> + {{ formatNumber(gainedMoney) }} IGM</p>
+    <p v-if="lvlPopUp"> + {{ formatNumber!(gainedMoney) }} IGM</p>
   </div>
 
   <i
@@ -25,12 +25,11 @@
 
 <script setup lang="ts">
 
+import { gameStore } from '@/stores/useGameStore';
+
+const { lvl, exp, expToNextLvl, factoryName, userName } = gameStore
+
 defineProps({
-  factoryName: String,
-  userName: String,
-  lvl: Number,
-  exp: Number,
-  expToNextLvl: Number,
   gainedMoney: Number,
   lvlPopUp: Boolean,
   mobileMenu: Boolean,
@@ -41,6 +40,7 @@ defineProps({
 defineEmits(["openMenu"])
 
 </script>
+
 <style lang="scss">
 header {
     width: 100%;

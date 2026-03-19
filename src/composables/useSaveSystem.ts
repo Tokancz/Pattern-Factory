@@ -6,6 +6,8 @@ const SAVE_KEY = "game_save"
 export function useSaveSystem() {
   function saveGame() {
     const data = {
+      factoryName: gameStore.factoryName.value,
+      userName: gameStore.userName.value,
       money: gameStore.money.value,
       dc: gameStore.dc.value,
       lvl: gameStore.lvl.value,
@@ -30,6 +32,9 @@ export function useSaveSystem() {
     if (!raw) return
 
     const data = JSON.parse(raw)
+
+    gameStore.factoryName.value = data.factoryName || "My Factory"
+    gameStore.userName.value = data.userName || "Player"
 
     gameStore.money.value = data.money ?? 0
     gameStore.dc.value = data.dc ?? 0
@@ -65,9 +70,6 @@ export function useSaveSystem() {
   }
 
   function prestigeReset(patterns: any) {
-    // --- KEEP (meta progression) ---
-    const prestigeMultiplier = gameStore.prestigeMultiplier.value
-
     // --- RESET core progress ---
     gameStore.money.value = 0
     gameStore.dc.value = 0

@@ -1,19 +1,20 @@
-import { computed } from "vue"
 import { gameStore } from '@/stores/useGameStore'
+import { useSaveSystem } from "./useSaveSystem"
 
-const { money, lvl, exp, expToNextLvl, partsSold } = gameStore
+const { money, lvl, exp, expToNextLvl } = gameStore
+const { saveGame } = useSaveSystem()
 
 export function useGameState() {
-  const formattedMoney = computed(() => formatNumber(money.value))
-  const formattedPartsSold = computed(() => formatNumber(partsSold.value))
-
   function gainExp(amount: number) {
     exp.value += amount
     if (exp.value >= expToNextLvl.value) {
       exp.value = 0
       lvl.value++
       expToNextLvl.value = Math.floor(expToNextLvl.value * 1.5)
-      money.value += Math.pow(lvl.value, 6)
+      money.value += Math.pow(lvl.value, 4)
+
+      console.log(`Leveled up to ${lvl.value}! Next level at ${expToNextLvl.value} exp.`)
+      saveGame()
     }
   }
 
@@ -30,5 +31,5 @@ export function useGameState() {
     return `${num.toFixed(num < 10 ? 1 : 0)}${units[unit]}`
   }
 
-  return { formattedMoney, gainExp, formatNumber, formattedPartsSold }
+  return { gainExp, formatNumber }
 }

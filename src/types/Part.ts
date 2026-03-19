@@ -2,6 +2,7 @@ export type PartTraits = {
   color?: string
   cut?: string
   merged?: boolean
+  shape: string // <- required now
 }
 
 export type Part = {

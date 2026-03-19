@@ -33,7 +33,7 @@
       class="part"
       viewBox="0 0 32 32"
       :style="partStyle!(part)"
-      v-html="shapes![part.traits.cut]">
+      v-html="shapes![part.traits.shape]">
     </svg>
   </section>
 </template>
@@ -42,13 +42,13 @@
 
 import type { Part } from "@/types/Part"
 import type { Machine } from "@/types/Machine"
-import type { Pattern } from "@/types/Pattern"
+import { gameStore } from "@/stores/useGameStore";
+
+const { machines, currentPattern } = gameStore
 
 const props = defineProps<{
-  machines: Machine[]
   parts: Part[]
   shapes: Record<string, string>
-  currentPattern: Pattern
   creatingProgress: number
   machinePos: (machine: Machine) => any
   partStyle: (part: Part) => any

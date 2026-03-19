@@ -1,18 +1,43 @@
 import { computed, type Ref } from "vue"
 import type { Pattern } from "@/types/Pattern"
 import { useSaveSystem } from "./useSaveSystem"
-import { gameStore, getDefaultUpgrades } from '@/stores/useGameStore'
+import { gameStore, getDefaultUpgrades, getDefaultMachines } from '@/stores/useGameStore'
+import { useGameState } from "@/composables/useGameState"
+
 
 export function usePatterns(
-  prestigeMultiplier: Ref<number>,
-  formatNumber: (n: number) => string,
   colors: Record<string, string>
 ) {
   const { saveGame, loadGame } = useSaveSystem()
-  const { ownedPatterns, dailyPattern, dailyPatternTime, currentPattern, machines, upgrades, money} = gameStore
+  const { formatNumber } = useGameState()
+  const { ownedPatterns, dailyPattern, dailyPatternTime, currentPattern, machines, upgrades, money, prestigeMultiplier} = gameStore
 
   // ---------- PATTERNS ----------
   const patterns: Record<string, Pattern> = generatePatterns()
+
+  // 1. load save
+  loadGame(patterns)
+
+  // 2. fix missing values
+  if (!currentPattern.value) {
+    currentPattern.value = structuredClone(patterns.basic)
+  }
+
+  if (!dailyPattern.value) {
+    dailyPattern.value = getDailyPattern()
+  }
+
+  if (!upgrades.value || !upgrades.value.clickingPower) {
+    upgrades.value = getDefaultUpgrades()
+  }
+
+  if (!machines.value.length) {
+    machines.value = getDefaultMachines()
+  }
+
+  // 3. save once
+  saveGame()
+
   const patternList = computed(() => Object.values(patterns))
 
   // ---------- SHAPES ----------
@@ -111,18 +136,6 @@ export function usePatterns(
     return structuredClone(random)
   }
 
-  loadGame(patterns)
-
-  if (!upgrades.value || !upgrades.value.clickingPower) {
-    upgrades.value = getDefaultUpgrades()
-  }
-
-  if (!machines.value.length) {
-    machines.value = []
-  }
-
-  saveGame()
-
   // ---------- API ----------
   function setPattern(pattern: Pattern) {
     currentPattern.value = pattern
@@ -142,8 +155,10 @@ export function usePatterns(
   }
 
   function getPatternValue(pattern: Pattern) {
+    const daily = dailyPattern.value
+
     const base =
-      pattern.id === dailyPattern.value.id
+      daily && pattern.id === daily.id
         ? pattern.baseValue * 1.5
         : pattern.baseValue
 
@@ -165,6 +180,7 @@ export function usePatterns(
     displayValue,
     getPatternValue,
     getDailyPattern,
-    shapes
+    shapes,
+    generatePatterns
   }
 }

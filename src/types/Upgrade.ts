@@ -1,4 +1,5 @@
 export type Upgrade = {
+  key: keyof Upgrades
   id: string
   lvl: number
   value: number
