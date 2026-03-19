@@ -95,9 +95,61 @@ export function getDefaultMachines(): Machine[] {
 // --- UPGRADES ---
 export function getDefaultUpgrades(): Upgrades {
   return {
-    clickingPower: { key: "clickingPower", id: "Clicking Power", lvl: 1, value: 50, power: 25 },
-    creationSpeed: { key: "creationSpeed", id: "Creation Speed", lvl: 1, value: 100, power: 1 },
-    sellMultiplier: { key: "sellMultiplier", id: "Sell Multiplier", lvl: 1, value: 100, power: 1 }
+    clickingPower: {
+      key: "clickingPower",
+      id: "Clicking Power",
+      lvl: 1,
+      value: 50,
+      power: 25,
+      baseCost: 50,
+      baseValue: 25,
+      valueScale: 1.6,
+      powerScale: 1.15
+    },
+    creationSpeed: {
+      key: "creationSpeed",
+      id: "Creation Speed",
+      lvl: 1,
+      value: 100,
+      power: 1,
+      baseCost: 100,
+      baseValue: 1,
+      valueScale: 1.7,
+      powerScale: 1.1
+    },
+    sellMultiplier: {
+      key: "sellMultiplier",
+      id: "Sell Multiplier",
+      lvl: 1,
+      value: 100,
+      power: 1,
+      baseCost: 100,
+      baseValue: 1,
+      valueScale: 1.8,
+      powerScale: 1.2
+    },
+    offlineCap: {
+      key: "offlineCap",
+      id: "Offline Cap",
+      lvl: 1,
+      value: 1000,
+      power: 1000,
+      baseCost: 1000,
+      baseValue: 1000,
+      valueScale: 2,
+      powerScale: 1.2
+    },
+    offlineMultiplier: {
+      key: "offlineMultiplier",
+      id: "Offline Multiplier",
+      lvl: 1,
+      value: 500,
+      power: 0.5,
+      baseCost: 500,
+      baseValue: 0.5,
+      valueScale: 1.8,
+      powerScale: 0.05
+    }
   }
 }
 

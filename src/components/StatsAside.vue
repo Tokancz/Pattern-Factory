@@ -2,20 +2,22 @@
     <aside id="stats">
       <section>
         <h3>Stats</h3>
-        <p>Idle: {{ formatNumber(Math.floor(idleIncomePerSecond * 100) / 100) }} IGM/s</p>
+        <p>Income: {{ props.incomePerSecond }} IGM/s</p>
+        <p>Idle: {{ props.idleIncomePerSecond }} IGM/s</p>
         <p>Parts Sold: {{ formatNumber(partsSold) }}</p>
+        <p>Prestige Bonus: {{ prestigeMultiplier }} *</p>
       </section>
       <section>
         <h3>Progress</h3>
         <p>Next Part: {{ currentPattern ? Math.floor(creatingProgress! / currentPattern.creationTime * 100) : 0 }} %</p>
         <input type="range" min="0" :max="currentPattern?.creationTime ?? 1" class="slider" :value="creatingProgress" disabled>
         <p>Initial Price: {{ formatNumber(currentPattern?.baseValue ?? 0) }} IGM</p>
-        <p>Current Price: {{ displayValue(currentPattern ?? patterns.basic) }} IGM</p>
+        <p>Current Price: {{ displayValue!(currentPattern) }} IGM</p>
       </section>
       <section>
         <h3>Daily Pattern</h3>
         <p>1.5x multiplier !!</p>
-        <p>Price: {{ displayValue(dailyPattern) }} IGM</p>
+        <p>Price: {{ displayValue!(dailyPattern) }} IGM</p>
         <p>DC: 10 DC</p>
         <svg v-if="dailyPattern?.traits"
              viewBox="0 0 32 32"
@@ -30,10 +32,11 @@
 
     import { gameStore } from '@/stores/useGameStore';
     import { useGameState } from '@/composables/useGameState';
-    import { useOffline } from '@/composables/useOffline';
 
     const props = defineProps({
         creatingProgress: Number,
+        incomePerSecond: String,
+        idleIncomePerSecond: String,
         currentPattern: Object,
         displayValue: Function,
         shapes: Object
@@ -41,8 +44,7 @@
 
     const { formatNumber } = useGameState()
 
-    const { currentPattern, dailyPattern, partsSold } = gameStore
-    const { idleIncomePerSecond } = useOffline()
+    const { currentPattern, dailyPattern, partsSold, prestigeMultiplier } = gameStore
 
 </script>
 

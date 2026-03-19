@@ -1,4 +1,4 @@
-import { computed, type Ref } from "vue"
+import { computed } from "vue"
 import type { Pattern } from "@/types/Pattern"
 import { useSaveSystem } from "./useSaveSystem"
 import { gameStore, getDefaultUpgrades, getDefaultMachines } from '@/stores/useGameStore'
@@ -86,7 +86,6 @@ export function usePatterns(
           baseExp: Math.floor(BASE.exp * Math.pow(SCALE.exp, tier)),
           creationTime: Math.floor(BASE.creationTime * Math.pow(SCALE.creationTime, tier)),
           price: isBasic ? 0 : Math.floor(Math.pow(SCALE.price, tier) * 100),
-          owned: isBasic,
           requirements: {
             ...(color.requiresColor ? { color: true } : {}),
             ...(shape.requiresCut ? { cut: true } : {})
@@ -143,14 +142,10 @@ export function usePatterns(
   }
 
   function buyPattern(pattern: Pattern) {
-    if (money.value >= pattern.price && !pattern.owned) {
+    if (money.value >= pattern.price && !ownedPatterns.value.includes(pattern.id)) {
       money.value -= pattern.price
-      pattern.owned = true
-
-      if (!ownedPatterns.value.includes(pattern.id)) {
-        ownedPatterns.value.push(pattern.id)
-        saveGame()
-      }
+      ownedPatterns.value.push(pattern.id)
+      saveGame()
     }
   }
 

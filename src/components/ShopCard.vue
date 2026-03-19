@@ -1,11 +1,12 @@
 <template>
   <div class="card">
 
+    <!-- PATTERNS + INVENTORY -->
     <template v-if="type === 'patterns' || type === 'inventory'">
       <svg
         viewBox="0 0 32 32"
-        :style="{ fill: data.traits.color }"
-        v-html="shapes![data.traits.shape]"
+        :style="{ fill: data.traits?.color || '#fff' }"
+        v-html="shapes?.[data.traits?.shape || 'circle']"
       ></svg>
 
       <p>Value: {{ displayValue!(data) }}</p>
@@ -13,12 +14,12 @@
       <p>Time: {{ formatNumber(data.creationTime) }}</p>
 
       <!-- PATTERN SHOP -->
-      <button
-        v-if="type === 'patterns' && !data.owned"
+    <button
+        v-if="type === 'patterns' && !gameStore.ownedPatterns.value.includes(data.id)"
         @click="$emit('buy', data)"
-      >
+        >
         {{ formatNumber(data.price) }} IGM
-      </button>
+    </button>
 
       <!-- INVENTORY -->
       <button
@@ -26,6 +27,24 @@
         @click="$emit('select', data)"
       >
         {{ currentPattern?.id === data.id ? 'Selected' : 'Select' }}
+      </button>
+    </template>
+
+    <!-- MACHINES -->
+    <template v-else-if="type === 'machines'">
+      <p>{{ data.description }}</p>
+
+      <img :src="data.src" style="width: 80px" />
+
+      <button
+        v-if="!data.owned"
+        @click="$emit('buy', data)"
+      >
+        {{ formatNumber(data.price) }} IGM
+      </button>
+
+      <button v-else>
+        Owned
       </button>
     </template>
 
@@ -57,7 +76,7 @@ import { gameStore } from "@/stores/useGameStore"
 const { currentPattern } = gameStore
 
 defineProps<{
-  type: 'patterns' | 'upgrades' | 'inventory' | 'prestige'
+  type: 'patterns' | 'upgrades' | 'inventory' | 'prestige' | 'machines'
   data: any
   shapes?: Record<string, string>
   formatNumber: (n: number) => string
@@ -97,62 +116,62 @@ section.tab {
     }
     }
     div.container {
-    width: 100%;
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    align-items: start;
-    overflow-y: scroll;
-    gap: 20px;
-    padding: 0 20px;
-
-    @media (width <= 768px) {
-        grid-template-columns: repeat(3, 1fr);
-    }
-    @media (width <= 425px) {
-        grid-template-columns: repeat(2, 1fr);
-        font-size: .9em;
-        padding: 0px;
-    }
-    .card{
         width: 100%;
-        @include flexColumn(10px, start);
-        padding: 10px;
-        border: var(--darkgray) 2px solid;
-        border-radius: 8px;
-        cursor: pointer;
-        background-color: var(--gray);
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        align-items: start;
+        overflow-y: auto;
+        gap: 20px;
+        padding: 0 20px;
 
-        @media (width <= 425px) {
-        gap: 5px;
-        }
-
-        svg {
         @media (width <= 768px) {
-            width: 80px;
+            grid-template-columns: repeat(3, 1fr);
         }
+        @media (width <= 425px) {
+            grid-template-columns: repeat(2, 1fr);
+            font-size: .9em;
+            padding: 0px;
         }
-        button {
-        background: var(--lightgray);
-        border: 2px solid var(--darkgray);
-        border-radius: 8px;
-        padding: 5px;
-        cursor: pointer;
+        .card{
+            width: 100%;
+            @include flexColumn(10px, start);
+            padding: 10px;
+            border: var(--darkgray) 2px solid;
+            border-radius: 8px;
+            cursor: pointer;
+            background-color: var(--gray);
+
+            @media (width <= 425px) {
+                gap: 5px;
+            }
+
+            svg {
+                @media (width <= 768px) {
+                    width: 80px;
+                }
+            }
+            button {
+                background: var(--lightgray);
+                border: 2px solid var(--darkgray);
+                border-radius: 8px;
+                padding: 5px;
+                cursor: pointer;
+            }
+            p {
+                font-size: 1.3em;
+                color: var(--white);
+            }
         }
-        p {
-        font-size: 1.3em;
-        color: var(--white);
-        }
-    }
     }
     >p {
-    width: 100%;
-    color: var(--white);
-    font-size: 2em;
+        width: 100%;
+        color: var(--white);
+        font-size: 2em;
     }
     >button {
-    padding: 10px;
-    border-radius: 8px;
-    font-size: 2em;
+        padding: 10px;
+        border-radius: 8px;
+        font-size: 2em;
     }
 }
 </style>

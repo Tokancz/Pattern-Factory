@@ -35,6 +35,9 @@ export function useFactory(
 
   function click() {
     creatingProgress.value += upgrades.value.clickingPower?.power
+
+    console.log(`Clicked! Progress: ${creatingProgress.value.toFixed(2)}/${currentPattern.value.creationTime}`)
+    
     if (creatingProgress.value >= currentPattern.value.creationTime) {
       spawnPart()
       creatingProgress.value = 0

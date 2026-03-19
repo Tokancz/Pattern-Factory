@@ -5,14 +5,27 @@ import { useSaveSystem } from "./useSaveSystem"
 const { money, upgrades, currentPattern } = gameStore
 const { saveGame } = useSaveSystem()
 
-export function useOffline() {
+export function useOffline(speedController = 20) {
   const showOfflinePopup = ref(false)
   const offlineReward = ref(0)
-  const speedController = 20
 
+  // --- REAL-TIME INCOME PER SECOND (factory loop style) ---
+  const incomePerSecond = computed(() => {
+    const creationSpeed = upgrades.value.creationSpeed?.power || 0
+    const prestige = gameStore.prestigeMultiplier.value
+    const sellMul = upgrades.value.sellMultiplier?.power || 1
+    const patternValue = currentPattern.value?.baseValue || 0
+    const patternTime = currentPattern.value?.creationTime || 1
+
+    const progressPerSecond = creationSpeed * prestige * speedController
+    const partsPerSecond = progressPerSecond / patternTime
+    return partsPerSecond * patternValue * sellMul
+  })
+
+  // --- IDLE / OFFLINE INCOME PER SECOND ---
   const idleIncomePerSecond = computed(() => {
-    const partsPerSecond = upgrades.value?.creationSpeed?.power || 0 / currentPattern.value!.creationTime
-    return partsPerSecond * currentPattern.value!.baseValue * speedController * upgrades.value?.sellMultiplier?.power || 0 * gameStore.prestigeMultiplier.value
+    const offlineMul = upgrades.value.offlineMultiplier?.power ?? 1
+    return incomePerSecond.value * offlineMul
   })
 
   function applyOfflineProgress() {
@@ -20,16 +33,21 @@ export function useOffline() {
     if (!lastOnline) return
 
     const elapsedSeconds = (Date.now() - Number(lastOnline)) / 1000
-    if (elapsedSeconds > 5) {
-      const reward = elapsedSeconds * idleIncomePerSecond.value
-      money.value += Math.floor(reward)
-      offlineReward.value = Math.floor(reward)
-      showOfflinePopup.value = true
-      
-      saveGame()
+    if (elapsedSeconds <= 5) return
 
-      setTimeout(closeOfflinePopup, 6000)
-    }
+    // Total offline reward
+    const reward = elapsedSeconds * idleIncomePerSecond.value
+
+    // Apply offline cap
+    const offlineCap = upgrades.value.offlineCap?.power ?? Infinity
+    const finalReward = Math.min(reward, offlineCap)
+
+    money.value += Math.floor(finalReward)
+    offlineReward.value = Math.floor(finalReward)
+    showOfflinePopup.value = true
+
+    saveGame()
+    setTimeout(closeOfflinePopup, 6000)
   }
 
   function closeOfflinePopup() {
@@ -37,5 +55,12 @@ export function useOffline() {
     offlineReward.value = 0
   }
 
-  return { showOfflinePopup, offlineReward, applyOfflineProgress, idleIncomePerSecond }
+  return {
+    showOfflinePopup,
+    offlineReward,
+    applyOfflineProgress,
+    incomePerSecond,       // active factory income per second
+    idleIncomePerSecond,    // offline / idle income per second
+    closeOfflinePopup
+  }
 }

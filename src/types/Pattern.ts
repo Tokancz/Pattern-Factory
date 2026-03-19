@@ -15,7 +15,6 @@ export type Pattern = {
   baseExp: number
   creationTime: number
   price: number
-  owned: boolean
   requirements: PatternRequirements
   traits: PatternTraits
 }
