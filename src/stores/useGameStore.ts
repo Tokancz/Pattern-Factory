@@ -148,7 +148,7 @@ export function getDefaultUpgrades(): Upgrades {
       baseCost: 500,
       baseValue: 0.5,
       valueScale: 1.8,
-      powerScale: 0.05
+      powerScale: 1.05
     }
   }
 }
