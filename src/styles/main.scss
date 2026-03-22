@@ -1,0 +1,55 @@
+:root {
+    --primary: #C0FE04;
+    --secondary: #8A00FF;
+    --black: #000000;
+    --white: #FFFFFF;
+}
+
+@font-face {
+    font-family: "ivy-presto";
+    src: url("../../public/fonts/ivy-presto-display.otf") format("opentype");
+    font-weight: normal;
+    font-style: normal;
+}
+@font-face {
+    font-family: "KHInterference";
+    src: url("../../public/fonts/KHInterference-Bold.otf") format("opentype");
+    font-weight: bold;
+    font-style: normal;
+}
+@font-face {
+    font-family: "KHInterference";
+    src: url("../../public/fonts/KHInterference-Regular.otf") format("opentype");
+    font-weight: normal;
+    font-style: normal;
+}
+
+@mixin flexRow($gap:0px, $justify: center, $align: center) {
+  display: flex;
+  justify-content: $justify;
+  align-items: $align;
+  gap: $gap;
+}
+@mixin flexColumn($gap:0px, $justify: center, $align: center) {
+  display: flex;
+  flex-direction: column;
+  justify-content: $justify;
+  align-items: $align;
+  gap: $gap;
+}
+
+body {
+    height: 100dvh;
+    width: 100%;
+
+    @include flexColumn(0px, center, center);
+
+    background: var(--black);
+    color: var(--white);
+    font-family: "KHInterference", sans-serif;
+
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}

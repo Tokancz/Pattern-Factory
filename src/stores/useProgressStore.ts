@@ -1,9 +1,52 @@
-import { defineStore } from 'pinia'
+import { defineStore } from "pinia"
+import { useGameStore } from "./useGameStore"
+import { usePatternStore } from "./usePatternStore"
+import { PATTERNS } from "@/data/patterns"
 
-export const useProgressStore = defineStore('progress', {
+export const useProgressStore = defineStore("progress", {
   state: () => ({
-    currentProgress: 0,
-    creationSpeed: 10,
-    clickPower: 1,
+    progress: 0,
+    maxProgress: 100,
+
+    baseSpeed: 1,
+    clickPower: 1
   }),
+
+  getters: {
+    progressPercent: (state) => state.progress / state.maxProgress
+  },
+
+  actions: {
+    tick(delta: number) {
+      this.progress += delta * this.baseSpeed
+
+      if (this.progress >= this.maxProgress) {
+        this.complete()
+      }
+    },
+
+    click() {
+      this.progress += this.clickPower
+    },
+
+    complete() {
+      const game = useGameStore()
+      const patterns = usePatternStore()
+
+      const patternId = game.activePattern
+      const value = patterns.getPatternValue(patternId)
+
+      // reward system
+      const type = PATTERNS[patternId].type
+
+      if (type === "money") game.addMoney(value)
+      if (type === "exp") game.addExp(value)
+      if (type === "dc") game.addDC(value)
+
+      // level up pattern
+      patterns.levelUpPattern(patternId)
+
+      this.progress = 0
+    }
+  }
 })
