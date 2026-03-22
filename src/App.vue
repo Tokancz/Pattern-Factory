@@ -4,35 +4,50 @@
       <h1>Factory Name</h1>
       <p>Username</p>
     </div>
-    <ProgressBar />
+    <ProgressBar :prefix="'LVL'"/>
   </header>
   <CurrencyDisplay />
   <main>
-    <div id="patterns"></div>
-    <div id="upgrades"></div>
+    <Simulation />
+    <div class="panels">
+      <PatternPanel v-if="shop === 'pattern'" />
+      <UpgradePanel v-if="shop === 'upgrade'" />
+      <MachinePanel v-if="shop === 'machine'" />
+      <PrestigePanel v-if="shop === 'prestige'" />
+      <InventoryPanel v-if="shop === 'inventory'" />
+    </div>
     <div id="stats"></div>
-    <ProgressBar />
+    <ProgressBar :prefix="'CREATING PART'"/>
   </main>
   <aside>
     <nav>
-      <li @click.prevent="">PATTERNS</li>
-      <li @click.prevent="">UPGRADES</li>
-      <li @click.prevent="">MACHINES</li>
-      <li @click.prevent="">INVENTORY</li>
-      <li @click.prevent="">PRESTIGE</li>
+      <li @click.prevent="shop = 'pattern'">PATTERNS</li>
+      <li @click.prevent="shop = 'upgrade'">UPGRADES</li>
+      <li @click.prevent="shop = 'machine'">MACHINES</li>
+      <li @click.prevent="shop = 'inventory'">INVENTORY</li>
+      <li @click.prevent="shop = 'prestige'">PRESTIGE</li>
     </nav>
     <img src="/public/img/Stripes.png" alt="Stripes Background" aria-hidden="true">
   </aside>
 </template>
 
 <script setup lang="ts">
-import { onMounted } from "vue"
-import { useProgressStore } from "@/stores/useProgressStore"
+import { onMounted, ref } from "vue"
+import { useSlotStore } from "@/stores/useSlotStore"
 
 import CurrencyDisplay from "@/components/ui/CurrencyDisplay.vue"
 import ProgressBar from "@/components/ui/ProgressBar.vue"
+import Simulation from "@/components/game/Simulation.vue"
 
-const progress = useProgressStore()
+import PatternPanel from "@/components/systems/PatternPanel.vue"
+import UpgradePanel from "@/components/systems/UpgradePanel.vue"
+import MachinePanel from "@/components/systems/MachinePanel.vue"
+import PrestigePanel from "@/components/systems/PrestigePanel.vue"
+import InventoryPanel from "@/components/systems/InventoryPanel.vue"
+
+const slots = useSlotStore()
+
+const shop = ref('pattern')
 
 onMounted(() => {
   let last = performance.now()
@@ -41,7 +56,7 @@ onMounted(() => {
     const delta = (now - last) / 1000
     last = now
 
-    progress.tick(delta)
+    slots.tick(delta)
 
     requestAnimationFrame(loop)
   }
@@ -100,13 +115,10 @@ div#app {
     "stats"
     "footer";
 
-    .patterns {
-      grid-area: patterns;
-    }
-    .shop {
+    .panels {
       grid-area: shop;
     }
-    .stats {
+    #stats {
       grid-area: stats;
     }
   }
@@ -140,6 +152,7 @@ div#app {
 
         padding: 0 20px;
         cursor: pointer;
+        user-select: none;
         transition: .3s;
 
         &:hover {

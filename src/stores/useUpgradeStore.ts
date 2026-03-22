@@ -31,7 +31,7 @@ export const useUpgradeStore = defineStore("upgrades", {
 
       game.money -= cost
       this.levels[id]++
-
+      
       // APPLY EFFECTS HERE
       if (id === "clickingPower") {
         progress.clickPower *= 1.2

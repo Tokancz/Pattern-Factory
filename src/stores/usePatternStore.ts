@@ -3,32 +3,38 @@ import { PATTERNS } from "@/data/patterns"
 
 export const usePatternStore = defineStore("patterns", {
   state: () => ({
-    patternLevels: {
-      square: 1,
-      triangle: 1,
-      circle: 1,
-      cross: 1
-    } as Record<string, number>,
+    patterns: {
+      square: { level: 1, exp: 0 },
+      triangle: { level: 1, exp: 0 },
+      circle: { level: 1, exp: 0 },
+      cross: { level: 1, exp: 0 }
+    } as Record<string, { level: number; exp: number }>,
 
     unlockedPatterns: ["square"]
   }),
 
   getters: {
-    getPatternLevel: (state) => (id: string) => {
-      return state.patternLevels[id] || 1
-    },
+    getPattern: (state) => (id: string) => state.patterns[id],
+
+    expToNext: () => (lvl: number) => Math.floor(10 * Math.pow(1.4, lvl)),
 
     getPatternValue: (state) => (id: string) => {
       const base = PATTERNS[id].baseValue
-      const lvl = state.patternLevels[id] || 1
+      const lvl = state.patterns[id].level
 
       return base * Math.pow(1.15, lvl)
     }
   },
 
   actions: {
-    levelUpPattern(id: string) {
-      this.patternLevels[id]++
+    addExp(id: string, amount: number) {
+      const p = this.patterns[id]
+      p.exp += amount
+
+      while (p.exp >= this.expToNext(p.level)) {
+        p.exp -= this.expToNext(p.level)
+        p.level++
+      }
     },
 
     unlockPattern(id: string) {

@@ -1,6 +1,6 @@
 <template>
   <div class="progress">
-    {{ bar }}
+    {{ props.prefix }} {{ bar }}
   </div>
 </template>
 
@@ -9,10 +9,21 @@ import { computed } from "vue"
 import { useProgressStore } from "@/stores/useProgressStore"
 import { generateBar } from "@/utils/ascii"
 
+const props = defineProps<{
+  prefix?: string
+  value?: number
+  max?: number
+  length?: number
+}>()
+
 const progress = useProgressStore()
 
 const bar = computed(() =>
-  generateBar(progress.progress, progress.maxProgress, 20)
+  generateBar(
+    props.value ?? progress.progress,
+    props.max ?? progress.maxProgress,
+    props.length ?? 20
+  )
 )
 </script>
 
