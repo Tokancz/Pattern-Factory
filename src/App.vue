@@ -27,7 +27,7 @@
       <li @click.prevent="shop = 'inventory'">INVENTORY</li>
       <li @click.prevent="shop = 'prestige'">PRESTIGE</li>
     </nav>
-    <img src="/public/img/Stripes.png" alt="Stripes Background" aria-hidden="true">
+    <img src="/img/Stripes.png" alt="Stripes Background" aria-hidden="true">
   </aside>
 </template>
 
@@ -79,6 +79,8 @@ div#app {
   "header currency"
   "main aside";
 
+  overflow: hidden;
+
   header {
     height: 100px;
 
@@ -117,9 +119,11 @@ div#app {
 
     .panels {
       grid-area: shop;
+      width: 100%;
     }
     #stats {
       grid-area: stats;
+      background-color: var(--primary);
     }
   }
   aside {

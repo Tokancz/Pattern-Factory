@@ -14,10 +14,16 @@ import Slot from "./Slot.vue"
 const slots = useSlotStore()
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 .simulation {
-    grid-area: patterns;
-    display: flex;
-    gap: 10px;
+  width: 100%;
+  height: 100%;
+
+  @include flexRow();
+
+  background-color: var(--secondary);
+  grid-area: patterns;
+  display: flex;
+  gap: 10px;
 }
 </style>

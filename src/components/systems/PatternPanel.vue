@@ -1,9 +1,9 @@
 <template>
   <Panel title="Patterns">
-    <div v-for="(p, id) in PATTERNS" :key="id">
-      <div>{{ id }}</div>
-      <div>Base: {{ p.baseValue }}</div>
-
+    <div v-for="(p, id) in PATTERNS" :key="id" class="pattern">
+      <img :src="p.src" :alt="id">
+      <div class="id">{{ id }}</div>
+      <div class="value">Base: {{ p.baseValue }}</div>
       <button @click="buy(id)">Buy</button>
     </div>
   </Panel>
@@ -27,3 +27,25 @@ function buy(id: string) {
   patterns.unlockPattern(id)
 }
 </script>
+
+<style scoped lang="scss">
+  .pattern {
+    width: 100%;
+    height: 100%;
+
+    @include flexColumn(10px, center, center);
+
+    color: var(--black);
+    background-color: var(--white);
+
+    img {
+      width: 80px;
+    }
+    .id {
+      font-size: 2em;
+    }
+    .value {
+      font-size: 1.25em;
+    }
+  }
+</style>

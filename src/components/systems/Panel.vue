@@ -1,6 +1,10 @@
 <template>
   <div class="panel">
-    <h2>{{ title }}</h2>
+    <hr>
+    <div class="panelHeader">
+      <h2>{{ title }}</h2>
+      <p>X</p>
+    </div>
     <div class="content">
       <slot></slot>
     </div>
@@ -13,12 +17,36 @@ defineProps<{ title: string }>()
 
 <style scoped lang="scss">
 .panel {
-  border: 1px solid #C0FE04;
-  padding: 10px;
-  width: 250px;
+  width: 100%;
+  height: 100%;
+  @include flexColumn(0, center, start);
+  padding: 20px 40px;
 
-  h2 {
-    color: #8A00FF;
+  hr {
+    width: 100%;
+    border: 1px solid var(--white);
+  }
+  .panelHeader {
+    width: 100%;
+    @include flexRow(0, space-between);
+    
+    color: var(--white);
+    font-family: "ivy-presto";
+    line-height: 1;
+
+    h2 {
+      font-size: 3em;
+      text-decoration: underline;
+    }
+    p {
+      font-size: 3em;
+    }
+  }
+  .content {
+    width: 100%;
+    height: 100%;
+    @include flexRow(20px, space-around, start);
+    padding-top: 20px;
   }
 }
 </style>

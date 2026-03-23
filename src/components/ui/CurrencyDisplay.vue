@@ -26,6 +26,7 @@ const game = useGameStore()
         height: 100%;
         flex: 1;
         border-right: 2px solid var(--black);
+        text-align: center;
     }
 }
 </style>

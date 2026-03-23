@@ -1,6 +1,8 @@
 <template>
   <div class="slot" @click="handleClick">
-    <div v-if="slot.patternId">
+    <img src="/img/Slot.png" alt="slot background" aria-hidden="true">
+    <div v-if="slot.patternId" class="slotPattern">
+      <img src="" alt="">
       <div>{{ slot.patternId.toUpperCase() }}</div>
       <div>{{ bar }}</div>
     </div>
@@ -46,11 +48,22 @@ function handleClick() {
 
 <style scoped lang="scss">
 .slot {
-  border: 1px solid #C0FE04;
-  padding: 10px;
-  width: 150px;
+  width: 120px;
+  height: 120px;
+  position: relative;
+
   cursor: pointer;
   user-select: none;
+
+  img {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+  }
+  .slotPattern {
+    position: absolute;
+    z-index: 10;
+  }
 }
 
 .empty {

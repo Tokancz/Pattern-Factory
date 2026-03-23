@@ -7,19 +7,19 @@
 
 @font-face {
     font-family: "ivy-presto";
-    src: url("../../public/fonts/ivy-presto-display.otf") format("opentype");
+    src: url("/fonts/ivy-presto-display.otf") format("opentype");
     font-weight: normal;
     font-style: normal;
 }
 @font-face {
     font-family: "KHInterference";
-    src: url("../../public/fonts/KHInterference-Bold.otf") format("opentype");
+    src: url("/fonts/KHInterference-Bold.otf") format("opentype");
     font-weight: bold;
     font-style: normal;
 }
 @font-face {
     font-family: "KHInterference";
-    src: url("../../public/fonts/KHInterference-Regular.otf") format("opentype");
+    src: url("/fonts/KHInterference-Regular.otf") format("opentype");
     font-weight: normal;
     font-style: normal;
 }
@@ -47,6 +47,9 @@ body {
     background: var(--black);
     color: var(--white);
     font-family: "KHInterference", sans-serif;
+
+    box-sizing: border-box;
+    line-height: 1.2;
 
     font-synthesis: none;
     text-rendering: optimizeLegibility;
