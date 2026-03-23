@@ -9,7 +9,7 @@ export const UPGRADES = {
     scale: 1.5
   },
   sellMultiplier: {
-    name: "Worthy Shapes",
+    name: "Worthy Squares",
     description: "Sell patterns for more IGM",
     src: `${BASE}img/icons/bx-dollar-circle.svg`,
     baseCost: 50,

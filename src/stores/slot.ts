@@ -8,15 +8,17 @@ interface Slot {
   patternId: string | null
   progress: number
   unlocked: boolean
+  speedMultiplier: number
+  outputMultiplier: number
 }
 
 export const useSlotStore = defineStore("slots", {
   state: () => ({
     slots: [
-      { id: 0, patternId: "square", progress: 0, unlocked: true },
-      { id: 1, patternId: null, progress: 0, unlocked: false },
-      { id: 2, patternId: null, progress: 0, unlocked: false },
-      { id: 3, patternId: null, progress: 0, unlocked: false }
+      { id: 0, patternId: "square", progress: 0, unlocked: true, speedMultiplier: 1, outputMultiplier: 1 },
+      { id: 1, patternId: null, progress: 0, unlocked: false, speedMultiplier: 1, outputMultiplier: 1 },
+      { id: 2, patternId: null, progress: 0, unlocked: false, speedMultiplier: 1, outputMultiplier: 1 },
+      { id: 3, patternId: null, progress: 0, unlocked: false, speedMultiplier: 1, outputMultiplier: 1 }
     ],
 
     maxProgress: 100,
@@ -28,10 +30,14 @@ export const useSlotStore = defineStore("slots", {
       const game = useGameStore()
       const patterns = usePatternStore()
 
+      // 🔥 guard delta
+      if (!delta || isNaN(delta)) return
+
       this.slots.forEach(slot => {
         if (!slot.unlocked || !slot.patternId) return
 
-        slot.progress += delta * this.baseSpeed
+        slot.progress += delta * this.baseSpeed * slot.speedMultiplier
+        slot.progress = typeof slot.progress === "number" && !isNaN(slot.progress) ? slot.progress : 0
 
         if (slot.progress >= this.maxProgress) {
           this.completeSlot(slot, game, patterns)
@@ -47,7 +53,7 @@ export const useSlotStore = defineStore("slots", {
     },
 
     completeSlot(slot: Slot, game: any, patterns: any) {
-      const value = patterns.getPatternValue(slot.patternId)
+      const value = patterns.getPatternValue(slot.patternId) * slot.outputMultiplier
       const type = PATTERNS[slot.patternId].type
 
       if (type === "money") game.addMoney(value)
@@ -69,6 +75,15 @@ export const useSlotStore = defineStore("slots", {
       if (!slot) return
 
       slot.patternId = patternId
+    },
+
+    cleanSlot(slot: any) {
+      return {
+        ...slot,
+        progress: typeof slot.progress === "number" && !isNaN(slot.progress) ? slot.progress : 0,
+        speedMultiplier: typeof slot.speedMultiplier === "number" ? slot.speedMultiplier : 1,
+        outputMultiplier: typeof slot.outputMultiplier === "number" ? slot.outputMultiplier : 1,
+      }
     }
   }
 })

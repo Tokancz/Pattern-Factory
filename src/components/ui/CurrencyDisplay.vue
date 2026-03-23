@@ -1,13 +1,14 @@
 <template>
   <div class="currency">
-    <p>Money - {{ game.money.toFixed(0) }} IGM</p>
-    <p>DC - {{ game.dc.toFixed(0) }}</p>
+    <p>Money - {{ formatNumber(game.money) }} IGM</p>
+    <p>DC - {{ formatNumber(game.dc) }}</p>
     <p>Prestige - 1x</p>
   </div>
 </template>
 
 <script setup lang="ts">
 import { useGameStore } from "@/stores/game"
+import { formatNumber } from "@/utils/format";
 
 const game = useGameStore()
 </script>

@@ -19,6 +19,14 @@ export const useUpgradeStore = defineStore("upgrades", {
       const lvl = state.levels[id]
 
       return Math.floor(base * Math.pow(UPGRADES[id].scale, lvl))
+    },
+    getOfflineCap: (state) => {
+      const lvl = state.levels.offlineCap || 0
+
+      const base = 3600 // 1 hour
+      const perLevel = 1800 // +30 min per level
+
+      return base + lvl * perLevel
     }
   },
 

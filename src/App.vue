@@ -32,28 +32,35 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from "vue"
+import { onMounted } from "vue"
 import { useSlotStore } from "@/stores/slot"
+import { useUpgradeStore } from "@/stores/upgrade"
+import { loadGame, startAutoSave } from "@/utils/save"
+import { startGameLoop } from "@/composables/gameLoop"
 
 import CurrencyDisplay from "@/components/ui/CurrencyDisplay.vue"
 import ProgressBar from "@/components/ui/ProgressBar.vue"
 import Simulation from "@/components/game/Simulation.vue"
 
-const slots = useSlotStore()
-
 onMounted(() => {
-  let last = performance.now()
+  const slotStore = useSlotStore()
+  const upgradeStore = useUpgradeStore()
 
-  function loop(now: number) {
-    const delta = (now - last) / 1000
-    last = now
+  const data = loadGame()
 
-    slots.tick(delta)
+  if (data) {
+    const now = Date.now()
+    const rawDelta = (now - data.timestamp) / 1000
 
-    requestAnimationFrame(loop)
+    const cap = upgradeStore.getOfflineCap
+
+    const delta = Math.min(rawDelta, cap)
+
+    slotStore.tick(delta)
   }
 
-  requestAnimationFrame(loop)
+  startAutoSave()
+  startGameLoop()
 })
 </script>
 

@@ -4,19 +4,26 @@
       <img :src="p.visuals.icon" :alt="id" class="pattern-image">
       <div class="text-container">
         <p class="pattern-name">{{ id }}</p>
-        <div>Lvl: {{ patterns.getPattern(id)?.level }}</div>
-        <div>
+        <p>Lvl: {{ patterns.getPattern(id)?.level }}</p>
+        <p>
           EXP: {{ patterns.getPattern(id)?.exp }} /
           {{ expToNext(patterns.getPattern(id)!.level) }}
-        </div>
+        </p>
+        <p class="pattern-value">
+          Value: {{ formatNumber(getValue(id)) }} 
+          <span v-if="p.type === 'money'">IGM</span>
+          <span v-else-if="p.type === 'exp'">EXP</span>
+          <span v-else-if="p.type === 'dc'">DC</span>
+          <span v-else>Special</span>
+        </p>
       </div>
-      <div>Value: {{ getValue(id) }}</div>
     </div>
   </Panel>
 </template>
 
 <script setup lang="ts">
 import Panel from "../components/system/Panel.vue"
+import { formatNumber } from "@/utils/format"
 import { PATTERNS } from "@/data/patterns"
 import { usePatternStore } from "@/stores/pattern"
 
