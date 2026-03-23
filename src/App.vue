@@ -74,6 +74,8 @@ onMounted(() => {
 //need to think about cross shape
 //plus value while clicking
 //add stats
+//advanced engeneering - boosts 1st pattern slot
+//upgrades / machines bought by dc
 </script>
 
 <style lang="scss">
