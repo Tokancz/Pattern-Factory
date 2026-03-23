@@ -10,10 +10,10 @@
 </template>
 
 <script setup lang="ts">
-import Panel from "./Panel.vue"
+import Panel from "../components/system/Panel.vue"
 import { PATTERNS } from "@/data/patterns"
-import { usePatternStore } from "@/stores/usePatternStore"
-import { useGameStore } from "@/stores/useGameStore"
+import { usePatternStore } from "@/stores/pattern"
+import { useGameStore } from "@/stores/game"
 
 const patterns = usePatternStore()
 const game = useGameStore()

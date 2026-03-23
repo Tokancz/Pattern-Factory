@@ -6,7 +6,7 @@
 
 <script setup lang="ts">
 import { computed } from "vue"
-import { useProgressStore } from "@/stores/useProgressStore"
+import { useProgressStore } from "@/stores/progress"
 import { generateBar } from "@/utils/ascii"
 
 const props = defineProps<{

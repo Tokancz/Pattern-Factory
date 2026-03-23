@@ -16,8 +16,8 @@
 <script setup lang="ts">
 import { computed } from "vue"
 import { generateBar } from "@/utils/ascii"
-import { useSlotStore } from "@/stores/useSlotStore"
-import { usePatternStore } from "@/stores/usePatternStore"
+import { useSlotStore } from "@/stores/slot"
+import { usePatternStore } from "@/stores/pattern"
 
 const patternStore = usePatternStore()
 

@@ -1,6 +1,6 @@
 import { defineStore } from "pinia"
-import { useGameStore } from "./useGameStore"
-import { usePatternStore } from "./usePatternStore"
+import { useGameStore } from "./game"
+import { usePatternStore } from "./pattern"
 import { PATTERNS } from "@/data/patterns"
 
 interface Slot {

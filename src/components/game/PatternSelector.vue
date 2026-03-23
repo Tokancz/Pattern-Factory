@@ -12,8 +12,8 @@
 </template>
 
 <script setup lang="ts">
-import { useGameStore } from "@/stores/useGameStore"
-import { usePatternStore } from "@/stores/usePatternStore"
+import { useGameStore } from "@/stores/game"
+import { usePatternStore } from "@/stores/pattern"
 
 const game = useGameStore()
 const patterns = usePatternStore()

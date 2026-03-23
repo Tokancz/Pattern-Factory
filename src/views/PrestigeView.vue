@@ -11,8 +11,8 @@
 </template>
 
 <script setup lang="ts">
-import Panel from "./Panel.vue"
-import { useGameStore } from "@/stores/useGameStore"
+import Panel from "../components/system/Panel.vue"
+import { useGameStore } from "@/stores/game"
 
 const game = useGameStore()
 

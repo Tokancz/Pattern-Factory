@@ -8,7 +8,7 @@
 </template>
 
 <script setup lang="ts">
-import { useSlotStore } from "@/stores/useSlotStore"
+import { useSlotStore } from "@/stores/slot"
 import Slot from "./Slot.vue"
 
 const slots = useSlotStore()

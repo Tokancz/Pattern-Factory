@@ -10,7 +10,7 @@
 </template>
 
 <script setup lang="ts">
-import Panel from "./Panel.vue"
+import Panel from "../components/system/Panel.vue"
 import { reactive } from "vue"
 
 const machines = {

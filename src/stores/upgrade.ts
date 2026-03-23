@@ -1,6 +1,6 @@
 import { defineStore } from "pinia"
-import { useGameStore } from "./useGameStore"
-import { useProgressStore } from "./useProgressStore"
+import { useGameStore } from "./game"
+import { useProgressStore } from "./progress"
 import { UPGRADES } from "@/data/upgrades"
 
 export const useUpgradeStore = defineStore("upgrades", {

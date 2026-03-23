@@ -13,8 +13,8 @@
 </template>
 
 <script setup lang="ts">
-import Panel from "./Panel.vue"
-import { usePatternStore } from "@/stores/usePatternStore"
+import Panel from "../components/system/Panel.vue"
+import { usePatternStore } from "@/stores/pattern"
 
 const patterns = usePatternStore()
 

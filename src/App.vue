@@ -4,28 +4,24 @@
       <h1>Factory Name</h1>
       <p>Username</p>
     </div>
-    <ProgressBar :prefix="'LVL'"/>
+    <ProgressBar :prefix="'LVL'" :length="10"/>
   </header>
   <CurrencyDisplay />
   <main>
     <Simulation />
     <div class="panels">
-      <PatternPanel v-if="shop === 'pattern'" />
-      <UpgradePanel v-if="shop === 'upgrade'" />
-      <MachinePanel v-if="shop === 'machine'" />
-      <PrestigePanel v-if="shop === 'prestige'" />
-      <InventoryPanel v-if="shop === 'inventory'" />
+      <router-view />
     </div>
     <div id="stats"></div>
     <ProgressBar :prefix="'CREATING PART'"/>
   </main>
   <aside>
     <nav>
-      <li @click.prevent="shop = 'pattern'">PATTERNS</li>
-      <li @click.prevent="shop = 'upgrade'">UPGRADES</li>
-      <li @click.prevent="shop = 'machine'">MACHINES</li>
-      <li @click.prevent="shop = 'inventory'">INVENTORY</li>
-      <li @click.prevent="shop = 'prestige'">PRESTIGE</li>
+      <li><router-link to="/Pattern-Factory/patterns">PATTERNS</router-link></li>
+      <li><router-link to="/Pattern-Factory/upgrades">UPGRADES</router-link></li>
+      <li><router-link to="/Pattern-Factory/machines">MACHINES</router-link></li>
+      <li><router-link to="/Pattern-Factory/inventory">INVENTORY</router-link></li>
+      <li><router-link to="/Pattern-Factory/prestige">PRESTIGE</router-link></li>
     </nav>
     <img src="/img/Stripes.png" alt="Stripes Background" aria-hidden="true">
   </aside>
@@ -33,17 +29,11 @@
 
 <script setup lang="ts">
 import { onMounted, ref } from "vue"
-import { useSlotStore } from "@/stores/useSlotStore"
+import { useSlotStore } from "@/stores/slot"
 
 import CurrencyDisplay from "@/components/ui/CurrencyDisplay.vue"
 import ProgressBar from "@/components/ui/ProgressBar.vue"
 import Simulation from "@/components/game/Simulation.vue"
-
-import PatternPanel from "@/components/systems/PatternPanel.vue"
-import UpgradePanel from "@/components/systems/UpgradePanel.vue"
-import MachinePanel from "@/components/systems/MachinePanel.vue"
-import PrestigePanel from "@/components/systems/PrestigePanel.vue"
-import InventoryPanel from "@/components/systems/InventoryPanel.vue"
 
 const slots = useSlotStore()
 
@@ -145,14 +135,9 @@ div#app {
         width: 100%;
         height: 100%;
 
-        font-family: "ivy-presto";
-        font-size: 4em;
-        text-decoration: none;
-        text-align: end;
-        list-style: none;
-        color: var(--primary);
         border-bottom: 2px solid var(--primary);
         border-top: 2px solid var(--primary);
+        text-align: end;
 
         padding: 0 20px;
         cursor: pointer;
@@ -162,6 +147,18 @@ div#app {
         &:hover {
           background-color: var(--primary);
           color: var(--black);
+        }
+        &:hover a {
+          color: var(--black);
+        }
+        a {
+          display: block;
+          width: 100%;
+          color: var(--primary);
+          font-family: "ivy-presto";
+          font-size: 4em;
+          text-decoration: none;
+          list-style: none;
         }
       }
     }

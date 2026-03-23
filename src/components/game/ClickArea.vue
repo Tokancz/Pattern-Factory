@@ -5,7 +5,7 @@
 </template>
 
 <script setup lang="ts">
-import { useProgressStore } from "@/stores/useProgressStore"
+import { useProgressStore } from "@/stores/progress"
 
 const progress = useProgressStore()
 </script>
