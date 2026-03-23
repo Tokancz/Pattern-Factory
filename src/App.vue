@@ -1,60 +1,66 @@
 <template>
-  <header>
-    <div>
-      <h1>Factory Name</h1>
-      <p>Username</p>
-    </div>
-    <ProgressBar :type="'level'" :length="10"/>
-  </header>
-  <CurrencyDisplay />
-  <main>
-    <Simulation />
-    <div class="panels">
-      <router-view />
-    </div>
-    <div id="stats"></div>
-    <footer>
-      <p>Created by Mates</p>
-    </footer>
-  </main>
+  <Login v-if="!user.loggedIn" />
 
-  <aside>
-    <nav>
-      <li><router-link to="/Pattern-Factory/patterns">PATTERNS</router-link></li>
-      <li><router-link to="/Pattern-Factory/upgrades">UPGRADES</router-link></li>
-      <li><router-link to="/Pattern-Factory/machines">MACHINES</router-link></li>
-      <li><router-link to="/Pattern-Factory/inventory">INVENTORY</router-link></li>
-      <li><router-link to="/Pattern-Factory/prestige">PRESTIGE</router-link></li>
-    </nav>
-    <img src="/img/Stripes.png" alt="Stripes Background" aria-hidden="true" draggable="false">
-  </aside>
+  <template v-else>
+    <header>
+      <div>
+        <h1>{{ user.factoryName }}</h1>
+        <p>{{ user.username }}</p>
+      </div>
+      <ProgressBar :type="'level'" :length="10"/>
+    </header>
+
+    <CurrencyDisplay />
+
+    <main>
+      <Simulation />
+      <div class="panels">
+        <router-view />
+      </div>
+      <div id="stats"></div>
+      <footer>
+        <p>Created by Mates</p>
+      </footer>
+    </main>
+
+    <aside>
+      <nav>
+        <li><router-link to="/Pattern-Factory/patterns">PATTERNS</router-link></li>
+        <li><router-link to="/Pattern-Factory/upgrades">UPGRADES</router-link></li>
+        <li><router-link to="/Pattern-Factory/machines">MACHINES</router-link></li>
+        <li><router-link to="/Pattern-Factory/inventory">INVENTORY</router-link></li>
+        <li><router-link to="/Pattern-Factory/prestige">PRESTIGE</router-link></li>
+      </nav>
+      <img src="/img/Stripes.png" alt="Stripes Background" aria-hidden="true" draggable="false">
+    </aside>
+  </template>
 </template>
 
 <script setup lang="ts">
 import { onMounted } from "vue"
 import { useSlotStore } from "@/stores/slot"
 import { useUpgradeStore } from "@/stores/upgrade"
+import { useUserStore } from "@/stores/user"
 import { loadGame, startAutoSave } from "@/utils/save"
 import { startGameLoop } from "@/composables/gameLoop"
 
 import CurrencyDisplay from "@/components/ui/CurrencyDisplay.vue"
 import ProgressBar from "@/components/ui/ProgressBar.vue"
 import Simulation from "@/components/game/Simulation.vue"
+import Login from "./components/ui/Login.vue"
+
+const slotStore = useSlotStore()
+const upgradeStore = useUpgradeStore()
+const user = useUserStore() // ✅ reactive store reference
 
 onMounted(() => {
-  const slotStore = useSlotStore()
-  const upgradeStore = useUpgradeStore()
-
   const data = loadGame()
 
   if (data) {
     const now = Date.now()
     const rawDelta = (now - data.timestamp) / 1000
-
     const cap = upgradeStore.getOfflineCap
-
     const delta = Math.min(rawDelta, cap)
-
     slotStore.tick(delta)
   }
 

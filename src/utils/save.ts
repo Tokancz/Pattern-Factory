@@ -3,6 +3,7 @@ import { usePatternStore } from "@/stores/pattern"
 import { useSlotStore } from "@/stores/slot"
 import { useUpgradeStore } from "@/stores/upgrade"
 import { useMachineStore } from "@/stores/machine"
+import { useUserStore } from "@/stores/user"
 
 const SAVE_KEY = "pattern-factory-save"
 
@@ -12,6 +13,7 @@ export function saveGame() {
   const slots = useSlotStore()
   const upgrades = useUpgradeStore()
   const machines = useMachineStore()
+  const user = useUserStore()
 
   const cleanedSlots = slots.slots.map(slots.cleanSlot)
 
@@ -23,6 +25,7 @@ export function saveGame() {
     slots: cleanedSlots,
     upgrades: upgrades.$state,
     machines: machines.$state,
+    user: user.$state,
 
     timestamp: Date.now()
   }
@@ -36,8 +39,10 @@ export function loadGame() {
 
   const data = JSON.parse(raw)
 
-  const slotsStore = useSlotStore()
+  const userStore = useUserStore()
+  if (data.user) userStore.$patch(data.user)
 
+  const slotsStore = useSlotStore()
   // get default slots from store
   const defaultSlots = slotsStore.getDefaultSlots
 
