@@ -2,6 +2,7 @@ import { defineStore } from "pinia"
 import { useGameStore } from "./game"
 import { usePatternStore } from "./pattern"
 import { PATTERNS } from "@/data/patterns"
+import { saveGame } from "@/utils/save"
 
 interface Slot {
   id: number
@@ -12,18 +13,23 @@ interface Slot {
   outputMultiplier: number
 }
 
+const DEFAULT_SLOTS: Slot[] = [
+  { id: 0, patternId: "square", progress: 0, unlocked: true, speedMultiplier: 1, outputMultiplier: 1 },
+  { id: 1, patternId: null, progress: 0, unlocked: false, speedMultiplier: 1, outputMultiplier: 1 },
+  { id: 2, patternId: null, progress: 0, unlocked: false, speedMultiplier: 1, outputMultiplier: 1 },
+  { id: 3, patternId: null, progress: 0, unlocked: false, speedMultiplier: 1, outputMultiplier: 1 }
+]
+
 export const useSlotStore = defineStore("slots", {
   state: () => ({
-    slots: [
-      { id: 0, patternId: "square", progress: 0, unlocked: true, speedMultiplier: 1, outputMultiplier: 1 },
-      { id: 1, patternId: null, progress: 0, unlocked: false, speedMultiplier: 1, outputMultiplier: 1 },
-      { id: 2, patternId: null, progress: 0, unlocked: false, speedMultiplier: 1, outputMultiplier: 1 },
-      { id: 3, patternId: null, progress: 0, unlocked: false, speedMultiplier: 1, outputMultiplier: 1 }
-    ],
-
+    slots: [...DEFAULT_SLOTS],
     maxProgress: 100,
     baseSpeed: 1
   }),
+  
+  getters: {
+    getDefaultSlots: () => [...DEFAULT_SLOTS] // <-- export default slots
+  },
 
   actions: {
     tick(delta: number) {
@@ -65,16 +71,20 @@ export const useSlotStore = defineStore("slots", {
       slot.progress = 0
     },
 
-    unlockSlot() {
-      const locked = this.slots.find(s => !s.unlocked)
-      if (locked) locked.unlocked = true
-    },
-
     assignPattern(slotId: number, patternId: string) {
       const slot = this.slots.find(s => s.id === slotId)
       if (!slot) return
 
       slot.patternId = patternId
+      saveGame() // <-- immediately persist
+    },
+
+    unlockSlot() {
+      const slot = this.slots.find(s => !s.unlocked)
+      if (!slot) return
+
+      slot.unlocked = true
+      saveGame()
     },
 
     cleanSlot(slot: any) {

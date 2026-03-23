@@ -1,17 +1,24 @@
 <template>
-  <div class="slot" :class="{ locked: !slot.unlocked }" @click="handleClick">
+  <div
+    class="slot"
+    :class="{ locked: !slot.unlocked, flash: slotFlash }"
+    @click="handleClick"
+    @wheel.prevent="handleWheel"
+  >
     <img src="/img/Slot.png" alt="slot background" aria-hidden="true">
-    
+
     <div v-if="slot.patternId" class="slotPattern">
       <img v-if="patternData" :src="patternData.visuals.slot" alt="pattern image" draggable="false">
-      <div>{{ slot.patternId.toUpperCase() }}</div>
-      <div class="progressBar">{{ bar }}</div>
+      <p>{{ slot.patternId.toUpperCase() }}</p>
+      <p class="progressBar">{{ bar }}</p>
     </div>
+
+    <img v-else class="empty" src="/img/icons/lock-alert.svg" alt="empty slot" aria-hidden="true">
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed } from "vue"
+import { computed, ref } from "vue"
 import { PATTERNS } from "@/data/patterns"
 import { generateBar } from "@/utils/ascii"
 import { useSlotStore } from "@/stores/slot"
@@ -25,6 +32,8 @@ const props = defineProps<{
 
 const slots = useSlotStore()
 
+const slotFlash = ref(false)
+
 const patternData = computed(() => {
   if (!props.slot.patternId) return null
   return PATTERNS[props.slot.patternId]
@@ -34,21 +43,37 @@ const bar = computed(() =>
   generateBar(props.slot.progress, slots.maxProgress, 8)
 )
 
+const availablePatterns = computed(() => patternStore.unlockedPatterns)
+
+function selectPattern(patternId: string) {
+  if (availablePatterns.value.includes(patternId)) {
+    slots.assignPattern(props.slot.id, patternId)
+  }
+}
+
 function handleClick() {
   if (!props.slot.unlocked) return
 
   if (!props.slot.patternId) {
-    const available = patternStore.unlockedPatterns
-    const selected = prompt(`Choose: ${available.join(", ")}`)
-
-    if (selected && available.includes(selected)) {
-      slots.assignPattern(props.slot.id, selected)
-    }
+    // default to first available pattern if empty
+    const firstPattern = availablePatterns.value[0]
+    if (firstPattern) selectPattern(firstPattern)
     return
   }
 
   slots.clickSlot(props.slot.id)
 }
+
+function handleWheel(event: WheelEvent) {
+  if (!props.slot.unlocked || availablePatterns.value.length === 0) return
+
+  const currentIndex = availablePatterns.value.indexOf(props.slot.patternId || "")
+  const delta = event.deltaY > 0 ? 1 : -1
+  const nextIndex = (currentIndex + delta + availablePatterns.value.length) % availablePatterns.value.length
+
+  selectPattern(availablePatterns.value[nextIndex])
+}
+
 </script>
 
 <style scoped lang="scss">
@@ -87,10 +112,17 @@ function handleClick() {
       text-align: center;
     }
   }
+  .empty {
+    width: 60%;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
 }
 
 .locked {
-  opacity: 0.3;
+  opacity: 0.5;
   pointer-events: none;
 }
 </style>

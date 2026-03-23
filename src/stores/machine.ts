@@ -2,6 +2,7 @@ import { defineStore } from "pinia"
 import { useGameStore } from "./game"
 import { useSlotStore } from "./slot"
 import { MACHINES } from "@/data/machines"
+import { saveGame } from "@/utils/save"
 
 export const useMachineStore = defineStore("machines", {
   state: () => ({
@@ -34,6 +35,8 @@ export const useMachineStore = defineStore("machines", {
       this.levels[id] = (this.levels[id] || 0) + 1
 
       const machine = MACHINES[id]
+      
+      saveGame()
 
       machine.effect?.({
         game,

@@ -2,6 +2,7 @@ import { defineStore } from "pinia"
 import { useGameStore } from "./game"
 import { useProgressStore } from "./progress"
 import { UPGRADES } from "@/data/upgrades"
+import { saveGame } from "@/utils/save"
 
 export const useUpgradeStore = defineStore("upgrades", {
   state: () => ({
@@ -34,21 +35,18 @@ export const useUpgradeStore = defineStore("upgrades", {
     buy(id: string) {
       const game = useGameStore()
       const progress = useProgressStore()
-
       const cost = this.getCost(id)
       if (game.money < cost) return
 
       game.money -= cost
-      this.levels[id] = (this.levels[id] || 0) + 1
-      
-      // APPLY EFFECTS HERE
-      if (id === "clickingPower") {
-        progress.clickPower *= 1.2
-      }
+      this.levels[id]++
 
-      if (id === "creationSpeed") {
-        progress.baseSpeed *= 1.1
-      }
+      // APPLY EFFECTS
+      if (id === "clickingPower") progress.clickPower *= 1.2
+      if (id === "creationSpeed") progress.baseSpeed *= 1.1
+
+      // ✅ SAVE GAME IMMEDIATELY
+      saveGame()
     }
   }
 })

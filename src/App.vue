@@ -15,7 +15,6 @@
     <div id="stats"></div>
     <footer>
       <p>Created by Mates</p>
-      <ProgressBar :type="'progress'" />
     </footer>
   </main>
 
@@ -27,7 +26,7 @@
       <li><router-link to="/Pattern-Factory/inventory">INVENTORY</router-link></li>
       <li><router-link to="/Pattern-Factory/prestige">PRESTIGE</router-link></li>
     </nav>
-    <img src="/img/Stripes.png" alt="Stripes Background" aria-hidden="true">
+    <img src="/img/Stripes.png" alt="Stripes Background" aria-hidden="true" draggable="false">
   </aside>
 </template>
 
@@ -62,6 +61,13 @@ onMounted(() => {
   startAutoSave()
   startGameLoop()
 })
+
+//todo: need to add upgrade pagination -> upgrade for more pattern exp
+//add new machine
+//need to see if prestige works,
+//need to think about cross shape
+//plus value while clicking
+//add stats
 </script>
 
 <style lang="scss">
@@ -109,7 +115,7 @@ div#app {
     grid-area: main;
 
     display: grid;
-    grid-template-rows: 3fr 4fr 1fr 1fr;
+    grid-template-rows: 3fr 4fr 1fr 40px;
     grid-template-areas: 
     "patterns"
     "shop"
@@ -180,6 +186,7 @@ div#app {
     }
     img {
       width: 100%;
+      user-select: none;
     }
   }
 }

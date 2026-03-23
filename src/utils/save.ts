@@ -36,19 +36,29 @@ export function loadGame() {
 
   const data = JSON.parse(raw)
 
-  const game = useGameStore()
-  const patterns = usePatternStore()
-  const upgrades = useUpgradeStore()
-  const machines = useMachineStore()
   const slotsStore = useSlotStore()
 
-  // patch state (safe merge)
-  game.$patch(data.game)
-  patterns.$patch(data.patterns)
-  slotsStore.$patch(data.slots.map(slotsStore.cleanSlot))
+  // get default slots from store
+  const defaultSlots = slotsStore.getDefaultSlots
 
-  upgrades.$patch(data.upgrades)
-  machines.$patch(data.machines)
+  slotsStore.slots = defaultSlots.map((defaultSlot, i) => {
+    const saved = data.slots[i] || {}
+    return {
+      ...defaultSlot,
+      ...saved,
+      progress: typeof saved.progress === "number" && !isNaN(saved.progress) ? saved.progress : 0,
+      speedMultiplier: typeof saved.speedMultiplier === "number" ? saved.speedMultiplier : 1,
+      outputMultiplier: typeof saved.outputMultiplier === "number" ? saved.outputMultiplier : 1,
+      patternId: saved.patternId ?? defaultSlot.patternId,
+      unlocked: typeof saved.unlocked === "boolean" ? saved.unlocked : defaultSlot.unlocked
+    }
+  })
+
+  // patch other stores
+  useGameStore().$patch(data.game)
+  usePatternStore().$patch(data.patterns)
+  useUpgradeStore().$patch(data.upgrades)
+  useMachineStore().$patch(data.machines)
 
   return data
 }

@@ -28,7 +28,7 @@ const bar = computed(() => {
       props.length ?? 20
     )
   } else if (props.type === "level") {
-    return "LVL " + generateBar(
+    return `LVL.${game.level} ` + generateBar(
       game.exp,
       game.expToNextLevel,
       props.length ?? 20

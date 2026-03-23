@@ -2,6 +2,7 @@ import { defineStore } from "pinia"
 import { PATTERNS } from "@/data/patterns"
 import { useUpgradeStore } from "./upgrade"
 import { useGameStore } from "./game"
+import { saveGame } from "@/utils/save"
 
 export const usePatternStore = defineStore("patterns", {
   state: () => ({
@@ -80,6 +81,7 @@ export const usePatternStore = defineStore("patterns", {
       if (req.dc) game.dc -= req.dc
 
       this.unlockPattern(id)
+      saveGame()
       return true
     }
   }
