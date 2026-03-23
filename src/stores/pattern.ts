@@ -72,9 +72,7 @@ export const usePatternStore = defineStore("patterns", {
 
       if (req.money && game.money < req.money) return false
       if (req.dc && game.dc < req.dc) return false
-
-      const patternState = this.patterns[id]
-      if (req.level && patternState.level < req.level) return false
+      if (req.level && game.level < req.level) return false
 
       // passed all checks → unlock and deduct resources if needed
       if (req.money) game.money -= req.money
