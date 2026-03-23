@@ -31,7 +31,7 @@ export const useUpgradeStore = defineStore("upgrades", {
       if (game.money < cost) return
 
       game.money -= cost
-      this.levels[id]++
+      this.levels[id] = (this.levels[id] || 0) + 1
       
       // APPLY EFFECTS HERE
       if (id === "clickingPower") {

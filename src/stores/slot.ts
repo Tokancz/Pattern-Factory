@@ -13,13 +13,11 @@ interface Slot {
 export const useSlotStore = defineStore("slots", {
   state: () => ({
     slots: [
-      {
-        id: 0,
-        patternId: "square",
-        progress: 0,
-        unlocked: true
-      }
-    ] as Slot[],
+      { id: 0, patternId: "square", progress: 0, unlocked: true },
+      { id: 1, patternId: null, progress: 0, unlocked: false },
+      { id: 2, patternId: null, progress: 0, unlocked: false },
+      { id: 3, patternId: null, progress: 0, unlocked: false }
+    ],
 
     maxProgress: 100,
     baseSpeed: 1
@@ -62,14 +60,8 @@ export const useSlotStore = defineStore("slots", {
     },
 
     unlockSlot() {
-      const newId = this.slots.length
-
-      this.slots.push({
-        id: newId,
-        patternId: null,
-        progress: 0,
-        unlocked: true
-      })
+      const locked = this.slots.find(s => !s.unlocked)
+      if (locked) locked.unlocked = true
     },
 
     assignPattern(slotId: number, patternId: string) {

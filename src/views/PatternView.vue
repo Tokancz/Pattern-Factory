@@ -1,7 +1,7 @@
 <template>
   <Panel title="Patterns">
     <div v-for="(p, id) in PATTERNS" :key="id" class="pattern">
-      <img :src="p.src" :alt="id" class="pattern-image">
+      <img :src="p.visuals.icon" :alt="id" class="pattern-image">
       <div class="text-container">
         <p class="pattern-name">{{ id }}</p>
         <p> Base value: {{ p.baseValue }}</p>

@@ -1,26 +1,32 @@
 <template>
   <Panel title="Machines">
-    <div v-for="(m, id) in machines" :key="id">
-      <div>{{ id }}</div>
-      <div>Lvl: {{ levels[id] || 0 }}</div>
+    <div v-for="(machine, id) in MACHINES" :key="id" class="machine">
+  
+      <img :src="machine.src" alt="">
 
-      <button @click="buy(id)">Buy</button>
+      <div class="text-container">
+        <p class="machine-name">{{ machine.name }}</p>
+        <p>{{ machine.description }}</p>
+
+        <p>Cost: {{ getCost(id) }}</p>
+      </div>
+
+      <button @click="buy(id)" class="button">Buy</button>
     </div>
   </Panel>
 </template>
 
 <script setup lang="ts">
 import Panel from "../components/system/Panel.vue"
-import { reactive } from "vue"
+import { MACHINES } from "@/data/machines"
+import { useMachineStore } from "@/stores/machine"
 
-const machines = {
-  slotUnlock: {},
-  slotBoost: {}
-}
+const machines = useMachineStore()
 
-const levels = reactive<Record<string, number>>({})
-
-function buy(id: string) {
-  levels[id] = (levels[id] || 0) + 1
-}
+const getCost = machines.getCost
+const buy = machines.buy
 </script>
+
+<style scoped lang="scss">
+@use "@/styles/views.scss";
+</style>

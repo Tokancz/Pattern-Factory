@@ -4,7 +4,7 @@
       <h1>Factory Name</h1>
       <p>Username</p>
     </div>
-    <ProgressBar :prefix="'LVL'" :length="10"/>
+    <ProgressBar :type="'level'" :length="10"/>
   </header>
   <CurrencyDisplay />
   <main>
@@ -13,8 +13,12 @@
       <router-view />
     </div>
     <div id="stats"></div>
-    <ProgressBar :prefix="'CREATING PART'"/>
+    <footer>
+      <p>Created by Mates</p>
+      <ProgressBar :type="'progress'" />
+    </footer>
   </main>
+
   <aside>
     <nav>
       <li><router-link to="/Pattern-Factory/patterns">PATTERNS</router-link></li>
@@ -36,8 +40,6 @@ import ProgressBar from "@/components/ui/ProgressBar.vue"
 import Simulation from "@/components/game/Simulation.vue"
 
 const slots = useSlotStore()
-
-const shop = ref('pattern')
 
 onMounted(() => {
   let last = performance.now()
@@ -114,6 +116,13 @@ div#app {
     #stats {
       grid-area: stats;
       background-color: var(--primary);
+    }
+    footer {
+      grid-area: footer;
+      @include flexRow(30px, center, center);
+      > p {
+        font-size: 0.9em;
+      }
     }
   }
   aside {

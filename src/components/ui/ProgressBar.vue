@@ -1,30 +1,42 @@
 <template>
   <div class="progress">
-    {{ props.prefix }} {{ bar }}
+    {{ bar }}
   </div>
 </template>
 
 <script setup lang="ts">
 import { computed } from "vue"
 import { useProgressStore } from "@/stores/progress"
+import { useGameStore } from "@/stores/game";
 import { generateBar } from "@/utils/ascii"
 
 const props = defineProps<{
-  prefix?: string
+  type: "progress" | "level"
   value?: number
   max?: number
   length?: number
 }>()
 
 const progress = useProgressStore()
+const game = useGameStore()
 
-const bar = computed(() =>
-  generateBar(
-    props.value ?? progress.progress,
-    props.max ?? progress.maxProgress,
-    props.length ?? 20
-  )
-)
+const bar = computed(() => {
+  if (props.type === "progress") {
+    return "CREATING PART " + generateBar(
+      props.value ?? progress.progress,
+      props.max ?? progress.maxProgress,
+      props.length ?? 20
+    )
+  } else if (props.type === "level") {
+    return "LVL " + generateBar(
+      game.exp,
+      game.expToNextLevel,
+      props.length ?? 20
+    )
+  } else {
+    return ""
+  }
+})
 </script>
 
 <style lang="scss">
