@@ -1,13 +1,14 @@
 <template>
   <Panel title="Upgrades">
-    <div v-for="(upgrade, id) in UPGRADES" :key="id">
-      <img :src="upgrade.src"></img>
-      <p>{{ upgrade.name }}</p>
-      <p>{{ upgrade.description }}</p>
-      <p v-if="levels[id] != 0">Lvl: {{ levels[id] }}</p>
-      <p>Cost: {{ getCost(id) }}</p>
-
-      <button @click="buy(id)">Buy</button>
+    <div v-for="(upgrade, id) in UPGRADES" :key="id" class="upgrade">
+      <img :src="upgrade.src" alt="Upgrade Image" draggable="false" class="upgrade-image"></img>
+      <div class="text-container">
+        <p class="upgrade-name">{{ upgrade.name }}</p>
+        <p>{{ upgrade.description }}</p>
+        <p v-if="levels[id] != 0">Lvl: {{ levels[id] }}</p>
+        <p>Cost: {{ getCost(id) }}</p>
+      </div>
+      <button @click="buy(id)" class="button">Buy</button>
     </div>
   </Panel>
 </template>
@@ -23,3 +24,7 @@ const levels = upgrades.levels
 const getCost = upgrades.getCost
 const buy = upgrades.buy
 </script>
+
+<style scoped lang="scss">
+  @use "@/styles/views.scss";
+</style>

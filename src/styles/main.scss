@@ -56,3 +56,19 @@ body {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
 }
+
+.button {
+    padding: 10px 15px;
+    font-size: 1.25em;
+    background-color: var(--white);
+    border: 2px solid var(--black);
+    border-radius: 4px;
+    transition: .3s ease-in-out;
+    user-select: none;
+
+    &:hover {
+        background-color: var(--black);
+        color: var(--white);
+        cursor: pointer;
+    }
+}

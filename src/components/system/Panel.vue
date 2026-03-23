@@ -45,7 +45,11 @@ defineProps<{ title: string }>()
   .content {
     width: 100%;
     height: 100%;
-    @include flexRow(20px, space-around, start);
+
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-gap: 20px;
+    
     padding-top: 20px;
   }
 }
