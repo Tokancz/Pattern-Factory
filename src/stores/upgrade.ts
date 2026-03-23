@@ -8,7 +8,8 @@ export const useUpgradeStore = defineStore("upgrades", {
     levels: {
       clickingPower: 0,
       sellMultiplier: 0,
-      creationSpeed: 0
+      creationSpeed: 0,
+      offlineCap: 0
     } as Record<string, number>
   }),
 
