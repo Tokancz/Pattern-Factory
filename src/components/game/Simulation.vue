@@ -8,8 +8,8 @@
         <img src="/img/patterns/Square.svg" alt="square pattern background" aria-hidden="true" draggable="false">
       </div>
       <div>
-        <img src="/img/patterns/Triangle.svg" alt="triangle pattern background" aria-hidden="true" draggable="false">
         <img src="/img/patterns/Cross.svg" alt="cross pattern background" aria-hidden="true" draggable="false">
+        <img src="/img/patterns/Triangle.svg" alt="triangle pattern background" aria-hidden="true" draggable="false">
       </div>
     </div>
 

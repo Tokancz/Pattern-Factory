@@ -44,7 +44,7 @@ export const UPGRADES = {
   offlineGain: {
     name: "Autopilot",
     description: "Increaser offline multiplier",
-    src: `${BASE}img/icons/robot.svg`,
+    src: `${BASE}img/icons/cpu.svg`,
     baseCost: 100,
     scale: 1.7,
     currency: "money"

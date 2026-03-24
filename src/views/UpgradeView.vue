@@ -1,6 +1,6 @@
 <template>
   <Panel title="Upgrades">
-    <div class="upgrade-wrapper">
+    <div class="wrapper">
       <button class="button arrow" @click="prevPage"><i class="fa-solid fa-chevron-left"></i></button>
 
       <div class="grid">

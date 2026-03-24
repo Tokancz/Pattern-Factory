@@ -4,6 +4,7 @@ import { usePatternStore } from "./pattern"
 import { useUpgradeStore } from "./upgrade"
 import { PATTERNS } from "@/data/patterns"
 import { saveGame } from "@/utils/save"
+import { useMachineStore } from "./machine"
 
 interface Slot {
   id: number
@@ -24,7 +25,8 @@ const DEFAULT_SLOTS: Slot[] = [
 export const useSlotStore = defineStore("slots", {
   state: () => ({
     slots: [...DEFAULT_SLOTS],
-    baseSpeed: 1
+    baseSpeed: 1,
+    selectedSlotId: null as number | null
   }),
   
   getters: {
@@ -32,6 +34,23 @@ export const useSlotStore = defineStore("slots", {
   },
 
   actions: {
+    getSlotSpeed(slot: Slot) {
+      const machines = useMachineStore()
+      const upgrades = useUpgradeStore()
+
+      let speed =
+        this.baseSpeed *
+        slot.speedMultiplier *
+        upgrades.getSpeedMultiplier *
+        machines.getMultiplier("slotBoost")
+
+      if (slot.id === this.selectedSlotId) {
+        speed *= machines.getMultiplier("targetedBoost")
+      }
+
+      return speed
+    },
+
     tick(delta: number) {
       const game = useGameStore()
       const patterns = usePatternStore()
@@ -44,8 +63,7 @@ export const useSlotStore = defineStore("slots", {
 
         const maxProgress = PATTERNS[slot.patternId].baseProgress || 100
 
-        const upgrades = useUpgradeStore()
-        slot.progress += delta * upgrades.getSpeedMultiplier
+        slot.progress += delta * this.getSlotSpeed(slot)
         slot.progress = typeof slot.progress === "number" && !isNaN(slot.progress) ? slot.progress : 0
 
         if (slot.progress >= maxProgress) {
@@ -68,8 +86,11 @@ export const useSlotStore = defineStore("slots", {
 
     completeSlot(slot: Slot, game: any, patterns: any) {
       const upgrades = useUpgradeStore()
+      const machines = useMachineStore()
 
-      const value = patterns.getPatternValue(slot.patternId) * slot.outputMultiplier
+      let value = patterns.getPatternValue(slot.patternId) * slot.outputMultiplier
+      value *= machines.getMultiplier("outputBoost")
+
       const type = PATTERNS[slot.patternId].type
       
       if (type === "money") game.addMoney(value)
@@ -87,7 +108,8 @@ export const useSlotStore = defineStore("slots", {
         game.addPrestigePoints(prestigeGain)
       }
 
-      const expGain = value * 0.4 * upgrades.getExpMultiplier // base 20% of output as EXP, scaled by upgrades
+      const expMultiplier = upgrades.getExpMultiplier * machines.getMultiplier("expMachine")
+      const expGain = value * 0.4 * expMultiplier
 
       patterns.addExp(slot.patternId, expGain)
 
@@ -110,6 +132,15 @@ export const useSlotStore = defineStore("slots", {
       saveGame()
     },
 
+    selectSlot(id: number) {
+      const machines = useMachineStore()
+
+      // ❌ block if machine not unlocked
+      if (machines.getLevel("targetedBoost") < 1) return
+
+      this.selectedSlotId = id
+    },
+
     cleanSlot(slot: any) {
       return {
         ...slot,
@@ -118,7 +149,7 @@ export const useSlotStore = defineStore("slots", {
         outputMultiplier: typeof slot.outputMultiplier === "number" ? slot.outputMultiplier : 1,
       }
     },
-    
+
     reset() {
       this.slots = this.getDefaultSlots.map(s => ({ ...s }))
     }

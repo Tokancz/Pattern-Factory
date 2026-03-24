@@ -1,7 +1,7 @@
 <template>
   <div
     class="slot"
-    :class="{ locked: !slot.unlocked, flash: slotFlash }"
+    :class="{ locked: !slot.unlocked, flash: slotFlash, selected: slot.id === slots.selectedSlotId }"
     @click="handleClick"
     @wheel.prevent="handleWheel"
   >
@@ -33,6 +33,7 @@ import { generateBar } from "@/utils/ascii"
 import { useSlotStore } from "@/stores/slot"
 import { usePatternStore } from "@/stores/pattern"
 import { useUpgradeStore } from "@/stores/upgrade"
+import { useMachineStore } from "@/stores/machine"
 
 type FloatingText = {
   id: number
@@ -79,15 +80,23 @@ function selectPattern(patternId: string) {
 function handleClick(event: MouseEvent) {
   if (!props.slot.unlocked) return
 
+  const machines = useMachineStore()
+
+  // 🎯 selection only if unlocked
+  if (event.shiftKey) {
+    if (machines.getLevel("targetedBoost") < 1) {
+      spawnFloatingText(event, "Machine required")
+      return
+    }
+  }
+
   if (!props.slot.patternId) {
-    // default to first available pattern if empty
     const firstPattern = availablePatterns.value[0]
     if (firstPattern) selectPattern(firstPattern)
     return
   }
-
   slots.clickSlot(props.slot.id)
-  // playSound("click") // enable later
+
   spawnFloatingText(event, `+${upgrades.getClickPower}`)
 }
 
@@ -167,6 +176,12 @@ function spawnFloatingText(event: MouseEvent, value: string) {
 .locked {
   opacity: 0.5;
   pointer-events: none;
+}
+
+.selected {
+  outline: 3px solid var(--primary);
+  outline: -5px;
+  filter: brightness(1.3);
 }
 
 .floating-text {

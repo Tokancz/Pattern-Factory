@@ -6,7 +6,13 @@ import { saveGame } from "@/utils/save"
 
 export const useMachineStore = defineStore("machines", {
   state: () => ({
-    levels: {} as Record<string, number>
+    levels: {
+      slotUnlock: 0,
+      slotBoost: 0,
+      targetedBoost: 0,
+      outputBoost: 0,
+      expMachine: 0
+    } as Record<string, number>
   }),
 
   getters: {
@@ -19,6 +25,15 @@ export const useMachineStore = defineStore("machines", {
       const base = MACHINES[id].baseCost
 
       return Math.floor(base * Math.pow(MACHINES[id].scale, lvl))
+    },
+
+    getMultiplier: (state) => (id: string) => {
+      const lvl = state.levels[id] || 0
+      const machine = MACHINES[id]
+
+      if (!machine || !machine.value) return 1
+
+      return Math.pow(machine.value, lvl)
     }
   },
 
@@ -32,17 +47,17 @@ export const useMachineStore = defineStore("machines", {
 
       game.money -= cost
 
+      // increase level
       this.levels[id] = (this.levels[id] || 0) + 1
 
       const machine = MACHINES[id]
-      
-      saveGame()
 
-      machine.effect?.({
-        game,
-        slots,
-        machines: this
-      })
+      // ✅ HANDLE INSTANT EFFECTS HERE
+      if (machine.type === "unlockSlot") {
+        slots.unlockSlot()
+      }
+
+      saveGame()
     },
 
     reset() {

@@ -7,17 +7,15 @@
         <h1>{{ user.factoryName }}</h1>
         <p>{{ user.username }}</p>
       </div>
-      <ProgressBar :type="'level'" :length="10"/>
+      <ProgressBar :type="'level'" :length="15"/>
     </header>
 
     <CurrencyDisplay />
 
     <main>
       <Simulation />
-      <div class="panels">
-        <router-view />
-      </div>
-      <div id="stats"></div>
+      <router-view />
+      <Stats />
       <footer>
         <p>Created by Mates</p>
       </footer>
@@ -47,6 +45,7 @@ import { startGameLoop } from "@/composables/gameLoop"
 import CurrencyDisplay from "@/components/ui/CurrencyDisplay.vue"
 import ProgressBar from "@/components/ui/ProgressBar.vue"
 import Simulation from "@/components/game/Simulation.vue"
+import Stats from "./components/game/Stats.vue"
 import Login from "./components/ui/Login.vue"
 
 const slotStore = useSlotStore()
@@ -89,7 +88,7 @@ div#app {
   "header currency"
   "main aside";
 
-  //overflow: hidden;
+  overflow: hidden;
 
   header {
     height: 100px;
@@ -127,14 +126,6 @@ div#app {
     "stats"
     "footer";
 
-    .panels {
-      grid-area: shop;
-      width: 100%;
-    }
-    #stats {
-      grid-area: stats;
-      background-color: var(--primary);
-    }
     footer {
       grid-area: footer;
       @include flexRow(30px, center, center);
@@ -190,7 +181,7 @@ div#app {
       }
     }
     img {
-      width: 100%;
+      height: 100%;
       user-select: none;
     }
   }

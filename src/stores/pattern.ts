@@ -19,7 +19,7 @@ export const usePatternStore = defineStore("patterns", {
   getters: {
     getPattern: (state) => (id: string) => state.patterns[id],
 
-    expToNext: () => (lvl: number) => Math.floor(5 * Math.pow(1.35, lvl)),
+    expToNext: () => (lvl: number) => Math.floor(10 * Math.pow(1.5, lvl)),
 
     getPatternValue: (state) => (id: string) => {
       const base = PATTERNS[id].baseValue
