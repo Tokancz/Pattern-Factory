@@ -36,6 +36,7 @@ export const MACHINES = {
   outputBoost: {
     name: "Industrial Press",
     description: "Increases all output",
+    src: `${BASE}img/icons/factory-building.svg`,
     baseCost: 500,
     scale: 4,
     type: "globalOutput",
@@ -45,6 +46,7 @@ export const MACHINES = {
   expMachine: {
     name: "Neural Trainer",
     description: "Patterns gain more EXP",
+    src: `${BASE}img/icons/bx-git-repo-forked.svg`,
     baseCost: 400,
     scale: 4.5,
     type: "expBoost",
