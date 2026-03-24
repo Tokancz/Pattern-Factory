@@ -1,6 +1,5 @@
 import { defineStore } from "pinia"
 import { useGameStore } from "./game"
-import { useProgressStore } from "./progress"
 import { UPGRADES } from "@/data/upgrades"
 import { saveGame } from "@/utils/save"
 
@@ -10,7 +9,9 @@ export const useUpgradeStore = defineStore("upgrades", {
       clickingPower: 0,
       sellMultiplier: 0,
       creationSpeed: 0,
-      offlineCap: 0
+      expGain: 0,
+      offlineCap: 0,
+      offlineGain: 0
     } as Record<string, number>
   }),
 
@@ -27,25 +28,26 @@ export const useUpgradeStore = defineStore("upgrades", {
       const base = 3600 // 1 hour
       const perLevel = 1800 // +30 min per level
 
-      return base + lvl * perLevel
-    }
+      return base + lvl * perLevel 
+    },
+    getClickPower: (state) => Math.pow(1.2, state.levels.clickingPower || 0),
+
+    getSpeedMultiplier: (state) => Math.pow(1.1, state.levels.creationSpeed || 0),
+
+    getExpMultiplier: (state) => 1 + (state.levels.expGain || 0) * 0.25,
+
+    getSellMultiplier: (state) => Math.pow(1.25, state.levels.sellMultiplier || 0)
   },
 
   actions: {
     buy(id: string) {
       const game = useGameStore()
-      const progress = useProgressStore()
       const cost = this.getCost(id)
       if (game.money < cost) return
 
       game.money -= cost
       this.levels[id]++
 
-      // APPLY EFFECTS
-      if (id === "clickingPower") progress.clickPower *= 1.2
-      if (id === "creationSpeed") progress.baseSpeed *= 1.1
-
-      // ✅ SAVE GAME IMMEDIATELY
       saveGame()
     }
   }

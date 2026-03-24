@@ -54,6 +54,11 @@ const prestige = game.prestige
         width: 80px;
       }
     }
+
+    >p {
+      font-size: .8em;
+      color: var(--secondary);
+    }
   }
 }
 </style>

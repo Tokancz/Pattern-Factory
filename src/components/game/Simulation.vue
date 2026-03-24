@@ -47,7 +47,7 @@ const slots = useSlotStore()
     
     @include flexColumn(0, space-between);
 
-    padding: 20px;
+    padding: 10px;
     pointer-events: none;
     opacity: 0.8;
     z-index: 0;
@@ -57,8 +57,7 @@ const slots = useSlotStore()
       @include flexRow(0, space-between);
 
       img {
-        width: 80px;
-        height: 80px;
+        width: 60px;
         user-select: none;
       }
       p {

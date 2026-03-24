@@ -6,8 +6,8 @@
         <p class="pattern-name">{{ id }}</p>
         <p>Lvl: {{ patterns.getPattern(id)?.level }}</p>
         <p>
-          EXP: {{ patterns.getPattern(id)?.exp }} /
-          {{ expToNext(patterns.getPattern(id)!.level) }}
+          EXP: {{ formatNumber( patterns.getPattern(id)?.exp! ) }} /
+          {{ formatNumber( expToNext(patterns.getPattern(id)!.level) ) }}
         </p>
         <p class="pattern-value">
           Value: {{ formatNumber(getValue(id)) }} 
@@ -31,6 +31,7 @@ const patterns = usePatternStore()
 
 const expToNext = patterns.expToNext
 const getValue = patterns.getPatternValue
+
 </script>
 
 <style scoped lang="scss">

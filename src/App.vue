@@ -86,13 +86,13 @@ div#app {
   max-width: 1440px;
 
   display: grid;
-  grid-template-columns: 8fr 4fr;
+  grid-template-columns: 10fr 4fr;
   grid-template-rows: 1fr 9fr;
   grid-template-areas: 
   "header currency"
   "main aside";
 
-  overflow: hidden;
+  //overflow: hidden;
 
   header {
     height: 100px;

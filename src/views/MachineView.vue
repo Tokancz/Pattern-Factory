@@ -8,7 +8,7 @@
         <p class="machine-name">{{ machine.name }}</p>
         <p>{{ machine.description }}</p>
 
-        <p>Cost: {{ getCost(id) }}</p>
+        <p class="machine-cost">Cost: {{ getCost(id) }}</p>
       </div>
 
       <button @click="buy(id)" class="button">Buy</button>

@@ -39,8 +39,12 @@ const patternData = computed(() => {
   return PATTERNS[props.slot.patternId]
 })
 
+const maxProgress = computed(() => {
+  if (!props.slot.patternId) return 100
+  return PATTERNS[props.slot.patternId].baseProgress || 100
+})
 const bar = computed(() =>
-  generateBar(props.slot.progress, slots.maxProgress, 8)
+  generateBar(props.slot.progress, maxProgress.value, 8)
 )
 
 const availablePatterns = computed(() => patternStore.unlockedPatterns)

@@ -19,7 +19,7 @@ export const usePatternStore = defineStore("patterns", {
   getters: {
     getPattern: (state) => (id: string) => state.patterns[id],
 
-    expToNext: () => (lvl: number) => Math.floor(5 * Math.pow(1.5, lvl)),
+    expToNext: () => (lvl: number) => Math.floor(5 * Math.pow(1.35, lvl)),
 
     getPatternValue: (state) => (id: string) => {
       const base = PATTERNS[id].baseValue
@@ -28,12 +28,11 @@ export const usePatternStore = defineStore("patterns", {
       // fix: level 1 = base value
       let value = base * Math.pow(1.5, lvl - 1)
 
-      // inject upgrades
       const upgrades = useUpgradeStore()
       const type = PATTERNS[id].type
 
       if (type === "money") {
-        value *= 1 + (upgrades.levels.sellMultiplier || 0) * 0.5
+        value *= upgrades.getSellMultiplier
       }
 
       return value
@@ -43,11 +42,20 @@ export const usePatternStore = defineStore("patterns", {
   actions: {
     addExp(id: string, amount: number) {
       const p = this.patterns[id]
+
+      if (!p || isNaN(amount)) {
+        console.warn("Invalid EXP:", id, amount)
+        return
+      }
+
       p.exp += amount
 
-      while (p.exp >= this.expToNext(p.level)) {
-        p.exp -= this.expToNext(p.level)
-        p.level++
+      let needed = this.expToNext(p!.level)
+
+      while (p!.exp >= needed) {
+        p!.exp -= needed
+        p!.level++
+        needed = this.expToNext(p!.level)
       }
     },
 

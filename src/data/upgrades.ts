@@ -10,7 +10,7 @@ export const UPGRADES = {
   },
   sellMultiplier: {
     name: "Worthy Squares",
-    description: "Sell patterns for more IGM",
+    description: "Sell squares for more IGM",
     src: `${BASE}img/icons/bx-dollar-circle.svg`,
     baseCost: 50,
     scale: 1.6
@@ -22,11 +22,25 @@ export const UPGRADES = {
     baseCost: 30,
     scale: 1.4
   },
+  expGain: {
+    name: "Learning Algorithm",
+    description: "Patterns gain more EXP",
+    src: `${BASE}img/icons/brain.svg`,
+    baseCost: 40,
+    scale: 1.5
+  },
   offlineCap: {
     name: "Not Connected",
     description: "Increases max offline earnings",
     src: `${BASE}img/icons/wifi-slash.svg`,
     baseCost: 30,
     scale: 1.4
+  },
+  offlineGain: {
+    name: "Autopilot",
+    description: "Increaser offline multiplier",
+    src: `${BASE}img/icons/robot.svg`,
+    baseCost: 100,
+    scale: 1.7
   }
 }

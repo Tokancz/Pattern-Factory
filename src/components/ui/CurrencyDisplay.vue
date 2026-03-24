@@ -1,6 +1,6 @@
 <template>
   <div class="currency">
-    <p>Money - {{ formatNumber(game.money) }} IGM</p>
+    <p>IGM - {{ formatNumber(game.money) }}</p>
     <p>DC - {{ formatNumber(game.dc) }}</p>
     <p>Prestige - 1x</p>
   </div>
@@ -25,6 +25,7 @@ const game = useGameStore()
     p {
         @include flexRow();
         height: 100%;
+        padding: 5px;
         flex: 1;
         border-right: 2px solid var(--black);
         text-align: center;
