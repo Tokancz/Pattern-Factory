@@ -34,6 +34,7 @@ import { useSlotStore } from "@/stores/slot"
 import { usePatternStore } from "@/stores/pattern"
 import { useUpgradeStore } from "@/stores/upgrade"
 import { useMachineStore } from "@/stores/machine"
+import { formatNumber } from "@/utils/format"
 
 type FloatingText = {
   id: number
@@ -97,7 +98,7 @@ function handleClick(event: MouseEvent) {
   }
   slots.clickSlot(props.slot.id)
 
-  spawnFloatingText(event, `+${upgrades.getClickPower}`)
+  spawnFloatingText(event, `+${ formatNumber(5 * upgrades.getClickPower) }`)
 }
 
 function handleWheel(event: WheelEvent) {

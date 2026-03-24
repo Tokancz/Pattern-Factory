@@ -1,7 +1,12 @@
 <template>
   <div class="simulation">
 
-    <p id="tag">Simulation</p>
+    <a id="tag" @click.prevent="openTutorial">Tutorial here</a>
+
+    <TutorialOverlay 
+      v-model:visible="tutorialVisible"
+      :steps="tutorialSteps"
+    />
 
     <div id="simulation-bg">
       <div>
@@ -21,10 +26,24 @@
 </template>
 
 <script setup lang="ts">
+import { ref } from "vue"
 import { useSlotStore } from "@/stores/slot"
 import Slot from "./Slot.vue"
+import TutorialOverlay from "@/components/ui/TutorialOverlay.vue"
+import { TUTORIAL_STEPS } from "@/data/tutorial"
 
 const slots = useSlotStore()
+const tutorialVisible = ref(false)
+const tutorialSteps = [
+  { title: 'Slots', description: 'Click a slot to select or assign patterns', highlightSelector: '.slot:first-child' },
+  { title: 'Patterns', description: 'Each pattern has unique properties', highlightSelector: '.slotPattern' },
+  { title: 'Upgrades', description: 'Upgrade clicking and speed', highlightSelector: '#upgrade-panel' },
+  { title: 'Machines', description: 'Unlock machines to boost production', highlightSelector: '#machine-panel' }
+]
+
+function openTutorial() {
+  tutorialVisible.value = true
+}
 </script>
 
 <style scoped lang="scss">
@@ -75,6 +94,7 @@ const slots = useSlotStore()
     background-color: var(--black);
     color: var(--white);
     padding: 10px 20px;
+    cursor: pointer;
   }
 }
 </style>
