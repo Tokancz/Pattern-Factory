@@ -11,7 +11,8 @@ export const useUpgradeStore = defineStore("upgrades", {
       creationSpeed: 0,
       expGain: 0,
       offlineCap: 0,
-      offlineGain: 0
+      offlineGain: 0,
+      prestigeOutput: 0
     } as Record<string, number>
   }),
 
@@ -43,12 +44,30 @@ export const useUpgradeStore = defineStore("upgrades", {
     buy(id: string) {
       const game = useGameStore()
       const cost = this.getCost(id)
-      if (game.money < cost) return
 
-      game.money -= cost
+      if (UPGRADES[id].currency === "prestige") {
+        if (game.prestigePoints < cost) return
+        game.prestigePoints -= cost
+      }
+      else if (UPGRADES[id].currency === "money") {
+        if (game.money < cost) return
+        game.money -= cost
+      }
+
       this.levels[id]++
 
       saveGame()
+    },
+
+    reset() {
+      this.levels = {
+        clickingPower: 0,
+        sellMultiplier: 0,
+        creationSpeed: 0,
+        expGain: 0,
+        offlineCap: 0,
+        offlineGain: 0
+      }
     }
   }
 })

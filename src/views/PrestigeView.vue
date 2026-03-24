@@ -1,17 +1,18 @@
 <template>
   <Panel title="Prestige">
     <div class="prestige">
-      
-      <p>After you reach 1t IGM you can prestige for permanent income increase by resetting your progress.</p>
+
+      <div class="text-container">
+        <p>After you reach 1t IGM you can prestige for permanent income increase by resetting your progress.</p>
+        <p id="gain">Current Prestige Gain: {{ game.getPrestigeGain() }}</p>
+      </div>
       
       <div class="prestige-container">
 
-        <button @click="prestige" class="prestige-button">
+        <button @click="prestige" :disabled="!game.canPrestige" class="prestige-button">
           <img src="/img/icons/connectdevelop.svg" alt="">
           <p>PRESTIGE</p>
         </button>
-
-        <p>Prestige Points: {{ game.prestigePoints }}</p>
       </div>
       
     </div>
@@ -35,8 +36,14 @@ const prestige = game.prestige
   
   font-size: 1.5em;
 
-  > p {
+  .text-container {
+    @include flexColumn(20px, center, start);
     max-width: 60%;
+
+    p#gain {
+      font-size: .8em;
+      color: var(--secondary);
+    }
   }
   .prestige-container {
     @include flexColumn(20px, center, center);

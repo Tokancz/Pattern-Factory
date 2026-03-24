@@ -43,6 +43,10 @@ export const useMachineStore = defineStore("machines", {
         slots,
         machines: this
       })
+    },
+
+    reset() {
+      this.levels = {} // or default state
     }
   }
 })

@@ -2,7 +2,7 @@
   <div class="currency">
     <p>IGM - {{ formatNumber(game.money) }}</p>
     <p>DC - {{ formatNumber(game.dc) }}</p>
-    <p>Prestige - 1x</p>
+    <p>PP - {{ formatNumber(game.prestigePoints) }}</p>
   </div>
 </template>
 

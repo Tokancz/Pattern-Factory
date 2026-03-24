@@ -13,7 +13,7 @@
             <p v-if="levels[upgrade.id] != 0">
               Lvl: {{ levels[upgrade.id] }}
             </p>
-            <p class="upgrade-cost">Cost: {{ getCost(upgrade.id) }} IGM</p>
+            <p class="upgrade-cost">Cost: {{ getCost(upgrade.id) }} {{ getCurrencyLabel(upgrade.currency) }}</p>
           </div>
 
           <button @click="buy(upgrade.id)" class="button">Buy</button>
@@ -51,6 +51,12 @@ const paginatedUpgrades = computed(() => {
   const start = page.value * perPage
   return upgradeList.value.slice(start, start + perPage)
 })
+
+function getCurrencyLabel(currency: string) {
+  if (currency === "money") return "IGM"
+  if (currency === "prestige") return "PP"
+  return ""
+}
 
 const totalPages = computed(() =>
   Math.ceil(upgradeList.value.length / perPage)

@@ -68,11 +68,8 @@ onMounted(() => {
   startGameLoop()
 })
 
-//todo: need to add upgrade pagination -> upgrade for more pattern exp
-//add new machine
+//todo:
 //need to see if prestige works,
-//need to think about cross shape
-//plus value while clicking
 //add stats
 //advanced engeneering - boosts 1st pattern slot
 //upgrades / machines bought by dc

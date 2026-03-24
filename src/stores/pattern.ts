@@ -89,6 +89,17 @@ export const usePatternStore = defineStore("patterns", {
       this.unlockPattern(id)
       saveGame()
       return true
+    },
+
+    reset() {
+      this.patterns = {
+        square: { level: 1, exp: 0 },
+        triangle: { level: 1, exp: 0 },
+        circle: { level: 1, exp: 0 },
+        cross: { level: 1, exp: 0 }
+      }
+
+      this.unlockedPatterns = ["square"]
     }
   }
 })
