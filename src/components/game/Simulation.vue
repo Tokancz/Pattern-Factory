@@ -33,7 +33,7 @@ import TutorialOverlay from "@/components/ui/TutorialOverlay.vue"
 import { TUTORIAL_STEPS } from "@/data/tutorial"
 
 const slots = useSlotStore()
-const tutorialVisible = ref(false)
+const tutorialVisible = ref(true)
 const tutorialSteps = [
   { title: 'Slots', description: 'Click a slot to select or assign patterns', highlightSelector: '.slot:first-child' },
   { title: 'Patterns', description: 'Each pattern has unique properties', highlightSelector: '.slotPattern' },

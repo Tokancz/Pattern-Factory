@@ -88,7 +88,7 @@ div#app {
   "header currency"
   "main aside";
 
-  overflow: hidden;
+  //overflow: hidden;
 
   header {
     height: 100px;
