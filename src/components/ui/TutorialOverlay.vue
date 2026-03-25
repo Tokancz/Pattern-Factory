@@ -1,5 +1,5 @@
 <template>
-  <div v-if="visible" class="tutorial-overlay">
+  <div v-if="modelValue" class="tutorial-overlay">
     <div class="tutorial-box">
       <h2>{{ step.title }}</h2>
       <p>{{ step.description }}</p>
@@ -15,7 +15,6 @@
       </div>
     </div>
 
-    <!-- Highlight overlay -->
     <div
       v-if="step.highlightSelector"
       class="tutorial-highlight"
@@ -31,22 +30,17 @@ interface TutorialStep {
   title: string
   description: string
   image?: string
-  highlightSelector?: string // CSS selector of element to highlight
+  highlightSelector?: string
 }
 
 const props = defineProps<{
   steps: TutorialStep[]
-  modelValue?: boolean
+  modelValue: boolean
 }>()
 
 const emits = defineEmits<{
-  (e: 'update:modelValue', value: boolean): void
+  (e: "update:modelValue", value: boolean): void
 }>()
-
-const visible = computed({
-  get: () => props.modelValue ?? false,
-  set: (val: boolean) => emits('update:modelValue', val)
-})
 
 const index = ref(0)
 
@@ -56,39 +50,35 @@ const hasPrev = computed(() => index.value > 0)
 
 function nextStep() { if (hasNext.value) index.value++ }
 function prevStep() { if (hasPrev.value) index.value-- }
-function close() { visible.value = false } // will trigger emits
+function close() { emits("update:modelValue", false) }
 
-// Highlight box
 const highlightStyle = ref({})
 
 function updateHighlight() {
-  if (!step.value.highlightSelector) {
-    highlightStyle.value = { display: 'none' }
+  if (!step.value?.highlightSelector) {
+    highlightStyle.value = { display: "none" }
     return
   }
-
   const el = document.querySelector(step.value.highlightSelector) as HTMLElement
   if (!el) {
-    highlightStyle.value = { display: 'none' }
+    highlightStyle.value = { display: "none" }
     return
   }
-
   const rect = el.getBoundingClientRect()
   highlightStyle.value = {
-    position: 'absolute',
+    position: "absolute",
     top: `${rect.top + window.scrollY}px`,
     left: `${rect.left + window.scrollX}px`,
     width: `${rect.width}px`,
     height: `${rect.height}px`,
-    border: '2px solid #FFD700',
-    borderRadius: '8px',
-    pointerEvents: 'none',
+    border: "2px solid #FFD700",
+    borderRadius: "8px",
+    pointerEvents: "none",
     zIndex: 1010,
-    transition: 'all 0.3s ease'
+    transition: "all 0.3s ease"
   }
 }
 
-// watch for step changes
 watch(step, () => nextTick(updateHighlight))
 </script>
 

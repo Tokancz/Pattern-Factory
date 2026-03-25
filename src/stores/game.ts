@@ -24,20 +24,24 @@ export const useGameStore = defineStore("game", {
   getters: {
     expToNextLevel: (state) => Math.floor(100 * Math.pow(1.2, state.level)),
 
-    canPrestige: (state) => state.money >= 1e12
+    // Prestige requires 1M IGM to feel meaningful
+    canPrestige: (state) => state.money >= 1_000_000
   },
 
   actions: {
     addMoney(amount: number) {
+      if (isNaN(amount) || !isFinite(amount)) return
       this.money += amount
     },
 
     addExp(amount: number) {
+      if (isNaN(amount) || !isFinite(amount)) return
       this.exp += amount
       this.checkLevelUp()
     },
 
     addDC(amount: number) {
+      if (isNaN(amount) || !isFinite(amount)) return
       this.dc += amount
     },
 
@@ -47,9 +51,11 @@ export const useGameStore = defineStore("game", {
     },
 
     checkLevelUp() {
-      while (this.exp >= this.expToNextLevel) {
+      let safety = 0
+      while (this.exp >= this.expToNextLevel && safety < 1000) {
         this.exp -= this.expToNextLevel
         this.level++
+        safety++
       }
     },
 
@@ -58,33 +64,36 @@ export const useGameStore = defineStore("game", {
     },
 
     getPrestigeGain() {
-      return Math.floor(Math.log10(this.money + 1))
+      // PP = floor(log10(money / 10000)) — meaningful scaling
+      // 1M IGM = 2 PP, 100M = 4 PP, 1B = 5 PP
+      if (this.money < 1_000_000) return 0
+      return Math.floor(Math.log10(this.money / 10_000))
     },
 
     prestige() {
-      const gained = this.getPrestigeGain()// 1. calculate gain
-
+      const gained = this.getPrestigeGain()
       if (gained <= 0) return
 
       this.prestigePoints += gained
-      // 2. reset all systems
+
       const patterns = usePatternStore()
       const slots = useSlotStore()
       const upgrades = useUpgradeStore()
       const machines = useMachineStore()
 
       this.resetRun()
-      patterns.reset()
+      patterns.reset()   // resets pattern levels too
       slots.reset()
-      upgrades.reset()
+      upgrades.reset()   // keeps prestigeLevels
       machines.reset()
 
-      saveGame()// 3. save
+      saveGame()
     },
 
     resetRun() {
       this.money = 0
       this.dc = 0
+      this.exp = 0
       this.level = 1
     }
   }

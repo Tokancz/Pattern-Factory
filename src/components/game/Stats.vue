@@ -1,55 +1,55 @@
 <template>
-    <div id="stat-grid">
-        <h3>Stats</h3>
-        <div class="columns">
-            <div class="column">
-                <p>Click Power: {{ formatNumber(5 * upgrades.getClickPower) }}</p>
-                <p>Speed Multiplier: {{ formatNumber(upgrades.getSpeedMultiplier) }}</p>
-                <p>Exp Multiplier: {{ formatNumber(upgrades.getExpMultiplier) }}</p>
-            </div>
-            <div class="column">
-                <p>Sell Multiplier: {{ formatNumber(upgrades.getSellMultiplier) }}</p>
-            </div>
-        </div>
+  <div id="stat-grid">
+    <h3>Stats</h3>
+    <div class="columns">
+      <div class="column">
+        <p>Click Power: {{ formatNumber(upgrades.getClickPower) }}</p>
+        <p>Speed Multiplier: {{ formatNumber(upgrades.getSpeedMultiplier) }}x</p>
+        <p>EXP Multiplier: {{ formatNumber(upgrades.getExpMultiplier) }}x</p>
+      </div>
+      <div class="column">
+        <p>Sell Multiplier: {{ formatNumber(upgrades.getSellMultiplier) }}x</p>
+        <p>Output Bonus: {{ formatNumber(upgrades.getPrestigeOutputBonus) }}x</p>
+      </div>
     </div>
+  </div>
 </template>
 
 <script setup lang="ts">
-    import { useUpgradeStore } from '@/stores/upgrade';
-    import { formatNumber } from '@/utils/format';
+import { useUpgradeStore } from "@/stores/upgrade"
+import { formatNumber } from "@/utils/format"
 
-    const upgrades = useUpgradeStore()
+const upgrades = useUpgradeStore()
 </script>
 
 <style scoped lang="scss">
-    #stat-grid {
-        grid-column: stats;
+#stat-grid {
+  grid-column: stats;
 
-        display: grid;
-        grid-template-columns: 2fr 6fr;
-        background-color: var(--primary);
-        color: var(--black);
+  display: grid;
+  grid-template-columns: 2fr 6fr;
+  background-color: var(--primary);
+  color: var(--black);
 
-        h3 {
-            display: block;
-            width: 100%;
-            height: 100%;
-            font-size: 3em;
-            padding: 10px;
+  h3 {
+    display: block;
+    width: 100%;
+    height: 100%;
+    font-size: 3em;
+    padding: 10px;
+    border-right: 4px solid var(--black);
+  }
 
-            border-right: 4px solid var(--black);
-        }
-        .columns {
-            width: 100%;
-            @include flexRow(10px, start, end);
-            padding: 10px;
+  .columns {
+    width: 100%;
+    @include flexRow(10px, start, end);
+    padding: 10px;
 
-            .column {
-                @include flexColumn(5px, start, start);
-
-                font-weight: bold;
-                font-size: 1.25em;
-            }
-        }
+    .column {
+      @include flexColumn(5px, start, start);
+      font-weight: bold;
+      font-size: 1.25em;
     }
+  }
+}
 </style>
