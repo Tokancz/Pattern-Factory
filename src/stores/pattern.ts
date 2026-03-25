@@ -21,11 +21,15 @@ export const usePatternStore = defineStore("patterns", {
 
     expToNext: () => (lvl: number) => Math.floor(10 * Math.pow(1.5, lvl)),
 
+    // FIX: getPatternValue now includes ALL multipliers so Inventory
+    // shows the real value a slot will actually produce — including
+    // prestige output bonus, machines, and sell multiplier.
+    // Previously prestige upgrades were not counted here.
     getPatternValue: (state) => (id: string) => {
       const base = PATTERNS[id].baseValue
       const lvl = state.patterns[id].level
 
-      // fix: level 1 = base value
+      // Level 1 = base value, each level ×1.5
       let value = base * Math.pow(1.5, lvl - 1)
 
       const upgrades = useUpgradeStore()
@@ -34,6 +38,10 @@ export const usePatternStore = defineStore("patterns", {
       if (type === "money") {
         value *= upgrades.getSellMultiplier
       }
+
+      // Include prestige output bonus so the inventory "display" is accurate.
+      // The slot store also applies this, but here we want the true final value.
+      value *= upgrades.getPrestigeOutputBonus
 
       return value
     }
