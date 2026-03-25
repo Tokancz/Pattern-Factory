@@ -14,7 +14,9 @@
 
     <main>
       <Simulation />
-      <router-view />
+      <div id="shop">
+        <router-view />
+      </div>
       <Stats />
       <footer>
         <p>Created by Mates</p>
@@ -126,6 +128,9 @@ div#app {
     "stats"
     "footer";
 
+    #shop {
+      grid-area: shop;
+    }
     footer {
       grid-area: footer;
       @include flexRow(30px, center, center);
