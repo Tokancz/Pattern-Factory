@@ -135,7 +135,7 @@ div#app {
     }
   }
   aside {
-    height: calc(100dvh - 100px);
+    //height: calc(100dvh - 100px);
     grid-area: aside;
 
     display: grid;
@@ -152,6 +152,8 @@ div#app {
       li {
         width: 100%;
         height: 100%;
+
+        @include flexRow(0, center, center);
 
         border-bottom: 2px solid var(--primary);
         border-top: 2px solid var(--primary);

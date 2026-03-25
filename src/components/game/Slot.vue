@@ -98,7 +98,7 @@ function handleClick(event: MouseEvent) {
   }
   slots.clickSlot(props.slot.id)
 
-  spawnFloatingText(event, `+${ formatNumber(5 * upgrades.getClickPower) }`)
+  spawnFloatingText(event, `+${ formatNumber(upgrades.getClickPower) }`)
 }
 
 function handleWheel(event: WheelEvent) {

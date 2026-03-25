@@ -28,9 +28,9 @@ export const useSlotStore = defineStore("slots", {
     baseSpeed: 1,
     selectedSlotId: null as number | null
   }),
-  
+
   getters: {
-    getDefaultSlots: () => [...DEFAULT_SLOTS], // <-- export default slots
+    getDefaultSlots: () => [...DEFAULT_SLOTS]
   },
 
   actions: {
@@ -55,16 +55,21 @@ export const useSlotStore = defineStore("slots", {
       const game = useGameStore()
       const patterns = usePatternStore()
 
-      // 🔥 guard delta
-      if (!delta || isNaN(delta)) return
+      if (!delta || isNaN(delta) || !isFinite(delta)) return
+      // Cap delta to prevent offline catch-up spikes causing NaN
+      const safeDelta = Math.min(delta, 3600)
 
       this.slots.forEach(slot => {
         if (!slot.unlocked || !slot.patternId) return
 
-        const maxProgress = PATTERNS[slot.patternId].baseProgress || 100
+        const maxProgress = PATTERNS[slot.patternId]?.baseProgress ?? 100
 
-        slot.progress += delta * this.getSlotSpeed(slot)
-        slot.progress = typeof slot.progress === "number" && !isNaN(slot.progress) ? slot.progress : 0
+        const speed = this.getSlotSpeed(slot)
+        const gain = safeDelta * speed
+
+        if (isNaN(gain) || !isFinite(gain)) return
+
+        slot.progress += gain
 
         if (slot.progress >= maxProgress) {
           this.completeSlot(slot, game, patterns)
@@ -75,43 +80,39 @@ export const useSlotStore = defineStore("slots", {
     clickSlot(slotId: number) {
       const slot = this.slots.find(s => s.id === slotId)
       if (!slot || !slot.patternId) return
-
-      if (slot.patternId === "cross") return // 👈 important
+      if (slot.patternId === "cross") return
 
       const upgrades = useUpgradeStore()
-      const clickPower = upgrades.getClickPower
-
-      slot.progress += 5 * clickPower
+      slot.progress += upgrades.getClickPower
     },
 
-    completeSlot(slot: Slot, game: any, patterns: any) {
+    completeSlot(slot: Slot, game: ReturnType<typeof useGameStore>, patterns: ReturnType<typeof usePatternStore>) {
       const upgrades = useUpgradeStore()
       const machines = useMachineStore()
 
-      let value = patterns.getPatternValue(slot.patternId) * slot.outputMultiplier
+      let value = patterns.getPatternValue(slot.patternId!) * slot.outputMultiplier
       value *= machines.getMultiplier("outputBoost")
+      value *= upgrades.getPrestigeOutputBonus
 
-      const type = PATTERNS[slot.patternId].type
-      
+      if (isNaN(value) || !isFinite(value)) return
+
+      const type = PATTERNS[slot.patternId!].type
+
       if (type === "money") game.addMoney(value)
-      if (type === "exp") game.addExp(value)
-      if (type === "dc") game.addDC(value)
-      if (type === "prestige") {
-        let prestigeGain = Math.log10(value + 1) // base scaling (IMPORTANT)
-
-        const boost = 1 + (upgrades.levels.crossBoost || 0) * 0.3// upgrade scaling
-        prestigeGain *= boost
-
-        // minimum gain
-        prestigeGain = Math.max(1, Math.floor(prestigeGain))
-
+      else if (type === "exp") game.addExp(value)
+      else if (type === "dc") game.addDC(value)
+      else if (type === "prestige") {
+        // Cross pattern gives PP: log2 scaling, meaningful but not OP
+        const prestigeGain = Math.max(1, Math.floor(Math.log2(value + 2)))
         game.addPrestigePoints(prestigeGain)
       }
 
       const expMultiplier = upgrades.getExpMultiplier * machines.getMultiplier("expMachine")
-      const expGain = value * 0.4 * expMultiplier
+      const expGain = value * 0.3 * expMultiplier
 
-      patterns.addExp(slot.patternId, expGain)
+      if (!isNaN(expGain) && isFinite(expGain)) {
+        patterns.addExp(slot.patternId!, expGain)
+      }
 
       slot.progress = 0
     },
@@ -119,39 +120,36 @@ export const useSlotStore = defineStore("slots", {
     assignPattern(slotId: number, patternId: string) {
       const slot = this.slots.find(s => s.id === slotId)
       if (!slot) return
-
       slot.patternId = patternId
-      saveGame() // <-- immediately persist
+      slot.progress = 0
+      saveGame()
     },
 
     unlockSlot() {
       const slot = this.slots.find(s => !s.unlocked)
       if (!slot) return
-
       slot.unlocked = true
       saveGame()
     },
 
     selectSlot(id: number) {
       const machines = useMachineStore()
-
-      // ❌ block if machine not unlocked
       if (machines.getLevel("targetedBoost") < 1) return
-
       this.selectedSlotId = id
     },
 
-    cleanSlot(slot: any) {
+    cleanSlot(slot: Slot) {
       return {
         ...slot,
         progress: typeof slot.progress === "number" && !isNaN(slot.progress) ? slot.progress : 0,
         speedMultiplier: typeof slot.speedMultiplier === "number" ? slot.speedMultiplier : 1,
-        outputMultiplier: typeof slot.outputMultiplier === "number" ? slot.outputMultiplier : 1,
+        outputMultiplier: typeof slot.outputMultiplier === "number" ? slot.outputMultiplier : 1
       }
     },
 
     reset() {
       this.slots = this.getDefaultSlots.map(s => ({ ...s }))
+      this.selectedSlotId = null
     }
   }
 })

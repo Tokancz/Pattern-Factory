@@ -5,51 +5,48 @@ export const MACHINES = {
     name: "Scale-Out",
     description: "Unlocks a new pattern slot",
     src: `${BASE}img/icons/server-plus.svg`,
-    baseCost: 100,
-    scale: 10,
-
+    baseCost: 200,
+    scale: 15,
     type: "unlockSlot"
   },
 
   slotBoost: {
     name: "Overclock",
-    description: "Boosts all slot speed",
+    description: "Boosts all slot speed by 25%",
     src: `${BASE}img/icons/flame.svg`,
-    baseCost: 200,
-    scale: 6,
-
+    baseCost: 500,
+    scale: 8,
     type: "globalSpeed",
-    value: 1.2
+    value: 1.25
   },
 
   targetedBoost: {
     name: "Advanced Engineering",
-    description: "Boosts selected slot (Shift + click)",
+    description: "Boosts selected slot speed by 75% (Shift + click to select)",
     src: `${BASE}img/icons/flask-outline.svg`,
-    baseCost: 300,
-    scale: 2.5,
-
+    baseCost: 800,
+    scale: 4,
     type: "targetedBoost",
-    value: 1.5
+    value: 1.75
   },
 
   outputBoost: {
     name: "Industrial Press",
-    description: "Increases all output",
+    description: "Increases all slot output by 20%",
     src: `${BASE}img/icons/factory-building.svg`,
-    baseCost: 500,
-    scale: 4,
+    baseCost: 1200,
+    scale: 5,
     type: "globalOutput",
-    value: 1.15
+    value: 1.2
   },
 
   expMachine: {
     name: "Neural Trainer",
-    description: "Patterns gain more EXP",
+    description: "Patterns gain 30% more EXP",
     src: `${BASE}img/icons/bx-git-repo-forked.svg`,
-    baseCost: 400,
-    scale: 4.5,
+    baseCost: 600,
+    scale: 5,
     type: "expBoost",
-    value: 1.2
+    value: 1.3
   }
 }

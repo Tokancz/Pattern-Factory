@@ -3,8 +3,8 @@
 
     <a id="tag" @click.prevent="openTutorial">Tutorial here</a>
 
-    <TutorialOverlay 
-      v-model:visible="tutorialVisible"
+    <TutorialOverlay
+      v-model="tutorialVisible"
       :steps="tutorialSteps"
     />
 
@@ -21,7 +21,8 @@
     <Slot
       v-for="slot in slots.slots"
       :key="slot.id"
-      :slot="slot" ></Slot>
+      :slot="slot"
+    />
   </div>
 </template>
 
@@ -33,13 +34,8 @@ import TutorialOverlay from "@/components/ui/TutorialOverlay.vue"
 import { TUTORIAL_STEPS } from "@/data/tutorial"
 
 const slots = useSlotStore()
-const tutorialVisible = ref(true)
-const tutorialSteps = [
-  { title: 'Slots', description: 'Click a slot to select or assign patterns', highlightSelector: '.slot:first-child' },
-  { title: 'Patterns', description: 'Each pattern has unique properties', highlightSelector: '.slotPattern' },
-  { title: 'Upgrades', description: 'Upgrade clicking and speed', highlightSelector: '#upgrade-panel' },
-  { title: 'Machines', description: 'Unlock machines to boost production', highlightSelector: '#machine-panel' }
-]
+const tutorialVisible = ref(false)
+const tutorialSteps = TUTORIAL_STEPS
 
 function openTutorial() {
   tutorialVisible.value = true
@@ -63,7 +59,7 @@ function openTutorial() {
     position: absolute;
     width: 100%;
     height: 100%;
-    
+
     @include flexColumn(0, space-between);
 
     padding: 10px;
@@ -79,12 +75,9 @@ function openTutorial() {
         width: 60px;
         user-select: none;
       }
-      p {
-        font-size: 18px;
-        color: var(--black);
-      }
     }
   }
+
   #tag {
     position: absolute;
     top: 0;
@@ -95,6 +88,7 @@ function openTutorial() {
     color: var(--white);
     padding: 10px 20px;
     cursor: pointer;
+    z-index: 10;
   }
 }
 </style>
