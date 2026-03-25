@@ -1,322 +1,190 @@
 <template>
-  <Login v-if="!isNameSet" />
+  <Login v-if="!user.loggedIn" />
 
-  <HeaderBar v-if="isNameSet"
-    :gainedMoney="gainedMoney"
-    :lvlPopUp="lvlPopUp"
-    :mobileMenu="mobileMenu"
-    :openedShop="openedShop"
-    :formatNumber="formatNumber"
-    @openMenu="mobileMenu = true"
-  />
-  <main v-if="isNameSet">
-    <StatsAside
-      v-if="!mobileMenu"
-      :incomePerSecond="formatNumber( Math.floor(incomePerSecond * 100) / 100 )"
-      :idleIncomePerSecond="formatNumber( Math.floor(idleIncomePerSecond * 100) / 100 )"
-      :creatingProgress="creatingProgress"
-      :currentPattern="currentPattern"
-      :displayValue="displayValue"
-      :shapes="shapes"
-    />
-
-    <FactorySimulation
-      :machines="machines"
-      :parts="parts"
-      :shapes="shapes"
-      :currentPattern="currentPattern"
-      :creatingProgress="creatingProgress"
-      @clickFactory="click"
-      :machinePos="machinePos"
-      :partStyle="partStyle"
-    />
-
-    <!-- SHOP MENU -->
-    <section id="shopList">
-      <img src="/img/Shop.png" draggable="false" />
-      <aside>
-        <div class="shop_header">
-          <h2>SHOP</h2>
-          <img src="/img/ShoppingCart.png" draggable="false" />
-        </div>
-
-        <div class="shop_buttons">
-          <button class="button" @click="openedShop = 'patterns'">Patterns</button>
-          <button class="button" @click="openedShop = 'machines'">Machines</button>
-          <button class="button" @click="openedShop = 'upgrades'">Upgrades</button>
-          <button class="button" @click="openedShop = 'prestige'">Prestige</button>
-          <button class="button" @click="openedShop = 'inventory'">Inventory</button>
-        </div>
-      </aside>
-    </section>
-
-    <!-- UNIVERSAL SHOP TAB -->
-    <section class="tab" v-if="shopConfig">
-      <div class="shop_header">
-        <h4>{{ shopConfig.title }}</h4>
-        <p @click="openedShop = ''">X</p>
+  <template v-else>
+    <header>
+      <div>
+        <h1>{{ user.factoryName }}</h1>
+        <p>{{ user.username }}</p>
       </div>
+      <ProgressBar :type="'level'" :length="15"/>
+    </header>
 
-      <div class="container">
-        <ShopCard
-          v-for="item in shopConfig.items"
-          :key="getItemKey(item)"
-          :type="shopConfig.type"
-          :data="item"
-          :shapes="shapes"
-          :formatNumber="formatNumber"
-          :displayValue="displayValue"
-          @buy="(val) => shopConfig!.action(val)"
-          @select="(val) => shopConfig!.action(val)"
-          @prestige="() => shopConfig!.action()"
-          v-show="shopConfig.filter ? shopConfig.filter(item) : true"
-        />
-      </div>
-    </section>
+    <CurrencyDisplay />
 
-    <!-- MOBILE MENU -->
-    <section id="mobileMenu" v-if="mobileMenu">
-      <img src="/img/Shop.png" draggable="false" />
-      <aside>
-        <div class="shop_header">
-          <h2>MENU</h2>
-          <i @click="mobileMenu = false" class="fa-solid fa-chevron-up"></i>
-        </div>
+    <main>
+      <Simulation />
+      <router-view />
+      <Stats />
+      <footer>
+        <p>Created by Mates</p>
+      </footer>
+    </main>
 
-        <div class="shop_buttons">
-          <button @click="mobileOpen('patterns')">Patterns</button>
-          <button @click="mobileOpen('machines')">Machines</button>
-          <button @click="mobileOpen('upgrades')">Upgrades</button>
-          <button @click="mobileOpen('prestige')">Prestige</button>
-          <button @click="mobileOpen('inventory')">Inventory</button>
-        </div>
-      </aside>
-    </section>
-
-    <!-- OFFLINE REWARD -->
-    <div v-if="showOfflinePopup" id="offlineReward">
-      <p @click="closeOfflinePopup">X</p>
-      <h3>Welcome back!</h3>
-      <p>You earned {{ formatNumber(offlineReward) }} IGM</p>
-    </div>
-  </main>
-  <CurrencyBar :money="formatNumber(money)" :dc="formatNumber(dc)" v-if="isNameSet" />
+    <aside>
+      <nav>
+        <li><router-link to="/Pattern-Factory/patterns">PATTERNS</router-link></li>
+        <li><router-link to="/Pattern-Factory/upgrades">UPGRADES</router-link></li>
+        <li><router-link to="/Pattern-Factory/machines">MACHINES</router-link></li>
+        <li><router-link to="/Pattern-Factory/inventory">INVENTORY</router-link></li>
+        <li><router-link to="/Pattern-Factory/prestige">PRESTIGE</router-link></li>
+      </nav>
+      <img src="/img/Stripes.png" alt="Stripes Background" aria-hidden="true" draggable="false">
+    </aside>
+  </template>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from "vue"
-import { gameStore, isNameSet } from "@/stores/useGameStore"
+import { onMounted } from "vue"
+import { useSlotStore } from "@/stores/slot"
+import { useUpgradeStore } from "@/stores/upgrade"
+import { useUserStore } from "@/stores/user"
+import { loadGame, startAutoSave } from "@/utils/save"
+import { startGameLoop } from "@/composables/gameLoop"
 
-import { useGameState } from "@/composables/useGameState"
-import { usePatterns } from "@/composables/usePatterns"
-import { useFactory } from "@/composables/useFactory"
-import { usePrestige } from "@/composables/usePrestige"
-import { useOffline } from "@/composables/useOffline"
-import { useSaveSystem } from "@/composables/useSaveSystem"
+import CurrencyDisplay from "@/components/ui/CurrencyDisplay.vue"
+import ProgressBar from "@/components/ui/ProgressBar.vue"
+import Simulation from "@/components/game/Simulation.vue"
+import Stats from "./components/game/Stats.vue"
+import Login from "./components/ui/Login.vue"
 
-import HeaderBar from "@/components/HeaderBar.vue"
-import FactorySimulation from "@/components/FactorySimulation.vue"
-import ShopCard from "@/components/ShopCard.vue"
-import CurrencyBar from "@/components/CurrencyBar.vue"
-import Login from "@/components/Login.vue"
-import StatsAside from "@/components/StatsAside.vue"
+const slotStore = useSlotStore()
+const upgradeStore = useUpgradeStore()
+const user = useUserStore() // ✅ reactive store reference
 
-import type { Pattern } from "@/types/Pattern"
-import type { Upgrades } from "@/types/Upgrade"
-
-// ---------- TYPES ----------
-type ShopType =
-  | "patterns"
-  | "machines"
-  | "upgrades"
-  | "inventory"
-  | "prestige"
-
-// ---------- COLORS ----------
-const colors = {
-  gray: "#cdcdcd",
-  red: "#ff4d4d",
-  blue: "#85a7ff",
-  green: "#4ddf88",
-  yellow: "#ffd972",
-  purple: "#9858ed",
-  cyan: "#4dd2df",
-} as const
-
-// ---------- GAME STATE ----------
-const { money, dc, upgrades } = gameStore
-const { gainExp, formatNumber } = useGameState()
-
-// ---------- PATTERNS ----------
-const {
-  patterns,
-  patternList,
-  ownedPatterns,
-  currentPattern,
-  setPattern,
-  buyPattern,
-  displayValue,
-  shapes,
-} = usePatterns(colors)
-
-// ---------- FACTORY ----------
-const {
-  machines,
-  parts,
-  creatingProgress,
-  click,
-  startFactoryLoop,
-  machinePos,
-  partStyle,
-} = useFactory(gainExp, colors)
-
-// ---------- PRESTIGE ----------
-const { prestige, calculatePrestigeReward } = usePrestige(
-  patterns,
-  ref([]),
-  parts,
-  creatingProgress
-)
-
-// ---------- OFFLINE ----------
-const { showOfflinePopup, offlineReward, applyOfflineProgress, closeOfflinePopup, idleIncomePerSecond, incomePerSecond } =
-  useOffline()
-
-const { saveGame, loadGame } = useSaveSystem()
-
-// ---------- UI STATE ----------
-const gainedMoney = ref(0)
-const lvlPopUp = ref(false)
-const openedShop = ref("")
-const mobileMenu = ref(false)
-
-// ---------- SHOP CONFIG ----------
-const shopConfig = computed<{
-  title: string
-  items: any[]
-  type: ShopType
-  action: Function
-  filter?: Function
-} | null>(() => {
-  switch (openedShop.value) {
-    case "patterns":
-      return {
-        title: "Pattern Shop",
-        items: patternList.value,
-        type: "patterns",
-        action: buyPattern,
-        filter: (p: Pattern) => canProducePattern(p) && !ownedPatterns.value.includes(p.id),
-      }
-
-    case "machines":
-      return {
-        title: "Machines",
-        items: machines.value,
-        type: "machines",
-        action: buyMachine,
-      }
-
-    case "upgrades":
-      return {
-        title: "Upgrades",
-        items: Object.values(upgrades.value),
-        type: "upgrades",
-        action: buyUpgrade,
-      }
-
-    case "inventory":
-      return {
-        title: "Inventory",
-        items: ownedPatterns.value
-          .map((id) => patterns[id])
-          .filter(Boolean),
-        type: "inventory",
-        action: setPattern,
-      }
-
-    case "prestige":
-      return {
-        title: "Prestige",
-        items: [{ reward: calculatePrestigeReward() }],
-        type: "prestige",
-        action: prestige,
-      }
-
-    default:
-      return null
-  }
-})
-
-// ---------- HELPERS ----------
-function getItemKey(item: any) {
-  if (!item) return Math.random()
-  if ("id" in item) return item.id
-  if ("key" in item) return item.key
-  if ("reward" in item) return "prestige"
-  return Math.random()
-}
-
-// ---------- LOGIC ----------
-function buyMachine(machine: any) {
-  if (money.value >= machine.price && !machine.owned) {
-    money.value -= machine.price
-    machine.owned = true
-  }
-}
-
-function buyUpgrade(upgradeKey: keyof Upgrades) {
-  const upgrade = upgrades.value[upgradeKey]
-  if (!upgrade || money.value < upgrade.value) return
-
-  money.value -= upgrade.value
-  upgrade.lvl++
-
-  // cost scaling
-  const costScale = upgrade.valueScale ?? 1.6
-  upgrade.value = Math.floor((upgrade.baseCost ?? 50) * Math.pow(costScale, upgrade.lvl))
-
-  // power scaling
-  const powerScale = upgrade.powerScale ?? 1.15
-  upgrade.power = Number(((upgrade.baseValue ?? 1) * Math.pow(powerScale, upgrade.lvl)).toFixed(2))
-}
-
-const ownedMachineCapabilities = computed(() => ({
-  color: machines.value.some((m) => m.id === "color" && m.owned),
-  cut: machines.value.some((m) => m.id === "cut" && m.owned),
-  merged: machines.value.some((m) => m.id === "merge" && m.owned),
-}))
-
-function canProducePattern(pattern: Pattern) {
-  return Object.entries(pattern.requirements).every(
-    ([req, needed]) =>
-      !needed || (ownedMachineCapabilities.value as any)[req]
-  )
-}
-
-function mobileOpen(tab: string) {
-  openedShop.value = tab
-}
-
-// ---------- INIT ----------
 onMounted(() => {
-  loadGame(patterns)
-  applyOfflineProgress()
-  startFactoryLoop()
-  saveGame()
+  const data = loadGame()
+
+  if (data) {
+    const now = Date.now()
+    const rawDelta = (now - data.timestamp) / 1000
+    const cap = upgradeStore.getOfflineCap
+    const delta = Math.min(rawDelta, cap)
+    slotStore.tick(delta)
+  }
+
+  startAutoSave()
+  startGameLoop()
 })
 
-
-//Todo: 
-//dailt only avaible
-//prestige format
-//Prestige cur pattern reset
-//Fx sfx ui - lobbby hudba + mute/volume butun
-//watch from cajty website
-//idle Cap - upgrade to idle cap
-//stat idle cap
-
+//todo:
+//need to see if prestige works,
+//add stats
+//advanced engeneering - boosts 1st pattern slot
+//upgrades / machines bought by dc
 </script>
 
 <style lang="scss">
-@use "@/styles/main.scss" as *;
+div#app {
+  height: 100dvh;
+  width: 100%;
+  max-height: 1024px;
+  max-width: 1440px;
+
+  display: grid;
+  grid-template-columns: 10fr 4fr;
+  grid-template-rows: 1fr 9fr;
+  grid-template-areas: 
+  "header currency"
+  "main aside";
+
+  //overflow: hidden;
+
+  header {
+    height: 100px;
+
+    @include flexRow(0, space-between);
+    
+    padding: 0 40px 0 20px;
+    grid-area: header;
+    font-weight: bold;
+    color: var(--primary);
+
+    div {
+      @include flexColumn(0, center, start );
+      line-height: 1.1;
+      
+
+      h1 {
+        font-size: 3em;
+        text-decoration: underline;
+      }
+      p {
+        font-size: 1.25em;
+        text-decoration: underline;
+      }
+    }
+  }
+  main {
+    grid-area: main;
+
+    display: grid;
+    grid-template-rows: 3fr 4fr 1fr 40px;
+    grid-template-areas: 
+    "patterns"
+    "shop"
+    "stats"
+    "footer";
+
+    footer {
+      grid-area: footer;
+      @include flexRow(30px, center, center);
+      > p {
+        font-size: 0.9em;
+      }
+    }
+  }
+  aside {
+    height: calc(100dvh - 100px);
+    grid-area: aside;
+
+    display: grid;
+    grid-template-rows: 6fr 3fr;
+    grid-template-areas: 
+    "nav"
+    "img";
+    overflow: hidden;
+
+    nav {
+      grid-area: nav;
+      @include flexColumn(0, space-around);
+
+      li {
+        width: 100%;
+        height: 100%;
+
+        border-bottom: 2px solid var(--primary);
+        border-top: 2px solid var(--primary);
+        text-align: end;
+
+        padding: 0 20px;
+        cursor: pointer;
+        user-select: none;
+        transition: .3s;
+
+        &:hover {
+          background-color: var(--primary);
+          color: var(--black);
+        }
+        &:hover a {
+          color: var(--black);
+        }
+        a {
+          display: block;
+          width: 100%;
+          color: var(--primary);
+          font-family: "ivy-presto";
+          font-size: 4em;
+          text-decoration: none;
+          list-style: none;
+        }
+      }
+    }
+    img {
+      height: 100%;
+      user-select: none;
+    }
+  }
+}
+
 </style>
