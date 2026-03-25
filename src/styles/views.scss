@@ -43,10 +43,24 @@
                     }
                 }
             }
-        }        
+        }
+
+        .prestige {
+            border: 1px solid var(--secondary);
+            box-shadow: 0 0 5px var(--secondary);
+
+            .upgrade-name {
+                color: var(--secondary);
+            }
+        }
     }
     .arrow {
         padding: 10px 5px;
+
+        &.disabled {
+            opacity: 0.3;
+            pointer-events: none;
+        }
     }
 }
 

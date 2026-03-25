@@ -1,11 +1,11 @@
 <template>
   <div
     class="slot"
-    :class="{ locked: !slot.unlocked, flash: slotFlash, selected: slot.id === slots.selectedSlotId }"
+    :class="{ locked: !slot.unlocked, flash: slotFlash }"
     @click="handleClick"
     @wheel.prevent="handleWheel"
   >
-    <img src="/img/Slot.png" alt="slot background" aria-hidden="true">
+    <img src="/img/Slot.png" alt="slot background" aria-hidden="true" :class="{selected: slot.id === slots.selectedSlotId }">
 
     <div v-if="slot.patternId" class="slotPattern">
       <img v-if="patternData" :src="patternData.visuals.slot" alt="pattern image" draggable="false">
@@ -89,6 +89,7 @@ function handleClick(event: MouseEvent) {
       spawnFloatingText(event, "Machine required")
       return
     }
+    slots.selectSlot(props.slot.id)
   }
 
   if (!props.slot.patternId) {
@@ -180,10 +181,26 @@ function spawnFloatingText(event: MouseEvent, value: string) {
 }
 
 .selected {
-  outline: 3px solid var(--primary);
-  outline: -5px;
-  filter: brightness(1.3);
+  position: relative;
+  animation: pulse 1.2s infinite ease-in-out;
 }
+
+@keyframes pulse {
+  0% {
+    filter: drop-shadow(0 0 6px var(--primary));
+    transform: scale(1);
+  }
+  50% {
+    filter: drop-shadow(0 0 18px var(--primary));
+    transform: scale(1.05);
+  }
+  100% {
+    filter: drop-shadow(0 0 6px var(--primary));
+    transform: scale(1);
+  }
+}
+
+
 
 .floating-text {
   position: absolute;
