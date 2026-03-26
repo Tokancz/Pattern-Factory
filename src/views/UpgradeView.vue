@@ -19,7 +19,7 @@
             </p>
             <p v-if="isMaxed(upgrade)" class="maxed">MAX</p>
 
-            <p class="upgrade-cost">
+            <p class="upgrade-cost" v-if="!upgrade.maxLevel">
               Cost: {{ formatNumber(getUpgradeData(upgrade).cost) }}
               {{ getUpgradeData(upgrade).currency }}
             </p>

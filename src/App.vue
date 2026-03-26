@@ -52,7 +52,7 @@ import Login from "./components/ui/Login.vue"
 
 const slotStore = useSlotStore()
 const upgradeStore = useUpgradeStore()
-const user = useUserStore() // ✅ reactive store reference
+const user = useUserStore()
 
 onMounted(() => {
   const data = loadGame()
@@ -70,10 +70,6 @@ onMounted(() => {
 })
 
 //todo:
-//need to see if prestige works,
-//add stats
-//advanced engeneering - boosts 1st pattern slot
-//upgrades / machines bought by dc
 </script>
 
 <style lang="scss">

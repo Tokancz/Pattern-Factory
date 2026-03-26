@@ -10,7 +10,7 @@
           <div class="text-container">
             <p class="machine-name">{{ machine.name }}</p>
             <p>{{ machine.description }}</p>
-            <p class="machine-cost">Cost: {{ getCost(machine.id) }} {{ getCurrencyLabel(machine.currency) }}</p>
+            <p class="machine-cost">Cost: {{ formatNumber( getCost(machine.id)) }} {{ getCurrencyLabel(machine.currency) }}</p>
           </div>
 
           <button @click="buy(machine.id)" class="button">Buy</button>
@@ -26,6 +26,7 @@
 import Panel from "../components/system/Panel.vue"
 import { MACHINES } from "@/data/machines"
 import { useMachineStore } from "@/stores/machine"
+import { formatNumber } from "@/utils/format"
 import { ref, computed } from "vue"
 
 const machines = useMachineStore()
