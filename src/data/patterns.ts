@@ -9,7 +9,7 @@ export const PATTERNS = {
       icon: BASE + "img/patterns/Square.svg",
       slot: BASE + "img/slots/SquareSlot.svg"
     },
-    requirements: null // default owned
+    requirements: null
   },
   triangle: {
     baseValue: 2,
@@ -20,7 +20,7 @@ export const PATTERNS = {
       slot: `${BASE}img/slots/TriangleSlot.svg`
     },
     requirements: {
-      money: 100 // cost to unlock
+      money: 100
     }
   },
   circle: {
@@ -32,7 +32,7 @@ export const PATTERNS = {
       slot: `${BASE}img/slots/CircleSlot.svg`
     },
     requirements: {
-      level: 5,
+      level: 15,
       money: 1000
     }
   },
@@ -46,7 +46,7 @@ export const PATTERNS = {
     },
     requirements: {
       level: 25,
-      dc: 250
+      dc: 500
     }
   }
 }

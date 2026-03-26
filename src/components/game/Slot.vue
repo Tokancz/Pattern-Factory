@@ -83,13 +83,13 @@ function handleClick(event: MouseEvent) {
 
   const machines = useMachineStore()
 
-  // 🎯 selection only if unlocked
   if (event.shiftKey) {
     if (machines.getLevel("targetedBoost") < 1) {
       spawnFloatingText(event, "Machine required")
       return
     }
     slots.selectSlot(props.slot.id)
+    return
   }
 
   if (!props.slot.patternId) {
@@ -97,8 +97,11 @@ function handleClick(event: MouseEvent) {
     if (firstPattern) selectPattern(firstPattern)
     return
   }
-  slots.clickSlot(props.slot.id)
 
+  // Cross is auto-only — silently do nothing on click
+  if (props.slot.patternId === "cross") return
+
+  slots.clickSlot(props.slot.id)
   spawnFloatingText(event, `+${ formatNumber(upgrades.getClickPower) }`)
 }
 
@@ -114,20 +117,19 @@ function handleWheel(event: WheelEvent) {
 
 function spawnFloatingText(event: MouseEvent, value: string) {
   const rect = (event.currentTarget as HTMLElement).getBoundingClientRect()
+  const id = idCounter++
 
   floatingTexts.value.push({
-    id: idCounter++,
+    id,
     x: event.clientX - rect.left + (Math.random() - 0.5) * 20,
     y: event.clientY - rect.top + (Math.random() - 0.5) * 10,
     value
   })
 
-  // remove after animation
   setTimeout(() => {
-    floatingTexts.value = floatingTexts.value.filter(t => t.id !== idCounter - 1)
+    floatingTexts.value = floatingTexts.value.filter(t => t.id !== id)
   }, 2000)
 }
-
 </script>
 
 <style scoped lang="scss">
@@ -199,8 +201,6 @@ function spawnFloatingText(event: MouseEvent, value: string) {
     transform: scale(1);
   }
 }
-
-
 
 .floating-text {
   position: absolute;

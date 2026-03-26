@@ -22,10 +22,6 @@ const DEFAULT_SLOTS: Slot[] = [
   { id: 3, patternId: null, progress: 0, unlocked: false, speedMultiplier: 1, outputMultiplier: 1 }
 ]
 
-// Hard cap on the combined speed multiplier per slot.
-// Without this, stacking Overclock machines becomes near-instant.
-const MAX_SLOT_SPEED = 10
-
 export const useSlotStore = defineStore("slots", {
   state: () => ({
     slots: [...DEFAULT_SLOTS],
@@ -42,18 +38,23 @@ export const useSlotStore = defineStore("slots", {
       const machines = useMachineStore()
       const upgrades = useUpgradeStore()
 
+      // DC speed multiplier is per-pattern
+      const dcSpeedBonus = slot.patternId
+        ? upgrades.getDcSpeedMultiplier(slot.patternId)
+        : 1
+
       let speed =
         this.baseSpeed *
         slot.speedMultiplier *
         upgrades.getSpeedMultiplier *
-        machines.getMultiplier("slotBoost")
+        machines.getMultiplier("slotBoost") *
+        dcSpeedBonus
 
       if (slot.id === this.selectedSlotId) {
         speed *= machines.getMultiplier("targetedBoost")
       }
 
-      // Cap total speed so late-game stacking doesn't break the game
-      return Math.min(speed, MAX_SLOT_SPEED)
+      return speed
     },
 
     tick(delta: number) {
@@ -76,12 +77,8 @@ export const useSlotStore = defineStore("slots", {
 
         if (slot.progress >= maxProgress) {
           this.completeSlot(slot, game, patterns)
-          // completeSlot sets progress = 0, but guard any overshoot
-          slot.progress = 0
         }
 
-        // Safety clamp — keeps progress in [0, maxProgress] at all times
-        // so generateBar never receives an out-of-range value
         slot.progress = Math.max(0, Math.min(slot.progress, maxProgress))
       })
     },
@@ -89,24 +86,26 @@ export const useSlotStore = defineStore("slots", {
     clickSlot(slotId: number) {
       const slot = this.slots.find(s => s.id === slotId)
       if (!slot || !slot.patternId) return
+      // Cross is auto-only — clicking does nothing
       if (slot.patternId === "cross") return
 
       const upgrades = useUpgradeStore()
-      const maxProgress = PATTERNS[slot.patternId]?.baseProgress ?? 100
-      // Clamp click so it doesn't push progress above max mid-tick
-      slot.progress = Math.min(slot.progress + upgrades.getClickPower, maxProgress)
+      slot.progress += upgrades.getClickPower
     },
 
     completeSlot(slot: Slot, game: ReturnType<typeof useGameStore>, patterns: ReturnType<typeof usePatternStore>) {
       const upgrades = useUpgradeStore()
       const machines = useMachineStore()
 
-      // getPatternValue already includes:
-      //   base × level scaling × sellMultiplier × prestigeOutputBonus
-      // We then additionally apply per-slot outputMultiplier and outputBoost machine.
-      // Do NOT apply upgrades.getPrestigeOutputBonus again here — already in getPatternValue.
+      // DC output multiplier is per-pattern
+      const dcOutputBonus = slot.patternId
+        ? upgrades.getDcOutputMultiplier(slot.patternId)
+        : 1
+
       let value = patterns.getPatternValue(slot.patternId!) * slot.outputMultiplier
       value *= machines.getMultiplier("outputBoost")
+      value *= upgrades.getPrestigeOutputBonus
+      value *= dcOutputBonus
 
       if (isNaN(value) || !isFinite(value)) return
 
@@ -120,10 +119,6 @@ export const useSlotStore = defineStore("slots", {
         game.addPrestigePoints(prestigeGain)
       }
 
-      // FIX: Flat 1 EXP per completion × upgrade multipliers only.
-      // Old code: `value * 0.3` — because value grows exponentially with
-      // level and prestige bonuses, EXP scaled out of control and patterns
-      // hit high levels within minutes. Now leveling requires real completions.
       const expMultiplier = upgrades.getExpMultiplier * machines.getMultiplier("expMachine")
       const expGain = 1 * expMultiplier
 

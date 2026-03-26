@@ -1,37 +1,62 @@
 <template>
-  <Panel :title="isPrestigePage ? '⬡ Prestige Upgrades' : 'Upgrades'">
+  <Panel :title="pageTitle">
     <div class="wrapper">
       <button class="button arrow" @click="prevPage" :class="{ disabled: page === 0 }">
         <i class="fa-solid fa-chevron-left"></i>
       </button>
+
       <div class="grid">
-        <div v-for="upgrade in paginatedUpgrades" :key="upgrade.id"
-          class="upgrade" :class="{ prestige: upgrade.type === 'prestige' }">
-
-          <img :src="upgrade.src" class="upgrade-image" draggable="false"/>
-          <div class="text-container">
-            <p class="upgrade-name">{{ upgrade.name }}</p>
-            <p>{{ upgrade.description }}</p>
-
-            <p v-if="getLevel(upgrade) > 0">
-              Lvl: {{ getLevel(upgrade) }}
-              <span v-if="upgrade.maxLevel"> / {{ upgrade.maxLevel }}</span>
-            </p>
-            <p v-if="isMaxed(upgrade)" class="maxed">MAX</p>
-
-            <p class="upgrade-cost" v-if="!upgrade.maxLevel">
-              Cost: {{ formatNumber(getUpgradeData(upgrade).cost) }}
-              {{ getUpgradeData(upgrade).currency }}
-            </p>
+        <!-- Normal upgrades (pages 0-1) -->
+        <template v-if="pageType === 'normal'">
+          <div v-for="upgrade in paginatedItems" :key="upgrade.id" class="upgrade">
+            <img :src="upgrade.src" class="upgrade-image" draggable="false" />
+            <div class="text-container">
+              <p class="upgrade-name">{{ upgrade.name }}</p>
+              <p>{{ upgrade.description }}</p>
+              <p v-if="(levels[upgrade.id] ?? 0) > 0">
+                Lvl: {{ levels[upgrade.id] }}
+                <span v-if="upgrade.maxLevel"> / {{ upgrade.maxLevel }}</span>
+              </p>
+              <p v-if="isNormalMaxed(upgrade)" class="tag-maxed">MAX</p>
+              <p v-else class="upgrade-cost">Cost: {{ formatNumber(getCost(upgrade.id)) }} IGM</p>
+            </div>
+            <button
+              @click="buy(upgrade.id)"
+              class="button"
+              :disabled="isNormalMaxed(upgrade)"
+            >Buy</button>
           </div>
-          <button
-            @click="upgrade.type === 'prestige' ? buyPrestige(upgrade.id) : buy(upgrade.id)"
-            class="button"
-            :disabled="upgrade.type === 'normal' && isMaxed(upgrade)"
-          >Buy
-          </button>
-        </div>
+        </template>
+
+        <!-- DC upgrades (pages 2-3) -->
+        <template v-else-if="pageType === 'dc'">
+          <div v-for="upgrade in paginatedItems" :key="upgrade.id" class="upgrade">
+            <img :src="upgrade.src" class="upgrade-image" draggable="false" />
+            <div class="text-container">
+              <p class="upgrade-name">{{ upgrade.name }}</p>
+              <p>{{ upgrade.description }}</p>
+              <p v-if="(dcLevels[upgrade.id] ?? 0) > 0">Lvl: {{ dcLevels[upgrade.id] }}</p>
+              <p class="upgrade-cost dc-cost">Cost: {{ formatNumber(getDcCost(upgrade.id)) }} DC</p>
+            </div>
+            <button @click="buyDc(upgrade.id)" class="button dc-btn">Buy</button>
+          </div>
+        </template>
+
+        <!-- Prestige upgrades (last page) -->
+        <template v-else-if="pageType === 'prestige'">
+          <div v-for="upgrade in paginatedItems" :key="upgrade.id" class="upgrade prestige">
+            <img :src="upgrade.src" class="upgrade-image" draggable="false" />
+            <div class="text-container">
+              <p class="upgrade-name">{{ upgrade.name }}</p>
+              <p>{{ upgrade.description }}</p>
+              <p v-if="(prestigeLevels[upgrade.id] ?? 0) > 0">Lvl: {{ prestigeLevels[upgrade.id] }}</p>
+              <p class="upgrade-cost prestige-cost">Cost: {{ formatNumber(getPrestigeCost(upgrade.id)) }} PP</p>
+            </div>
+            <button @click="buyPrestige(upgrade.id)" class="button prestige-btn">Buy</button>
+          </div>
+        </template>
       </div>
+
       <button class="button arrow" @click="nextPage" :class="{ disabled: page === totalPages - 1 }">
         <i class="fa-solid fa-chevron-right"></i>
       </button>
@@ -41,99 +66,58 @@
 
 <script setup lang="ts">
 import Panel from "../components/system/Panel.vue"
-import { UPGRADES, PRESTIGE_UPGRADES } from "@/data/upgrades"
+import { UPGRADES, DC_UPGRADES, PRESTIGE_UPGRADES } from "@/data/upgrades"
 import { useUpgradeStore } from "@/stores/upgrade"
 import { formatNumber } from "@/utils/format"
 import { ref, computed } from "vue"
 
 const upgradeStore = useUpgradeStore()
-
-const levels = upgradeStore.levels
-const prestigeLevels = upgradeStore.prestigeLevels
-const getCost = upgradeStore.getCost
-const getPrestigeCost = upgradeStore.getPrestigeCost
-const buy = upgradeStore.buy
-const buyPrestige = upgradeStore.buyPrestige
+const { levels, dcLevels, prestigeLevels, getCost, getDcCost, getPrestigeCost, buy, buyDc, buyPrestige } = upgradeStore
 
 const page = ref(0)
 const perPage = 4
 
-const normalUpgrades = computed(() =>
-  Object.entries(UPGRADES).map(([id, data]) => ({
-    id,
-    ...data,
-    type: "normal"
-  }))
-)
+const normalList = Object.entries(UPGRADES).map(([id, data]) => ({ id, ...data }))
+const dcList = Object.entries(DC_UPGRADES).map(([id, data]) => ({ id, ...data }))
+const prestigeList = Object.entries(PRESTIGE_UPGRADES).map(([id, data]) => ({ id, ...data }))
 
-const prestigeUpgrades = computed(() =>
-  Object.entries(PRESTIGE_UPGRADES).map(([id, data]) => ({
-    id,
-    ...data,
-    type: "prestige"
-  }))
-)
+const normalPages = Math.ceil(normalList.length / perPage)   // 2 pages (6 items)
+const dcPages = Math.ceil(dcList.length / perPage)           // 2 pages (8 items)
+const prestigePages = Math.ceil(prestigeList.length / perPage) // 1 page (3 items)
 
-const isPrestigePage = computed(() => {
-  return page.value >= normalPages.value
+const totalPages = computed(() => normalPages + dcPages + prestigePages)
+
+const pageType = computed(() => {
+  if (page.value < normalPages) return 'normal'
+  if (page.value < normalPages + dcPages) return 'dc'
+  return 'prestige'
 })
 
-const normalPages = computed(() =>
-  Math.ceil(normalUpgrades.value.length / perPage)
-)
+const pageTitle = computed(() => {
+  if (pageType.value === 'normal') return 'Upgrades'
+  if (pageType.value === 'dc') return 'DC Upgrades'
+  return '⬡ Prestige Upgrades'
+})
 
-const prestigePages = computed(() =>
-  Math.ceil(prestigeUpgrades.value.length / perPage)
-)
-
-const totalPages = computed(() =>
-  normalPages.value + prestigePages.value
-)
-
-const paginatedUpgrades = computed(() => {
-  // NORMAL PAGES
-  if (page.value < normalPages.value) {
+const paginatedItems = computed(() => {
+  if (pageType.value === 'normal') {
     const start = page.value * perPage
-    return normalUpgrades.value.slice(start, start + perPage)
+    return normalList.slice(start, start + perPage)
   }
-
-  // PRESTIGE PAGES
-  const prestigePageIndex = page.value - normalPages.value
-  const start = prestigePageIndex * perPage
-
-  return prestigeUpgrades.value.slice(start, start + perPage)
+  if (pageType.value === 'dc') {
+    const dcPage = page.value - normalPages
+    const start = dcPage * perPage
+    return dcList.slice(start, start + perPage)
+  }
+  // prestige
+  const prestigePage = page.value - normalPages - dcPages
+  const start = prestigePage * perPage
+  return prestigeList.slice(start, start + perPage)
 })
 
-function getLevel(upgrade: any) {
-  return upgrade.type === "prestige"
-    ? (prestigeLevels[upgrade.id] ?? 0)
-    : (levels[upgrade.id] ?? 0)
-}
-
-function isMaxed(upgrade: { id: string; maxLevel?: number; type: string }) {
+function isNormalMaxed(upgrade: { id: string; maxLevel?: number }) {
   if (!upgrade.maxLevel) return false
-
-  const lvl = upgrade.type === "prestige"
-    ? (prestigeLevels[upgrade.id] ?? 0)
-    : (levels[upgrade.id] ?? 0)
-
-  return lvl >= upgrade.maxLevel
-}
-
-function getUpgradeData(upgrade: any) {
-  const isPrestige = upgrade.type === "prestige"
-
-  return {
-    level: isPrestige
-      ? (prestigeLevels[upgrade.id] ?? 0)
-      : (levels[upgrade.id] ?? 0),
-
-    cost: isPrestige
-      ? getPrestigeCost(upgrade.id)
-      : getCost(upgrade.id),
-
-    currency: isPrestige ? "PP" : "IGM"
-  }
+  return (levels[upgrade.id] ?? 0) >= upgrade.maxLevel
 }
 
 function nextPage() {

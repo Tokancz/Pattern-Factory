@@ -24,7 +24,6 @@ export const useGameStore = defineStore("game", {
   getters: {
     expToNextLevel: (state) => Math.floor(100 * Math.pow(1.2, state.level)),
 
-    // Prestige requires 1M IGM to feel meaningful
     canPrestige: (state) => state.money >= 1_000_000
   },
 
@@ -64,10 +63,9 @@ export const useGameStore = defineStore("game", {
     },
 
     getPrestigeGain() {
-      // PP = floor(log10(money / 10000)) — meaningful scaling
-      // 1M IGM = 2 PP, 100M = 4 PP, 1B = 5 PP
+      // sqrt scaling: 1M = 3PP, 4M = 6PP, 9M = 9PP, 25M = 15PP
       if (this.money < 1_000_000) return 0
-      return Math.floor(Math.log10(this.money / 10_000))
+      return Math.floor(Math.sqrt(this.money / 100_000))
     },
 
     prestige() {
@@ -82,9 +80,9 @@ export const useGameStore = defineStore("game", {
       const machines = useMachineStore()
 
       this.resetRun()
-      patterns.reset()   // resets pattern levels too
+      patterns.reset()
       slots.reset()
-      upgrades.reset()   // keeps prestigeLevels
+      upgrades.reset()   // keeps dcLevels and prestigeLevels
       machines.reset()
 
       saveGame()
@@ -92,7 +90,7 @@ export const useGameStore = defineStore("game", {
 
     resetRun() {
       this.money = 0
-      this.dc = 0
+      // DC does NOT reset
       this.exp = 0
       this.level = 1
     }

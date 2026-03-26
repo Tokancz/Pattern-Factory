@@ -23,7 +23,11 @@ export function saveGame() {
     game: game.$state,
     patterns: patterns.$state,
     slots: cleanedSlots,
-    upgrades: upgrades.$state,
+    upgrades: {
+      levels: upgrades.levels,
+      dcLevels: upgrades.dcLevels,
+      prestigeLevels: upgrades.prestigeLevels
+    },
     machines: machines.$state,
     user: user.$state,
 
@@ -43,11 +47,10 @@ export function loadGame() {
   if (data.user) userStore.$patch(data.user)
 
   const slotsStore = useSlotStore()
-  // get default slots from store
   const defaultSlots = slotsStore.getDefaultSlots
 
   slotsStore.slots = defaultSlots.map((defaultSlot, i) => {
-    const saved = data.slots[i] || {}
+    const saved = data.slots?.[i] || {}
     return {
       ...defaultSlot,
       ...saved,
@@ -59,10 +62,15 @@ export function loadGame() {
     }
   })
 
-  // patch other stores
+  const upgradesStore = useUpgradeStore()
+  if (data.upgrades) {
+    if (data.upgrades.levels) upgradesStore.$patch({ levels: data.upgrades.levels })
+    if (data.upgrades.dcLevels) upgradesStore.$patch({ dcLevels: data.upgrades.dcLevels })
+    if (data.upgrades.prestigeLevels) upgradesStore.$patch({ prestigeLevels: data.upgrades.prestigeLevels })
+  }
+
   useGameStore().$patch(data.game)
   usePatternStore().$patch(data.patterns)
-  useUpgradeStore().$patch(data.upgrades)
   useMachineStore().$patch(data.machines)
 
   return data
@@ -71,7 +79,7 @@ export function loadGame() {
 export function startAutoSave() {
   setInterval(() => {
     saveGame()
-  }, 5000) // every 5s
+  }, 5000)
 }
 
 export function resetSave() {
