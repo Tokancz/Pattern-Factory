@@ -7,11 +7,17 @@
         <h1>{{ user.factoryName }}</h1>
         <p>{{ user.username }}</p>
       </div>
-      <ProgressBar :type="'level'" :length="15"/>
-      <img v-if="mobileLayout" @click="mobileMenuOpened = true" src="/img/icons/Menu.svg" alt="Menu Icon" aria-hidden="true" class="menu-icon">
+      <ProgressBar v-if="!mobileLayout" :type="'level'" :length="15"/>
+      <img
+        v-if="mobileLayout"
+        @click="mobileMenuOpened = true"
+        src="/img/icons/Menu.svg"
+        alt="Open menu"
+        class="menu-icon"
+      >
     </header>
 
-    <CurrencyDisplay />
+    <CurrencyDisplay :show-level="mobileLayout" />
 
     <main>
       <Simulation />
@@ -23,12 +29,32 @@
         <p>Created by Mates</p>
       </footer>
     </main>
-    <Navbar v-if="!mobileLayout"/>
+
+    <Navbar v-if="!mobileLayout" />
+
+    <!-- Mobile burger menu overlay -->
+    <Transition name="menu-fade">
+      <div
+        v-if="mobileLayout && mobileMenuOpened"
+        class="mobile-menu-overlay"
+        @click.self="mobileMenuOpened = false"
+      >
+        <nav class="mobile-menu" @click="mobileMenuOpened = false">
+          <router-link to="/Pattern-Factory/patterns">PATTERNS</router-link>
+          <router-link to="/Pattern-Factory/upgrades">UPGRADES</router-link>
+          <router-link to="/Pattern-Factory/machines">MACHINES</router-link>
+          <router-link to="/Pattern-Factory/inventory">INVENTORY</router-link>
+          <router-link to="/Pattern-Factory/prestige">PRESTIGE</router-link>
+
+          <img src="/img/Stripes.png" alt="Stripes Background" aria-hidden="true" draggable="false">
+        </nav>
+      </div>
+    </Transition>
   </template>
 </template>
 
 <script setup lang="ts">
-import { onMounted, computed, ref} from "vue"
+import { onMounted, computed, ref } from "vue"
 import { useWindowSize } from "@vueuse/core"
 import { useSlotStore } from "@/stores/slot"
 import { useUpgradeStore } from "@/stores/upgrade"
@@ -65,8 +91,6 @@ onMounted(() => {
   startAutoSave()
   startGameLoop()
 })
-
-//todo:
 </script>
 
 <style lang="scss">
@@ -79,76 +103,164 @@ div#app {
   display: grid;
   grid-template-columns: 10fr 4fr;
   grid-template-rows: 1fr 9fr;
-  grid-template-areas: 
-  "header currency"
-  "main aside";
+  grid-template-areas:
+    "header currency"
+    "main aside";
 
   @media (width <= 1200px) {
     font-size: .8em;
   }
+
   @media (width < 1024px) {
+    max-height: none;
     grid-template-columns: 1fr;
-    grid-template-rows: 100px 1fr 1fr 200px;
-    grid-template-areas: 
-    "header"
-    "currency"
-    "main"
-    "aside";
+    grid-template-rows: auto auto 1fr 1fr;
+    grid-template-areas:
+      "header"
+      "currency"
+      "main"
+      "aside";
+    font-size: .75em;
   }
 
-  //overflow: hidden;
+  @media (width <= 480px) {
+    font-size: .65em;
+  }
 
   header {
     height: 100px;
 
     @include flexRow(0, space-between);
-    
     padding: 0 40px 0 20px;
     grid-area: header;
     font-weight: bold;
     color: var(--primary);
 
+    @media (width < 1024px) {
+      padding: 0 16px;
+      height: 64px;
+    }
+
     div {
-      @include flexColumn(0, center, start );
+      @include flexColumn(0, center, start);
       line-height: 1.1;
-      
 
       h1 {
         font-size: 3em;
         text-decoration: underline;
+
+        @media (width < 1024px) {
+          font-size: 2.5em;
+        }
       }
       p {
         font-size: 1.25em;
         text-decoration: underline;
+
+        @media (width < 1024px) {
+          font-size: 1.5em;
+        }
       }
     }
+
     img.menu-icon {
       width: 48px;
       user-select: none;
+      cursor: pointer;
+
+      @media (width < 1024px) {
+        width: 36px;
+      }
     }
   }
+
   main {
     grid-area: main;
 
     display: grid;
     grid-template-rows: 3fr 4fr 1fr 40px;
-    grid-template-areas: 
-    "patterns"
-    "shop"
-    "stats"
-    "footer";
+    grid-template-areas:
+      "patterns"
+      "shop"
+      "stats"
+      "footer";
+
+    @media (width < 1024px) {
+      grid-template-rows: repeat(4, auto);
+    }
 
     #shop {
       grid-area: shop;
+      overflow: hidden;
     }
+
     footer {
       grid-area: footer;
       @include flexRow(30px, center, center);
+      padding: 5px 0;
+
       > p {
-        font-size: 0.9em;
+        font-size: 1.25em;
       }
     }
   }
 }
 
+/* Mobile burger menu overlay */
+.mobile-menu-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.75);
+  z-index: 100;
+  @include flexRow(0, flex-end, stretch);
+}
+
+.mobile-menu {
+  width: min(400px, 80vw);
+  height: 100%;
+  background-color: var(--black);
+  @include flexColumn(0, start, stretch);
+  padding: 20px 0;
+
+  a {
+    display: block;
+    padding: 20px 24px;
+    color: var(--primary);
+    font-family: "ivy-presto";
+    font-size: 4em;
+    text-decoration: none;
+    border-bottom: 2px solid var(--primary);
+    transition: background-color 0.2s;
+
+    &:hover,
+    &.router-link-active {
+      background-color: var(--primary);
+      color: var(--black);
+    }
+  }
+  img {
+    height: 100%;
+  }
+}
+
+/* Slide-in transition */
+.menu-fade-enter-active {
+  transition: opacity 0.2s ease;
+  .mobile-menu {
+    transition: transform 0.25s ease;
+  }
+}
+.menu-fade-leave-active {
+  transition: opacity 0.2s ease 0.05s;
+  .mobile-menu {
+    transition: transform 0.2s ease;
+  }
+}
+.menu-fade-enter-from,
+.menu-fade-leave-to {
+  opacity: 0;
+  .mobile-menu {
+    transform: translateX(100%);
+  }
+}
 </style>

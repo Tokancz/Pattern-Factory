@@ -98,7 +98,6 @@ function handleClick(event: MouseEvent) {
     return
   }
 
-  // Cross is auto-only — silently do nothing on click
   if (props.slot.patternId === "cross") return
 
   slots.clickSlot(props.slot.id)
@@ -137,15 +136,22 @@ function spawnFloatingText(event: MouseEvent, value: string) {
   width: 120px;
   height: 120px;
   position: relative;
+  flex-shrink: 0;
 
   cursor: pointer;
   user-select: none;
+
+  @media (width <= 425px) {
+    width: 100px;
+    height: 100px;
+  }
 
   > img {
     position: absolute;
     width: 100%;
     height: 100%;
   }
+
   .slotPattern {
     width: 100%;
     height: 100%;
@@ -158,16 +164,32 @@ function spawnFloatingText(event: MouseEvent, value: string) {
       height: 60%;
       user-select: none;
     }
+
+    p {
+      font-size: 1em;
+
+      @media (width <= 768px) {
+        font-size: .8em;
+      }
+    }
+
     .progressBar {
       position: absolute;
-      bottom: -60px;
+      bottom: -50px;
       left: 50%;
       width: 100px;
 
       transform: translateX(-50%);
       text-align: center;
+
+      @media (width <= 768px) {
+        font-size: .9em;
+        width: 80px;
+        bottom: -40px;
+      }
     }
   }
+
   .empty {
     width: 60%;
     position: absolute;

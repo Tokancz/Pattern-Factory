@@ -92,7 +92,7 @@ watch(step, () => nextTick(updateHighlight))
   z-index: 1000;
 
   .tutorial-box {
-    width: 600px;
+    width: min(600px, 90vw);
     @include flexColumn(20px, center);
     padding: 2rem;
     background: var(--secondary);

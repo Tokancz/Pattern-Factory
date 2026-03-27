@@ -1,131 +1,228 @@
 @use "@/styles/main.scss" as *;
+
 .wrapper {
-    width: 100%;
+  width: 100%;
+  height: 100%;
+  grid-column: 1 / span 4;
+
+  @include flexRow(20px);
+
+  @media (width <= 1024px) {
+    gap: 10px;
+  }
+
+  @media (width <= 480px) {
+    gap: 6px;
+  }
+
+  .grid {
     height: 100%;
-
-    grid-column: 1/ span 4;
-
-    @include flexRow(20px, space-between, center);
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-gap: 20px;
 
     @media (width <= 1024px) {
-        gap: 10px;
+      gap: 10px;
     }
 
-    .grid {
-        display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        grid-gap: 20px;
-
-        @media (width <= 1024px) {
-            gap: 10px;
-        }
-
-        .upgrade, .machine {
-            width: 100%;
-            height: 100%;
-            max-height: 300px;
-            max-width: 250px;
-
-            @include flexColumn(10px, start, center);
-            padding: 20px 10px;
-
-            color: var(--black);
-            background-color: var(--white);
-
-            .upgrade-image, .machine-image {
-                width: 64px;
-                user-select: none;
-            }
-            .text-container {
-                height: 100%;
-                @include flexColumn(5px, center, center);
-
-                p {
-                    text-align: center;
-                    font-size: .8em;
-
-                    &.upgrade-name, &.machine-name {
-                        font-size: 1.3em;
-                    }
-                    &.upgrade-cost, &.machine-cost {
-                        color: var(--secondary);
-                    }
-                }
-            }
-        }
-
-        .prestige {
-            border: 1px solid var(--secondary);
-            box-shadow: 0 0 5px var(--secondary);
-
-            .upgrade-name {
-                color: var(--secondary);
-            }
-        }
+    /* 2-col layout from 768px down */
+    @media (width <= 768px) {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
     }
-    .arrow {
-        padding: 10px 5px;
 
-        &.disabled {
-            opacity: 0.3;
-            pointer-events: none;
+    @media (width <= 480px) {
+      gap: 6px;
+    }
+
+    .upgrade, .machine {
+      width: 100%;
+      height: 100%;
+      min-height: 0;
+
+      @include flexColumn(10px, start, center);
+      padding: 20px 10px;
+
+      color: var(--black);
+      background-color: var(--white);
+
+      @media (width <= 768px) {
+        padding: 14px 8px;
+        gap: 6px;
+      }
+
+      @media (width <= 480px) {
+        padding: 10px 6px;
+        gap: 4px;
+      }
+
+      .upgrade-image, .machine-image {
+        width: 64px;
+        user-select: none;
+
+        @media (width <= 768px) {
+          width: 44px;
         }
-    }
-}
 
-.pattern {
-    width: 100%;
-    height: 100%;
+        @media (width <= 480px) {
+          width: 36px;
+        }
+      }
 
-    @include flexColumn(10px, start, center);
-    padding: 20px 30px;
-
-    color: var(--black);
-    background-color: var(--white);
-
-    .pattern-image {
-        width: 80px;
-    }
-    .text-container {
+      .text-container {
         height: 100%;
         @include flexColumn(5px, center, center);
 
         p {
-            text-align: center;
-            font-size: .9em;
-            
-            &.pattern-value {
-                color: var(--secondary);
-            }
-            &.requirements {
-                @include flexColumn();
-                font-size: 0.8em;
-                color: var(--secondary);
-            }
-            &.pattern-name {
-                font-size: 1.5em;
-            }
-        }
-    }
-    .text-container-inventory {
-        height: 100%;
-        @include flexColumn(10px, center, center);
+          text-align: center;
+          font-size: .8em;
 
-        p {
-            text-align: center;
-            font-size: 1.1em;
-            
-            &.pattern-value {
-                color: var(--secondary);
+          @media (width <= 480px) {
+            font-size: .7em;
+          }
+
+          &.upgrade-name, &.machine-name {
+            font-size: 1.3em;
+
+            @media (width <= 768px) {
+              font-size: 1.1em;
             }
-            &.requirements {
-                @include flexColumn();
-                font-size: 0.8em;
-                color: var(--secondary);
+
+            @media (width <= 480px) {
+              font-size: 1em;
             }
-            &.pattern-name {
-                font-size: 1.5em;
-            }
+          }
+
+          &.upgrade-cost, &.machine-cost {
+            color: var(--secondary);
+          }
         }
+      }
     }
+
+    .prestige {
+      border: 1px solid var(--secondary);
+      box-shadow: 0 0 5px var(--secondary);
+
+      .upgrade-name {
+        color: var(--secondary);
+      }
+    }
+  }
+
+  .arrow {
+    padding: 10px 5px;
+    flex-shrink: 0;
+
+    @media (width <= 480px) {
+      padding: 6px 4px;
+      font-size: .8em;
+    }
+
+    &.disabled {
+      opacity: 0.3;
+      pointer-events: none;
+    }
+  }
+}
+
+.pattern {
+  width: 100%;
+  height: 100%;
+
+  @include flexColumn(10px, start, center);
+  padding: 20px 30px;
+
+  color: var(--black);
+  background-color: var(--white);
+
+  @media (width <= 768px) {
+    padding: 12px 10px;
+    gap: 6px;
+  }
+
+  @media (width <= 480px) {
+    padding: 8px 6px;
+    gap: 4px;
+  }
+
+  .pattern-image {
+    width: 80px;
+
+    @media (width <= 768px) {
+      width: 54px;
+    }
+
+    @media (width <= 480px) {
+      width: 40px;
+    }
+  }
+
+  .text-container {
+    height: 100%;
+    @include flexColumn(5px, center, center);
+
+    p {
+      text-align: center;
+      font-size: .9em;
+
+      @media (width <= 480px) {
+        font-size: .75em;
+      }
+
+      &.pattern-value {
+        color: var(--secondary);
+      }
+
+      &.requirements {
+        @include flexColumn();
+        font-size: 0.8em;
+        color: var(--secondary);
+      }
+
+      &.pattern-name {
+        font-size: 1.5em;
+
+        @media (width <= 768px) {
+          font-size: 1.2em;
+        }
+      }
+    }
+  }
+
+  .text-container-inventory {
+    height: 100%;
+    @include flexColumn(10px, center, center);
+
+    @media (width <= 768px) {
+      gap: 6px;
+    }
+
+    p {
+      text-align: center;
+      font-size: 1.1em;
+
+      @media (width <= 768px) {
+        font-size: .9em;
+      }
+
+      &.pattern-value {
+        color: var(--secondary);
+      }
+
+      &.requirements {
+        @include flexColumn();
+        font-size: 0.8em;
+        color: var(--secondary);
+      }
+
+      &.pattern-name {
+        font-size: 1.5em;
+
+        @media (width <= 768px) {
+          font-size: 1.2em;
+        }
+      }
+    }
+  }
 }

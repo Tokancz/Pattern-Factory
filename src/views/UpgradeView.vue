@@ -28,7 +28,7 @@
           </div>
         </template>
 
-        <!-- DC upgrades (pages 2-3) -->
+        <!-- DC upgrades -->
         <template v-else-if="pageType === 'dc'">
           <div v-for="upgrade in paginatedItems" :key="upgrade.id" class="upgrade">
             <img :src="upgrade.src" class="upgrade-image" draggable="false" />
@@ -42,7 +42,7 @@
           </div>
         </template>
 
-        <!-- Prestige upgrades (last page) -->
+        <!-- Prestige upgrades -->
         <template v-else-if="pageType === 'prestige'">
           <div v-for="upgrade in paginatedItems" :key="upgrade.id" class="upgrade prestige">
             <img :src="upgrade.src" class="upgrade-image" draggable="false" />
@@ -70,26 +70,31 @@ import { UPGRADES, DC_UPGRADES, PRESTIGE_UPGRADES } from "@/data/upgrades"
 import { useUpgradeStore } from "@/stores/upgrade"
 import { formatNumber } from "@/utils/format"
 import { ref, computed } from "vue"
+import { useWindowSize } from "@vueuse/core"
 
 const upgradeStore = useUpgradeStore()
 const { levels, dcLevels, prestigeLevels, getCost, getDcCost, getPrestigeCost, buy, buyDc, buyPrestige } = upgradeStore
 
+const { width } = useWindowSize()
+
+// Use 2 items per page on smaller screens, 4 on desktop
+const perPage = computed(() => width.value <= 768 ? 2 : 4)
+
 const page = ref(0)
-const perPage = 4
 
 const normalList = Object.entries(UPGRADES).map(([id, data]) => ({ id, ...data }))
 const dcList = Object.entries(DC_UPGRADES).map(([id, data]) => ({ id, ...data }))
 const prestigeList = Object.entries(PRESTIGE_UPGRADES).map(([id, data]) => ({ id, ...data }))
 
-const normalPages = Math.ceil(normalList.length / perPage)   // 2 pages (6 items)
-const dcPages = Math.ceil(dcList.length / perPage)           // 2 pages (8 items)
-const prestigePages = Math.ceil(prestigeList.length / perPage) // 1 page (3 items)
+const normalPages = computed(() => Math.ceil(normalList.length / perPage.value))
+const dcPages = computed(() => Math.ceil(dcList.length / perPage.value))
+const prestigePages = computed(() => Math.ceil(prestigeList.length / perPage.value))
 
-const totalPages = computed(() => normalPages + dcPages + prestigePages)
+const totalPages = computed(() => normalPages.value + dcPages.value + prestigePages.value)
 
 const pageType = computed(() => {
-  if (page.value < normalPages) return 'normal'
-  if (page.value < normalPages + dcPages) return 'dc'
+  if (page.value < normalPages.value) return 'normal'
+  if (page.value < normalPages.value + dcPages.value) return 'dc'
   return 'prestige'
 })
 
@@ -101,18 +106,17 @@ const pageTitle = computed(() => {
 
 const paginatedItems = computed(() => {
   if (pageType.value === 'normal') {
-    const start = page.value * perPage
-    return normalList.slice(start, start + perPage)
+    const start = page.value * perPage.value
+    return normalList.slice(start, start + perPage.value)
   }
   if (pageType.value === 'dc') {
-    const dcPage = page.value - normalPages
-    const start = dcPage * perPage
-    return dcList.slice(start, start + perPage)
+    const dcPage = page.value - normalPages.value
+    const start = dcPage * perPage.value
+    return dcList.slice(start, start + perPage.value)
   }
-  // prestige
-  const prestigePage = page.value - normalPages - dcPages
-  const start = prestigePage * perPage
-  return prestigeList.slice(start, start + perPage)
+  const prestigePage = page.value - normalPages.value - dcPages.value
+  const start = prestigePage * perPage.value
+  return prestigeList.slice(start, start + perPage.value)
 })
 
 function isNormalMaxed(upgrade: { id: string; maxLevel?: number }) {

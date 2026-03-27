@@ -31,6 +31,11 @@ const upgrades = useUpgradeStore()
   background-color: var(--primary);
   color: var(--black);
 
+  @media (width < 425px) {
+    font-size: .8em;
+    grid-template-columns: 1fr;
+  }
+
   h3 {
     display: block;
     width: 100%;
@@ -38,6 +43,12 @@ const upgrades = useUpgradeStore()
     font-size: 3em;
     padding: 10px;
     border-right: 4px solid var(--black);
+
+    @media (width < 425px) {
+      border-right: none;
+      border-bottom: 4px solid var(--black);
+      padding-bottom: 0px;
+    }
   }
 
   .columns {
