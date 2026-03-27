@@ -7,11 +7,19 @@
 
     @include flexRow(20px);
 
+    @media (width <= 1024px) {
+        gap: 10px;
+    }
+
     .grid {
         height: 100%;
         display: grid;
         grid-template-columns: repeat(4, 1fr);
         grid-gap: 20px;
+
+        @media (width <= 1024px) {
+            gap: 10px;
+        }
 
         .upgrade, .machine {
             width: 100%;
@@ -69,7 +77,7 @@
     height: 100%;
 
     @include flexColumn(10px, start, center);
-    padding: 20px 10px;
+    padding: 20px 30px;
 
     color: var(--black);
     background-color: var(--white);
