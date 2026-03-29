@@ -58,12 +58,12 @@ const slotFlash = ref(false)
 
 const patternData = computed(() => {
   if (!props.slot.patternId) return null
-  return PATTERNS[props.slot.patternId]
+  return PATTERNS[props.slot.patternId as keyof typeof PATTERNS]
 })
 
 const maxProgress = computed(() => {
   if (!props.slot.patternId) return 100
-  return PATTERNS[props.slot.patternId].baseProgress || 100
+  return PATTERNS[props.slot.patternId as keyof typeof PATTERNS].baseProgress || 100
 })
 
 const bar = computed(() =>
@@ -111,7 +111,8 @@ function handleWheel(event: WheelEvent) {
   const delta = event.deltaY > 0 ? 1 : -1
   const nextIndex = (currentIndex + delta + availablePatterns.value.length) % availablePatterns.value.length
 
-  selectPattern(availablePatterns.value[nextIndex])
+  const nextPattern = availablePatterns.value[nextIndex]
+  if (nextPattern) selectPattern(nextPattern)
 }
 
 function spawnFloatingText(event: MouseEvent, value: string) {

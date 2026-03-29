@@ -26,14 +26,17 @@ export const usePatternStore = defineStore("patterns", {
     // prestige output bonus, machines, and sell multiplier.
     // Previously prestige upgrades were not counted here.
     getPatternValue: (state) => (id: string) => {
-      const base = PATTERNS[id].baseValue
-      const lvl = state.patterns[id].level
+      if (!(id in PATTERNS)) return 0
+      const p = state.patterns[id]
+      if (!p) return 0
+      const base = PATTERNS[id as keyof typeof PATTERNS].baseValue
+      const lvl = p.level
 
       // Level 1 = base value, each level ×1.5
       let value = base * Math.pow(1.5, lvl - 1)
 
       const upgrades = useUpgradeStore()
-      const type = PATTERNS[id].type
+      const type = PATTERNS[id as keyof typeof PATTERNS].type
 
       if (type === "money") {
         value *= upgrades.getSellMultiplier
@@ -75,7 +78,7 @@ export const usePatternStore = defineStore("patterns", {
 
     buyPattern(id: string) {
       const game = useGameStore()
-      const p = PATTERNS[id]
+      const p = PATTERNS[id as keyof typeof PATTERNS]
 
       if (this.unlockedPatterns.includes(id)) return false
       if (!p.requirements) {
@@ -86,13 +89,13 @@ export const usePatternStore = defineStore("patterns", {
       // check requirements
       const req = p.requirements
 
-      if (req.money && game.money < req.money) return false
-      if (req.dc && game.dc < req.dc) return false
-      if (req.level && game.level < req.level) return false
+      if (req && "money" in req && game.money < req.money) return false
+      if (req && "dc" in req && game.dc < req.dc) return false
+      if (req && "level" in req && game.level < req.level) return false
 
       // passed all checks → unlock and deduct resources if needed
-      if (req.money) game.money -= req.money
-      if (req.dc) game.dc -= req.dc
+      if ("money" in req && req.money !== undefined) game.money -= req.money
+      if ("dc" in req && req.dc !== undefined) game.dc -= req.dc
 
       this.unlockPattern(id)
       saveGame()

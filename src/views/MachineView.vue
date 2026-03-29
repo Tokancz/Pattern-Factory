@@ -10,7 +10,7 @@
           <div class="text-container">
             <p class="machine-name">{{ machine.name }}</p>
             <p>{{ machine.description }}</p>
-            <p class="machine-cost">Cost: {{ formatNumber( getCost(machine.id)) }} {{ getCurrencyLabel(machine.currency) }}</p>
+            <p class="machine-cost">Cost: {{ formatNumber( getCost(machine.id)) }} {{ getCurrencyLabel((machine as any).currency) }}</p>
           </div>
 
           <button @click="buy(machine.id)" class="button">Buy</button>

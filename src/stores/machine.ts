@@ -22,16 +22,17 @@ export const useMachineStore = defineStore("machines", {
 
     getCost: (state) => (id: string) => {
       const lvl = state.levels[id] || 0
-      const base = MACHINES[id].baseCost
+      const machine = MACHINES[id as keyof typeof MACHINES]
+      if (!machine) return 0
 
-      return Math.floor(base * Math.pow(MACHINES[id].scale, lvl))
+      return Math.floor(machine.baseCost * Math.pow(machine.scale, lvl))
     },
 
     getMultiplier: (state) => (id: string) => {
       const lvl = state.levels[id] || 0
-      const machine = MACHINES[id]
+      const machine = MACHINES[id as keyof typeof MACHINES]
 
-      if (!machine || !machine.value) return 1
+      if (!machine || !('value' in machine)) return 1
 
       return Math.pow(machine.value, lvl)
     }
@@ -50,7 +51,7 @@ export const useMachineStore = defineStore("machines", {
       // increase level
       this.levels[id] = (this.levels[id] || 0) + 1
 
-      const machine = MACHINES[id]
+      const machine = MACHINES[id as keyof typeof MACHINES]
 
       // ✅ HANDLE INSTANT EFFECTS HERE
       if (machine.type === "unlockSlot") {

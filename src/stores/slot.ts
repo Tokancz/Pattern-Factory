@@ -67,7 +67,7 @@ export const useSlotStore = defineStore("slots", {
       this.slots.forEach(slot => {
         if (!slot.unlocked || !slot.patternId) return
 
-        const maxProgress = PATTERNS[slot.patternId]?.baseProgress ?? 100
+        const maxProgress = PATTERNS[slot.patternId as keyof typeof PATTERNS]?.baseProgress ?? 100
         const speed = this.getSlotSpeed(slot)
         const gain = safeDelta * speed
 
@@ -109,7 +109,7 @@ export const useSlotStore = defineStore("slots", {
 
       if (isNaN(value) || !isFinite(value)) return
 
-      const type = PATTERNS[slot.patternId!].type
+      const type = PATTERNS[slot.patternId! as keyof typeof PATTERNS].type
 
       if (type === "money") game.addMoney(value)
       else if (type === "exp") game.addExp(value)

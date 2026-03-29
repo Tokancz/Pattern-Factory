@@ -15,7 +15,7 @@
               <p>{{ upgrade.description }}</p>
               <p v-if="(levels[upgrade.id] ?? 0) > 0">
                 Lvl: {{ levels[upgrade.id] }}
-                <span v-if="upgrade.maxLevel"> / {{ upgrade.maxLevel }}</span>
+                <span v-if="(upgrade as any).maxLevel"> / {{ (upgrade as any).maxLevel }}</span>
               </p>
               <p v-if="isNormalMaxed(upgrade)" class="tag-maxed">MAX</p>
               <p v-else class="upgrade-cost">Cost: {{ formatNumber(getCost(upgrade.id)) }} IGM</p>

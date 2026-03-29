@@ -1,8 +1,8 @@
 <template>
   <div v-if="modelValue" class="tutorial-overlay">
     <div class="tutorial-box">
-      <h2>{{ step.title }}</h2>
-      <p>{{ step.description }}</p>
+      <h2>{{ step!.title }}</h2>
+      <p>{{ step!.description }}</p>
 
       <div class="tutorial-actions">
         <button v-if="hasPrev" @click="prevStep" class="button">← Back</button>
@@ -10,13 +10,13 @@
         <button v-else @click="close" class="button">Got it!</button>
       </div>
 
-      <div v-if="step.image" class="tutorial-image">
-        <img :src="step.image" alt="tutorial visual" />
+      <div v-if="step!.image" class="tutorial-image">
+        <img :src="step!.image" alt="tutorial visual" />
       </div>
     </div>
 
     <div
-      v-if="step.highlightSelector"
+      v-if="step!.highlightSelector"
       class="tutorial-highlight"
       :style="highlightStyle"
     ></div>

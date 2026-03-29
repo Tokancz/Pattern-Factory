@@ -14,5 +14,5 @@ export function formatNumber(n: number): string {
   }
 
   n = Math.floor(n * 100) / 100
-  return n + units[i]
+  return n + units[i]!
 }
