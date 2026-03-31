@@ -61,7 +61,7 @@ export const useUpgradeStore = defineStore("upgrades", {
 
     getClickPower: (state) => {
       const lvl = Math.min(state.levels.clickingPower ?? 0, 10)
-      const base = 1 + lvl * 9
+      const base = 4 + lvl * 9 
       const prestigeBonus = 1 + (state.prestigeLevels.prestigeClick ?? 0) * 0.2
       return Math.min(base * prestigeBonus, 150)
     },

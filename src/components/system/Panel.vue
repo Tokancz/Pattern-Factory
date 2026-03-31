@@ -61,27 +61,10 @@ defineProps<{ title: string }>()
       }
     }
   }
-
   .content {
     width: 100%;
     height: 100%;
-
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    grid-gap: 20px;
-
-    padding-top: 20px;
-
-    @media (width <= 768px) {
-      grid-template-columns: repeat(2, 1fr);
-      width: 80%;
-      grid-gap: 10px;
-      padding-top: 15px;
-    }
-    @media (width <= 480px) {
-      grid-gap: 8px;
-      padding-top: 12px;
-    }
+    @include flexColumn();
   }
 }
 </style>

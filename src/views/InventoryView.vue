@@ -1,21 +1,23 @@
 <template>
   <Panel title="Inventory">
-    <div v-for="(p, id) in PATTERNS" :key="id" class="pattern">
-      <img :src="p.visuals.icon" :alt="id" class="pattern-image">
-      <div class="text-container-inventory">
-        <p class="pattern-name">{{ id }}</p>
-        <p>Lvl: {{ patterns.getPattern(id)?.level }}</p>
-        <p>
-          EXP: {{ formatNumber( patterns.getPattern(id)?.exp! ) }} /
-          {{ formatNumber( expToNext(patterns.getPattern(id)!.level) ) }}
-        </p>
-        <p class="pattern-value">
-          Value: {{ formatNumber(getValue(id)) }} 
-          <span v-if="p.type === 'money'">IGM</span>
-          <span v-else-if="p.type === 'exp'">EXP</span>
-          <span v-else-if="p.type === 'dc'">DC</span>
-          <span v-else-if="p.type === 'prestige'">PP</span>
-        </p>
+    <div class="pattern-grid">
+      <div v-for="(p, id) in PATTERNS" :key="id" class="pattern">
+        <img :src="p.visuals.icon" :alt="id" class="pattern-image">
+        <div class="text-container-inventory">
+          <p class="pattern-name">{{ id }}</p>
+          <p>Lvl: {{ patterns.getPattern(id)?.level }}</p>
+          <p>
+            EXP: {{ formatNumber( patterns.getPattern(id)?.exp! ) }} /
+            {{ formatNumber( expToNext(patterns.getPattern(id)!.level) ) }}
+          </p>
+          <p class="pattern-value">
+            Value: {{ formatNumber(getValue(id)) }} 
+            <span v-if="p.type === 'money'">IGM</span>
+            <span v-else-if="p.type === 'exp'">EXP</span>
+            <span v-else-if="p.type === 'dc'">DC</span>
+            <span v-else-if="p.type === 'prestige'">PP</span>
+          </p>
+        </div>
       </div>
     </div>
   </Panel>
