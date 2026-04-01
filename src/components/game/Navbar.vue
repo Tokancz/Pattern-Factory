@@ -6,6 +6,7 @@
             <li><router-link to="/Pattern-Factory/machines">MACHINES</router-link></li>
             <li><router-link to="/Pattern-Factory/inventory">INVENTORY</router-link></li>
             <li><router-link to="/Pattern-Factory/prestige">PRESTIGE</router-link></li>
+            <li><router-link to="/Pattern-Factory/leaderboard">ONLINE</router-link></li>
         </nav>
       
         <img src="/img/Stripes.png" alt="Stripes Background" aria-hidden="true" draggable="false">
