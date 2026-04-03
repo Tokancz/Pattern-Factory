@@ -1,18 +1,94 @@
 import { defineStore } from "pinia"
-import { saveGame } from "@/utils/save"
+import { api } from "@/utils/api"
+
+interface User {
+  id: number
+  username: string
+  email: string
+  factoryName: string
+}
+
+interface LoginPayload {
+  email: string
+  password: string
+}
+
+interface RegisterPayload {
+  username: string
+  email: string
+  password: string
+  factoryName: string
+}
+
+interface AuthResponse {
+  token: string
+  user: User
+}
 
 export const useUserStore = defineStore("user", {
   state: () => ({
-    username: "",
-    factoryName: "",
-    loggedIn: false
+    user: null as User | null,
+    token: localStorage.getItem("token") as string | null,
+    loggedIn: false,
+    loading: false,
+    error: null as string | null
   }),
+
   actions: {
-    login(username: string, factoryName: string) {
-      this.username = username
-      this.factoryName = factoryName
-      this.loggedIn = true
-      saveGame() // optionally save immediately
+    async login(payload: LoginPayload) {
+      this.loading = true
+      this.error = null
+      try {
+        const res = await api.post<AuthResponse>("/auth/login", payload, false)
+        this.token = res.token
+        this.user = res.user
+        this.loggedIn = true
+        localStorage.setItem("token", res.token)
+      } catch (err) {
+        this.error = err instanceof Error ? err.message : "Login failed"
+        throw err
+      } finally {
+        this.loading = false
+      }
+    },
+
+    async register(payload: RegisterPayload) {
+      this.loading = true
+      this.error = null
+      try {
+        const res = await api.post<AuthResponse>("/auth/register", payload, false)
+        this.token = res.token
+        this.user = res.user
+        this.loggedIn = true
+        localStorage.setItem("token", res.token)
+      } catch (err) {
+        this.error = err instanceof Error ? err.message : "Registration failed"
+        throw err
+      } finally {
+        this.loading = false
+      }
+    },
+
+    logout() {
+      this.user = null
+      this.token = null
+      this.loggedIn = false
+      localStorage.removeItem("token")
+    },
+
+    async restoreSession() {
+      const token = localStorage.getItem("token")
+      if (!token) return
+
+      try {
+        const user = await api.get<User>("/auth/me")
+        this.user = user
+        this.token = token
+        this.loggedIn = true
+      } catch {
+        // Token expired or invalid
+        this.logout()
+      }
     }
   }
 })

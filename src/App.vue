@@ -78,15 +78,20 @@ const { width } = useWindowSize()
 const mobileLayout = computed(() => width.value < 1024)
 const mobileMenuOpened = ref(false)
 
-onMounted(() => {
-  const data = loadGame()
+onMounted(async () => {
+  // Restore session first
+  await user.restoreSession()
 
-  if (data) {
-    const now = Date.now()
-    const rawDelta = (now - data.timestamp) / 1000
-    const cap = upgradeStore.getOfflineCap
-    const delta = Math.min(rawDelta, cap)
-    slotStore.tick(delta)
+  if (user.loggedIn) {
+    const lastPlayed = await loadGame()
+
+    if (lastPlayed) {
+      const now = Date.now()
+      const rawDelta = (now - lastPlayed) / 1000
+      const cap = upgradeStore.getOfflineCap
+      const delta = Math.min(rawDelta, cap)
+      slotStore.tick(delta)
+    }
   }
 
   startAutoSave()

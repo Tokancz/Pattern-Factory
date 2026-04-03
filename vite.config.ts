@@ -16,5 +16,14 @@ export default defineConfig({
         additionalData: `@use "@/styles/main.scss" as *;`
       }
     }
+  },
+  // ADD THIS:
+  server: {
+    proxy: {
+      "/api": {
+        target: "http://localhost:3001",
+        changeOrigin: true
+      }
+    }
   }
 })
