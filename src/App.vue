@@ -4,8 +4,8 @@
   <template v-else>
     <header>
       <div>
-        <h1>{{ user.factoryName }}</h1>
-        <p>{{ user.username }}</p>
+        <h1>{{ user.user?.factoryName }}</h1>
+        <p>{{ user.user?.username }}</p>
       </div>
       <ProgressBar v-if="!mobileLayout" :type="'level'" :length="15"/>
       <img
