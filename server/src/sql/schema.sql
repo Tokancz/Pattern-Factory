@@ -85,7 +85,9 @@ CREATE TABLE leaderboard_entries (
   prestige_points DOUBLE PRECISION DEFAULT 0,
   money           DOUBLE PRECISION DEFAULT 0,
   level           INTEGER DEFAULT 1,
-  submitted_at    TIMESTAMP DEFAULT NOW()
+  submitted_at    TIMESTAMP DEFAULT NOW(),
+
+  CONSTRAINT unique_user_leaderboard UNIQUE (user_id)
 );
 
 -- Indexes for common queries

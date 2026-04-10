@@ -9,7 +9,7 @@ export async function getLeaderboard(_req: Request, res: Response): Promise<void
       prestige_points: number; money: number; level: number; submitted_at: string
     }>(
       `SELECT
-         RANK() OVER (ORDER BY prestige_points, level, money DESC) as rank,
+         RANK() OVER (ORDER BY prestige_points DESC, level DESC, money DESC) as rank,
          u.username,
          le.factory_name,
          le.prestige_points,
@@ -38,7 +38,7 @@ export async function getMyRank(req: AuthRequest, res: Response): Promise<void> 
       `SELECT rank, prestige_points, money, level, submitted_at FROM (
          SELECT
            le.*,
-           RANK() OVER (ORDER BY prestige_points, level, money DESC) as rank
+           RANK() OVER (ORDER BY prestige_points DESC, level DESC, money DESC) as rank
          FROM leaderboard_entries le
        ) ranked
        WHERE user_id = $1
@@ -83,8 +83,15 @@ export async function submitScore(req: AuthRequest, res: Response): Promise<void
 
     await query(
       `INSERT INTO leaderboard_entries
-         (user_id, factory_name, prestige_points, money, level)
-       VALUES ($1,$2,$3,$4,$5)`,
+        (user_id, factory_name, prestige_points, money, level)
+      VALUES ($1,$2,$3,$4,$5)
+      ON CONFLICT (user_id)
+      DO UPDATE SET
+        factory_name = EXCLUDED.factory_name,
+        prestige_points = EXCLUDED.prestige_points,
+        money = EXCLUDED.money,
+        level = EXCLUDED.level,
+        submitted_at = NOW()`,
       [req.userId, factoryName, prestige_points, money, level]
     )
 

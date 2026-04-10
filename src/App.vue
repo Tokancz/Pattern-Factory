@@ -45,7 +45,7 @@
           <router-link to="/Pattern-Factory/machines">MACHINES</router-link>
           <router-link to="/Pattern-Factory/inventory">INVENTORY</router-link>
           <router-link to="/Pattern-Factory/prestige">PRESTIGE</router-link>
-          <router-link to="/Pattern-Factory/leaderboard">ONLINE</router-link>
+          <router-link to="/Pattern-Factory/leaderboard">RANKING</router-link>
 
           <img src="/img/Stripes.png" alt="Stripes Background" aria-hidden="true" draggable="false">
         </nav>

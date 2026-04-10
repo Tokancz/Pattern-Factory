@@ -1,20 +1,20 @@
 <template>
-  <Panel title="Leaderboard">
+  <Panel title="Ranking">
     <div class="leaderboard">
 
       <div class="submit-row">
         <div v-if="myRank" class="my-rank">
             <span>Your rank:</span>
             <strong>#{{ myRank.rank }}</strong>
-            <span>— {{ formatNumber(myRank.money) }} IGM</span>
         </div>
-
-        <p v-if="submitMessage" class="submit-msg" :class="{ error: submitError }">
-          {{ submitMessage }}
-        </p>
-        <button class="button submit-btn" @click="submitScore" :disabled="submitting">
-          {{ submitting ? "Submitting..." : "Submit My Score" }}
-        </button>
+        <div class="submit-container">
+            <p v-if="submitMessage" class="submit-msg" :class="{ error: submitError }">
+                {{ submitMessage }}
+            </p>
+            <button class="button submit-btn" @click="submitScore" :disabled="submitting">
+                {{ submitting ? "Submitting..." : "Submit My Score" }}
+            </button>
+        </div>
       </div>
 
       <!-- Loading -->
@@ -144,8 +144,12 @@ onMounted(() => {
   overflow: hidden;
 
   .submit-row {
-    @include flexRow(16px, space-between, center);
+    @include flexRow(20px, space-between, center);
     flex-shrink: 0;
+
+    .submit-container {
+      @include flexRow(20px, start, center);
+    }
 
     .submit-btn {
       white-space: nowrap;
@@ -163,7 +167,7 @@ onMounted(() => {
 
   .my-rank {
     @include flexRow(8px, start, center);
-    font-size: 1em;
+    font-size: 1.5em;
     color: var(--primary);
     flex-shrink: 0;
 
@@ -203,7 +207,7 @@ onMounted(() => {
 
   .lb-row {
     display: grid;
-    grid-template-columns: 2rem 2fr 2fr 1fr 1fr 1fr;
+    grid-template-columns: 2rem 2fr 2fr repeat(3, 1fr);
     gap: 8px;
     padding: 8px 12px;
     border-bottom: 1px solid rgba(255,255,255,0.08);
@@ -211,7 +215,7 @@ onMounted(() => {
     align-items: center;
 
     @media (width <= 768px) {
-      grid-template-columns: 2.5rem 1fr 1fr 1fr 1fr;
+      grid-template-columns: 2.5rem repeat(4, 1fr);
       .level { display: none; }
       font-size: 0.8em;
     }
