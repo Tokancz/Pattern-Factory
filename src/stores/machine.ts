@@ -4,6 +4,8 @@ import { useSlotStore } from "./slot"
 import { MACHINES } from "@/data/machines"
 import { saveGame } from "@/utils/save"
 
+const MAX_SLOTS = 4
+
 export const useMachineStore = defineStore("machines", {
   state: () => ({
     levels: {
@@ -35,6 +37,12 @@ export const useMachineStore = defineStore("machines", {
       if (!machine || !('value' in machine)) return 1
 
       return Math.pow(machine.value, lvl)
+    },
+
+    // Check if slotUnlock is maxed (all 4 slots unlocked)
+    isSlotUnlockMaxed: (_state) => {
+      const slots = useSlotStore()
+      return slots.slots.filter(s => s.unlocked).length >= MAX_SLOTS
     }
   },
 
@@ -42,6 +50,12 @@ export const useMachineStore = defineStore("machines", {
     buy(id: string) {
       const game = useGameStore()
       const slots = useSlotStore()
+
+      // Prevent buying more slot unlocks if all slots are already unlocked
+      if (id === "slotUnlock") {
+        const unlockedCount = slots.slots.filter(s => s.unlocked).length
+        if (unlockedCount >= MAX_SLOTS) return
+      }
 
       const cost = this.getCost(id)
       if (game.money < cost) return
@@ -53,7 +67,7 @@ export const useMachineStore = defineStore("machines", {
 
       const machine = MACHINES[id as keyof typeof MACHINES]
 
-      // ✅ HANDLE INSTANT EFFECTS HERE
+      // HANDLE INSTANT EFFECTS
       if (machine.type === "unlockSlot") {
         slots.unlockSlot()
       }
@@ -62,7 +76,7 @@ export const useMachineStore = defineStore("machines", {
     },
 
     reset() {
-      this.levels = {} // or default state
+      this.levels = {}
     }
   }
 })

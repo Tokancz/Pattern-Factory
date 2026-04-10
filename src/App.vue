@@ -1,5 +1,5 @@
 <template>
-  <Login v-if="!user.loggedIn" />
+  <Login v-if="!user.loggedIn" @logged-in="onLoggedIn" />
 
   <template v-else>
     <header>
@@ -78,20 +78,30 @@ const { width } = useWindowSize()
 const mobileLayout = computed(() => width.value < 1024)
 const mobileMenuOpened = ref(false)
 
+async function initGame() {
+  const lastPlayed = await loadGame()
+
+  if (lastPlayed) {
+    const now = Date.now()
+    const rawDelta = (now - lastPlayed) / 1000
+    const cap = upgradeStore.getOfflineCap
+    const delta = Math.min(rawDelta, cap)
+    slotStore.tick(delta)
+  }
+}
+
+// Called when user logs in via the Login form
+async function onLoggedIn() {
+  await initGame()
+}
+
 onMounted(async () => {
-  // Restore session first
+  // Restore session (JWT still valid from previous visit)
   await user.restoreSession()
 
   if (user.loggedIn) {
-    const lastPlayed = await loadGame()
-
-    if (lastPlayed) {
-      const now = Date.now()
-      const rawDelta = (now - lastPlayed) / 1000
-      const cap = upgradeStore.getOfflineCap
-      const delta = Math.min(rawDelta, cap)
-      slotStore.tick(delta)
-    }
+    // Pull fresh save from DB — this is the source of truth
+    await initGame()
   }
 
   startAutoSave()

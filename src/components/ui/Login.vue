@@ -35,6 +35,10 @@
 import { ref } from "vue"
 import { useUserStore } from "@/stores/user"
 
+const emit = defineEmits<{
+  (e: "logged-in"): void
+}>()
+
 const user = useUserStore()
 
 const mode = ref<"login" | "register">("login")
@@ -51,6 +55,7 @@ async function handleLogin() {
   loading.value = true
   try {
     await user.login({ email: email.value, password: password.value })
+    emit("logged-in")
   } catch (err) {
     error.value = err instanceof Error ? err.message : "Login failed"
   } finally {
@@ -69,6 +74,7 @@ async function handleRegister() {
       password: password.value,
       factoryName: factoryName.value
     })
+    emit("logged-in")
   } catch (err) {
     error.value = err instanceof Error ? err.message : "Registration failed"
   } finally {

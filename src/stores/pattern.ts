@@ -21,10 +21,9 @@ export const usePatternStore = defineStore("patterns", {
 
     expToNext: () => (lvl: number) => Math.floor(10 * Math.pow(1.5, lvl)),
 
-    // FIX: getPatternValue now includes ALL multipliers so Inventory
-    // shows the real value a slot will actually produce — including
-    // prestige output bonus, machines, and sell multiplier.
-    // Previously prestige upgrades were not counted here.
+    // getPatternValue includes ALL multipliers so Inventory shows the real
+    // value a slot will produce — including prestige bonus, sell multiplier,
+    // AND DC output upgrades per pattern.
     getPatternValue: (state) => (id: string) => {
       if (!(id in PATTERNS)) return 0
       const p = state.patterns[id]
@@ -42,9 +41,11 @@ export const usePatternStore = defineStore("patterns", {
         value *= upgrades.getSellMultiplier
       }
 
-      // Include prestige output bonus so the inventory "display" is accurate.
-      // The slot store also applies this, but here we want the true final value.
+      // Include prestige output bonus
       value *= upgrades.getPrestigeOutputBonus
+
+      // Include DC output multiplier for this specific pattern
+      value *= upgrades.getDcOutputMultiplier(id)
 
       return value
     }
@@ -86,14 +87,12 @@ export const usePatternStore = defineStore("patterns", {
         return true
       }
 
-      // check requirements
       const req = p.requirements
 
       if (req && "money" in req && game.money < req.money) return false
       if (req && "dc" in req && game.dc < req.dc) return false
       if (req && "level" in req && game.level < req.level) return false
 
-      // passed all checks → unlock and deduct resources if needed
       if ("money" in req && req.money !== undefined) game.money -= req.money
       if ("dc" in req && req.dc !== undefined) game.dc -= req.dc
 
