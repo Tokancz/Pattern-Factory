@@ -1,7 +1,9 @@
 <template>
   <Panel title="Machines">
     <div class="wrapper">
-      <button class="button arrow" @click="prevPage"><i class="fa-solid fa-chevron-left"></i></button>
+      <button class="button arrow" @click="prevPage" :class="{ disabled: page === 0 }">
+        <i class="fa-solid fa-chevron-left"></i>
+      </button>
 
       <div class="grid">
         <div v-for="machine in paginatedMachines" :key="machine.id" class="machine">
@@ -32,7 +34,9 @@
         </div>
       </div>
 
-      <button class="button arrow" @click="nextPage"><i class="fa-solid fa-chevron-right"></i></button>
+      <button class="button arrow" @click="nextPage" :class="{ disabled: page === totalPages - 1 }">
+        <i class="fa-solid fa-chevron-right"></i>
+      </button>
     </div>
   </Panel>
 </template>
