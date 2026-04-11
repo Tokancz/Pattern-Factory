@@ -1,7 +1,46 @@
 import { Request, Response } from "express"
 import { query } from "../db.js"
 import { AuthRequest } from "../middleware/auth.js"
-import type { SavePayload } from "../../../shared/types.js"
+
+interface SlotStatePayload {
+  slotIndex: number
+  patternId: string | null
+  progress: number
+  unlocked: boolean
+  speedMultiplier: number
+  outputMultiplier: number
+}
+interface UpgradeLevelPayload {
+  upgradeId: string
+  level: number
+  upgradeType: "normal" | "dc" | "prestige"
+}
+
+interface MachineLevelPayload {
+  machineId: string
+  level: number
+}
+
+interface PatternProgressPayload {
+  patternId: string
+  level: number
+  exp: number
+  unlocked: boolean
+}
+
+interface SavePayload {
+  money: number
+  dc: number
+  prestigePoints: number
+  level: number
+  exp: number
+  unlockedSlots: number
+  lastPlayed: number
+  slots: SlotStatePayload[]
+  upgrades: UpgradeLevelPayload[]
+  machines: MachineLevelPayload[]
+  patterns: PatternProgressPayload[]
+}
 
 export async function getSave(req: AuthRequest, res: Response): Promise<void> {
   try {
