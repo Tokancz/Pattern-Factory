@@ -1,7 +1,7 @@
 import { Request, Response } from "express"
 import { query } from "../db.js"
 import { AuthRequest } from "../middleware/auth.js"
-import type { SavePayload } from "@shared/types"
+import type { SavePayload } from "../../../shared/types.js"
 
 export async function getSave(req: AuthRequest, res: Response): Promise<void> {
   try {
