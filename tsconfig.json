@@ -1,4 +1,14 @@
 {
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "strict": true,
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
+    "baseUrl": "."
+  },
+
   "files": [],
   "references": [
     { "path": "./tsconfig.app.json" },
