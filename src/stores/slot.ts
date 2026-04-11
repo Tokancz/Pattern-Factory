@@ -5,15 +5,7 @@ import { useUpgradeStore } from "./upgrade"
 import { PATTERNS } from "@/data/patterns"
 import { saveGame } from "@/utils/save"
 import { useMachineStore } from "./machine"
-
-interface Slot {
-  id: number
-  patternId: string | null
-  progress: number
-  unlocked: boolean
-  speedMultiplier: number
-  outputMultiplier: number
-}
+import type { Slot } from "shared/types"
 
 const DEFAULT_SLOTS: Slot[] = [
   { id: 0, patternId: "square", progress: 0, unlocked: true, speedMultiplier: 1, outputMultiplier: 1 },

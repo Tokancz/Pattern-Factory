@@ -17,6 +17,15 @@ export interface SlotStatePayload {
   outputMultiplier: number
 }
 
+export interface Slot {
+  id: number
+  patternId: string | null
+  progress: number
+  unlocked: boolean
+  speedMultiplier: number
+  outputMultiplier: number
+}
+
 export interface UpgradeLevelPayload {
   upgradeId: string
   level: number
@@ -50,6 +59,7 @@ export interface SavePayload {
 }
 
 export interface LeaderboardEntry {
+  rank: number
   id: number
   userId: number
   username: string
@@ -58,6 +68,11 @@ export interface LeaderboardEntry {
   money: number
   level: number
   submittedAt: string
+}
+
+export interface MyRankData {
+  rank: number
+  money: number
 }
 
 export interface AuthResponse {

@@ -9,13 +9,13 @@ export async function getLeaderboard(_req: Request, res: Response): Promise<void
       prestige_points: number; money: number; level: number; submitted_at: string
     }>(
       `SELECT
-         RANK() OVER (ORDER BY prestige_points DESC, level DESC, money DESC) as rank,
-         u.username,
-         le.factory_name,
-         le.prestige_points,
-         le.money,
-         le.level,
-         le.submitted_at
+        RANK() OVER (ORDER BY prestige_points DESC, level DESC, money DESC) as rank,
+        u.username,
+        le.factory_name AS "factoryName",
+        le.prestige_points AS "prestigePoints",
+        le.money,
+        le.level,
+        le.submitted_at AS "submittedAt"
        FROM leaderboard_entries le
        JOIN users u ON u.id = le.user_id
        ORDER BY le.prestige_points DESC

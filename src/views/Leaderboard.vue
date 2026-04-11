@@ -43,9 +43,9 @@
           :class="{ 'is-me': entry.username === user.user?.username }"
         >
           <span class="rank">{{ entry.rank }}</span>
-          <span class="name">{{ entry.factory_name }}</span>
+          <span class="name">{{ entry.factoryName }}</span>
           <span class="player">{{ entry.username }}</span>
-          <span class="prestige">{{ formatNumber(entry.prestige_points) }}</span>
+          <span class="prestige">{{ formatNumber(entry.prestigePoints) }}</span>
           <span class="money">{{ formatNumber(entry.money) }}</span>
           <span class="level">Lvl {{ entry.level }}</span>
         </div>
@@ -64,20 +64,9 @@ import Panel from "../components/system/Panel.vue"
 import { useUserStore } from "@/stores/user"
 import { formatNumber } from "@/utils/format"
 import { api } from "@/utils/api"
+import type { LeaderboardEntry } from "shared/types"
+import type { MyRankData } from "shared/types"
 
-interface LeaderboardEntry {
-  rank: number
-  username: string
-  factory_name: string
-  prestige_points: number
-  level: number
-  money: number
-}
-
-interface MyRankData {
-  rank: number
-  money: number
-}
 
 const user = useUserStore()
 
