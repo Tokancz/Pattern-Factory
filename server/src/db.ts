@@ -1,5 +1,6 @@
 import pg from "pg"
 import dotenv from "dotenv"
+import type { QueryResultRow } from "pg"
 
 dotenv.config()
 
@@ -15,7 +16,7 @@ pool.on("error", (err) => {
   process.exit(-1)
 })
 
-export async function query<T>(
+export async function query<T extends QueryResultRow>(
   text: string,
   params?: unknown[]
 ): Promise<pg.QueryResult<T>> {
