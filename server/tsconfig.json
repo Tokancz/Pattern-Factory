@@ -5,7 +5,7 @@
     "moduleResolution": "NodeNext",
 
     "outDir": "./dist",
-    "rootDir": ".",
+    "rootDir": "..",
 
     "strict": true,
     "esModuleInterop": true,
@@ -15,14 +15,12 @@
     "baseUrl": ".",
     "paths": {
       "@shared/*": ["../shared/*"]
-    },
-
-    "forceConsistentCasingInFileNames": true
+    }
   },
 
   "include": [
-    "src/**/*.ts",
-    "../shared/**/*.ts"
+    "src",
+    "../shared"
   ],
 
   "exclude": [
