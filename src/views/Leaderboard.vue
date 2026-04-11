@@ -64,9 +64,20 @@ import Panel from "../components/system/Panel.vue"
 import { useUserStore } from "@/stores/user"
 import { formatNumber } from "@/utils/format"
 import { api } from "@/utils/api"
-import type { LeaderboardEntry } from "shared/types"
-import type { MyRankData } from "shared/types"
 
+interface LeaderboardEntry {
+  rank: number
+  username: string
+  factoryName: string
+  prestigePoints: number
+  level: number
+  money: number
+}
+
+interface MyRankData {
+  rank: number
+  money: number
+}
 
 const user = useUserStore()
 
