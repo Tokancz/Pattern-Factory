@@ -8,24 +8,17 @@ import PrestigeView from "@/views/PrestigeView.vue"
 import Leaderboard from "@/views/Leaderboard.vue"
 
 const routes = [
-  // Redirect root to patterns
-  { path: "/", redirect: "/Pattern-Factory/patterns" },
-  // Redirect bare base path to patterns
-  { path: "/Pattern-Factory", redirect: "/Pattern-Factory/patterns" },
-  { path: "/Pattern-Factory/", redirect: "/Pattern-Factory/patterns" },
-
-  { path: "/Pattern-Factory/patterns",    component: PatternView },
-  { path: "/Pattern-Factory/upgrades",    component: UpgradeView },
-  { path: "/Pattern-Factory/machines",    component: MachineView },
-  { path: "/Pattern-Factory/inventory",   component: InventoryView },
-  { path: "/Pattern-Factory/prestige",    component: PrestigeView },
-  { path: "/Pattern-Factory/leaderboard", component: Leaderboard },
-
-  // Catch-all fallback
-  { path: "/:pathMatch(.*)*", redirect: "/Pattern-Factory/patterns" }
+  { path: "/",           redirect: "/patterns" },
+  { path: "/patterns",   component: PatternView },
+  { path: "/upgrades",   component: UpgradeView },
+  { path: "/machines",   component: MachineView },
+  { path: "/inventory",  component: InventoryView },
+  { path: "/prestige",   component: PrestigeView },
+  { path: "/leaderboard", component: Leaderboard },
+  { path: "/:pathMatch(.*)*", redirect: "/patterns" }
 ]
 
 export const router = createRouter({
-  history: createWebHistory(),
+  history: createWebHistory(import.meta.env.BASE_URL),
   routes
 })
