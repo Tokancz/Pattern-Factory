@@ -40,12 +40,12 @@
         @click.self="mobileMenuOpened = false"
       >
         <nav class="mobile-menu" @click="mobileMenuOpened = false">
-          <router-link to="/Pattern-Factory/patterns">PATTERNS</router-link>
-          <router-link to="/Pattern-Factory/upgrades">UPGRADES</router-link>
-          <router-link to="/Pattern-Factory/machines">MACHINES</router-link>
-          <router-link to="/Pattern-Factory/inventory">INVENTORY</router-link>
-          <router-link to="/Pattern-Factory/prestige">PRESTIGE</router-link>
-          <router-link to="/Pattern-Factory/leaderboard">RANKING</router-link>
+          <router-link to="/patterns">PATTERNS</router-link>
+          <router-link to="/upgrades">UPGRADES</router-link>
+          <router-link to="/machines">MACHINES</router-link>
+          <router-link to="/inventory">INVENTORY</router-link>
+          <router-link to="/prestige">PRESTIGE</router-link>
+          <router-link to="/leaderboard">RANKING</router-link>
 
           <img src="/img/Stripes.png" alt="Stripes Background" aria-hidden="true" draggable="false">
         </nav>

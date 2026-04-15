@@ -1,12 +1,12 @@
 <template>
     <aside>
         <nav>
-            <li><router-link to="/Pattern-Factory/patterns">PATTERNS</router-link></li>
-            <li><router-link to="/Pattern-Factory/upgrades">UPGRADES</router-link></li>
-            <li><router-link to="/Pattern-Factory/machines">MACHINES</router-link></li>
-            <li><router-link to="/Pattern-Factory/inventory">INVENTORY</router-link></li>
-            <li><router-link to="/Pattern-Factory/prestige">PRESTIGE</router-link></li>
-            <li><router-link to="/Pattern-Factory/leaderboard">RANKING</router-link></li>
+            <li><router-link to="/patterns">PATTERNS</router-link></li>
+            <li><router-link to="/upgrades">UPGRADES</router-link></li>
+            <li><router-link to="/machines">MACHINES</router-link></li>
+            <li><router-link to="/inventory">INVENTORY</router-link></li>
+            <li><router-link to="/prestige">PRESTIGE</router-link></li>
+            <li><router-link to="/leaderboard">RANKING</router-link></li>
         </nav>
       
         <img src="/img/Stripes.png" alt="Stripes Background" aria-hidden="true" draggable="false">

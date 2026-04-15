@@ -39,6 +39,18 @@
     <!-- Canonical -->
     <link rel="canonical" href="https://tokancz.github.io/Pattern-Factory/" />
 
+    <!-- GitHub Pages SPA: restore path from 404.html redirect -->
+    <script>
+      (function (l) {
+        if (l.search[1] === "/") {
+          var decoded = l.search.slice(1).split("&").map(function (s) {
+            return s.replace(/~and~/g, "&");
+          }).join("?");
+          window.history.replaceState(null, null, l.pathname.slice(0, -1) + decoded + l.hash);
+        }
+      })(window.location);
+    </script>
+
     <!-- Styles -->
     <link rel="stylesheet" href="https://api.ssps.cajthaml.eu/file/68bd7c005c671348b091f8b1">
 
@@ -58,11 +70,11 @@
       "platform": "Web Browser"
     }
     </script>
-    <script type="module" crossorigin src="/Pattern-Factory/assets/index-DnxuZpEU.js"></script>
-    <link rel="stylesheet" crossorigin href="/Pattern-Factory/assets/index-l_ewKSsy.css">
+    <script type="module" crossorigin src="/Pattern-Factory/assets/index-B-S3PFK6.js"></script>
+    <link rel="stylesheet" crossorigin href="/Pattern-Factory/assets/index-DTCebE0Q.css">
   </head>
 
   <body>
-    <div id="app"></div>
+    <div id="app"></div>
   </body>
 </html>
