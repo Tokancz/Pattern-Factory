@@ -77,13 +77,13 @@ function formatOfflineCap(seconds: number): string {
 
   .columns {
     width: 100%;
-    @include flexRow(10px, start, end);
-    padding: 10px;
+    @include flexRow(20px, space-between, end);
+    padding: 10px 30px;
 
     .column {
       @include flexColumn(5px, start, start);
       font-weight: bold;
-      font-size: 1.25em;
+      font-size: 1em;
 
       @media (width < 768px) {
         font-size: 1em;

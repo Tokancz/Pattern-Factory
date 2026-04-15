@@ -1,9 +1,5 @@
 <template>
   <div class="simulation">
-
-    <SynergyPanel />
-    <a id="tag" @click.prevent="openTutorial">Tutorial here</a>
-
     <TutorialOverlay
       v-model="tutorialVisible"
       :steps="tutorialSteps"
@@ -26,6 +22,11 @@
         :slot="slot"
       />
     </div>
+  
+    <aside class="nav">
+      <SynergyPanel />
+      <a id="tag" @click.prevent="openTutorial">Tutorial</a>
+    </aside>
   </div>
 </template>
 
@@ -105,17 +106,29 @@ function openTutorial() {
     }
   }
 
-  #tag {
+  .nav {
     position: absolute;
     top: 0;
     right: 0;
-
-    font-size: 1.25em;
-    background-color: var(--black);
-    color: var(--white);
-    padding: 10px 20px;
-    cursor: pointer;
+    height: 100%;
+    @include flexColumn(0px, start, end);
     z-index: 10;
+
+    #tag {
+      width: 100%;
+      font-size: 1.25em;
+      color: var(--white);
+      background-color: var(--black);
+      padding: 10px 20px;
+      cursor: pointer;
+      
+      text-align: end;
+
+      &:hover {
+        background: var(--primary);
+        color: var(--black);
+      }
+    }
   }
 }
 </style>

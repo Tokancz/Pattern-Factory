@@ -130,7 +130,7 @@ div#app {
   @media (width < 1024px) {
     max-height: none;
     grid-template-columns: 1fr;
-    grid-template-rows: auto auto 1fr 1fr;
+    grid-template-rows: auto auto auto 1fr;
     grid-template-areas:
       "header"
       "currency"
@@ -206,7 +206,6 @@ div#app {
     }
 
     #shop {
-      max-height: 50dvh;
       grid-area: shop;
       overflow: hidden;
     }

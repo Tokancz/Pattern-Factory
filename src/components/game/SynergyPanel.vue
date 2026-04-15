@@ -95,23 +95,20 @@ function getDisplayBonuses(syn: SynergyDef): Record<string, string> {
 
 <style scoped lang="scss">
 .synergy-panel {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  z-index: 10;
+  width: 100%;
 
   .toggle {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 6px 14px;
-    font-size: 0.75em;
-    letter-spacing: 0.1em;
+    width: 100%;
+
+    @include flexRow(8px, end);
+
+    padding: 10px 20px;
+    font-size: 1.25em;
+    letter-spacing: 0.05em;
     cursor: pointer;
+    color: var(--white);
     background: var(--black);
-    color: var(--primary);
-    border: 1px solid var(--primary);
-    border-bottom: none;
+    border: none;
     transition: background 0.2s;
 
     &:hover {
@@ -140,10 +137,9 @@ function getDisplayBonuses(syn: SynergyDef): Record<string, string> {
 
   .panel-body {
     display: none;
-    flex-direction: column;
-    gap: 8px;
+
     background: var(--black);
-    border: 1px solid var(--primary);
+    border: 2px solid var(--primary);
     padding: 12px;
     max-width: 280px;
     max-height: 300px;
@@ -151,12 +147,12 @@ function getDisplayBonuses(syn: SynergyDef): Record<string, string> {
   }
 
   &.open .panel-body {
-    display: flex;
+    @include flexColumn(8px, center, stretch);
   }
 
   .section-label {
-    font-size: 0.65em;
-    letter-spacing: 0.15em;
+    font-size: 1em;
+    letter-spacing: 0.05em;
     color: var(--primary);
     opacity: 0.6;
     margin-bottom: 2px;
@@ -178,20 +174,18 @@ function getDisplayBonuses(syn: SynergyDef): Record<string, string> {
   }
 
   .synergy-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+    @include flexRow(10px, space-between, center);
     margin-bottom: 4px;
   }
 
   .synergy-name {
-    font-size: 0.85em;
+    font-size: 1em;
     color: var(--primary);
     font-weight: bold;
   }
 
   .type-badge {
-    font-size: 0.6em;
+    font-size: 0.8em;
     letter-spacing: 0.1em;
     padding: 2px 6px;
     border: 1px solid;
@@ -202,7 +196,7 @@ function getDisplayBonuses(syn: SynergyDef): Record<string, string> {
   }
 
   .synergy-desc {
-    font-size: 0.7em;
+    font-size: 0.9em;
     opacity: 0.7;
     margin-bottom: 4px;
   }

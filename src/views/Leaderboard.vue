@@ -160,7 +160,7 @@ onMounted(() => {
       color: var(--primary);
 
       &.error {
-        color: #ff4444;
+        color: var(--error);
       }
     }
   }
@@ -184,14 +184,13 @@ onMounted(() => {
   }
 
   .load-error {
-    color: #ff4444;
+    color: var(--error);
     opacity: 1;
   }
 
   .table-wrapper {
     flex: 1;
     overflow-y: auto;
-    border: 1px solid rgba(255,255,255,0.15);
 
     &::-webkit-scrollbar {
       width: 4px;

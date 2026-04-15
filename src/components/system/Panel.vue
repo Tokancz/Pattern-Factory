@@ -18,16 +18,11 @@ defineProps<{ title: string }>()
 <style scoped lang="scss">
 .panel {
   width: 100%;
-  height: 100%;
-  @include flexColumn();
+  @include flexColumn(0px, start);
   padding: 20px 40px;
 
   @media (width < 1024px) {
-    padding: 20px 16px;
-  }
-
-  @media (width <= 480px) {
-    padding: 20px 10px;
+    padding: 0 16px;
   }
 
   hr {

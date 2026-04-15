@@ -99,15 +99,4 @@ function prevPage() {
 
 <style scoped lang="scss">
 @use "@/styles/views.scss";
-
-.tag-maxed {
-  color: var(--primary);
-  font-weight: bold;
-  font-size: 1.1em;
-}
-
-.machine-level {
-  font-size: 0.85em;
-  opacity: 0.7;
-}
 </style>

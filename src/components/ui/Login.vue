@@ -155,7 +155,7 @@ async function handleRegister() {
   }
 
   .error {
-    color: #ff4444;
+    color: var(--error);
     font-size: 0.9em;
   }
 }
