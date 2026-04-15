@@ -1,17 +1,17 @@
 <template>
   <Panel :title="pageTitle">
     <div class="wrapper">
-      <button class="button arrow" @click="prevPage" :class="{ disabled: page === 0 }">
-        <i class="fa-solid fa-chevron-left"></i>
+      <button class="button arrow" type="button" aria-label="Previous page" @click="prevPage" :class="{ disabled: page === 0 }">
+        <i class="fa-solid fa-chevron-left" aria-hidden="true"></i>
       </button>
 
-      <div class="grid">
+      <ul class="grid">
         <!-- Normal upgrades (pages 0-1) -->
         <template v-if="pageType === 'normal'">
-          <div v-for="upgrade in paginatedItems" :key="upgrade.id" class="upgrade">
-            <img :src="upgrade.src" class="upgrade-image" draggable="false" />
+          <li v-for="upgrade in paginatedItems" :key="upgrade.id" class="upgrade">
+            <img :src="upgrade.src" class="upgrade-image" draggable="false" :alt="upgrade.name" />
             <div class="text-container">
-              <p class="upgrade-name">{{ upgrade.name }}</p>
+              <h3 class="upgrade-name">{{ upgrade.name }}</h3>
               <p>{{ upgrade.description }}</p>
               <p v-if="(levels[upgrade.id] ?? 0) > 0">
                 Lvl: {{ levels[upgrade.id] }}
@@ -21,44 +21,45 @@
               <p v-else class="upgrade-cost">Cost: {{ formatNumber(getCost(upgrade.id)) }} IGM</p>
             </div>
             <button
+              type="button"
               @click="buy(upgrade.id)"
               class="button"
               :disabled="isNormalMaxed(upgrade)"
             >Buy</button>
-          </div>
+          </li>
         </template>
 
         <!-- DC upgrades -->
         <template v-else-if="pageType === 'dc'">
-          <div v-for="upgrade in paginatedItems" :key="upgrade.id" class="upgrade">
-            <img :src="upgrade.src" class="upgrade-image" draggable="false" />
+          <li v-for="upgrade in paginatedItems" :key="upgrade.id" class="upgrade">
+            <img :src="upgrade.src" class="upgrade-image" draggable="false" :alt="upgrade.name" />
             <div class="text-container">
-              <p class="upgrade-name">{{ upgrade.name }}</p>
+              <h3 class="upgrade-name">{{ upgrade.name }}</h3>
               <p>{{ upgrade.description }}</p>
               <p v-if="(dcLevels[upgrade.id] ?? 0) > 0">Lvl: {{ dcLevels[upgrade.id] }}</p>
               <p class="upgrade-cost dc-cost">Cost: {{ formatNumber(getDcCost(upgrade.id)) }} DC</p>
             </div>
-            <button @click="buyDc(upgrade.id)" class="button dc-btn">Buy</button>
-          </div>
+            <button type="button" @click="buyDc(upgrade.id)" class="button dc-btn">Buy</button>
+          </li>
         </template>
 
         <!-- Prestige upgrades -->
         <template v-else-if="pageType === 'prestige'">
-          <div v-for="upgrade in paginatedItems" :key="upgrade.id" class="upgrade prestige">
-            <img :src="upgrade.src" class="upgrade-image" draggable="false" />
+          <li v-for="upgrade in paginatedItems" :key="upgrade.id" class="upgrade prestige">
+            <img :src="upgrade.src" class="upgrade-image" draggable="false" :alt="upgrade.name" />
             <div class="text-container">
-              <p class="upgrade-name">{{ upgrade.name }}</p>
+              <h3 class="upgrade-name">{{ upgrade.name }}</h3>
               <p>{{ upgrade.description }}</p>
               <p v-if="(prestigeLevels[upgrade.id] ?? 0) > 0">Lvl: {{ prestigeLevels[upgrade.id] }}</p>
               <p class="upgrade-cost prestige-cost">Cost: {{ formatNumber(getPrestigeCost(upgrade.id)) }} PP</p>
             </div>
-            <button @click="buyPrestige(upgrade.id)" class="button prestige-btn">Buy</button>
-          </div>
+            <button type="button" @click="buyPrestige(upgrade.id)" class="button prestige-btn">Buy</button>
+          </li>
         </template>
-      </div>
+      </ul>
 
-      <button class="button arrow" @click="nextPage" :class="{ disabled: page === totalPages - 1 }">
-        <i class="fa-solid fa-chevron-right"></i>
+      <button class="button arrow" type="button" aria-label="Next page" @click="nextPage" :class="{ disabled: page === totalPages - 1 }">
+        <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
       </button>
     </div>
   </Panel>

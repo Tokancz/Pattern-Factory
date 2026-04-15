@@ -1,12 +1,14 @@
 <template>
     <aside>
-        <nav>
-            <li><router-link to="/patterns">PATTERNS</router-link></li>
-            <li><router-link to="/upgrades">UPGRADES</router-link></li>
-            <li><router-link to="/machines">MACHINES</router-link></li>
-            <li><router-link to="/inventory">INVENTORY</router-link></li>
-            <li><router-link to="/prestige">PRESTIGE</router-link></li>
-            <li><router-link to="/leaderboard">RANKING</router-link></li>
+        <nav aria-label="Main navigation">
+            <ul>
+                <li><router-link to="/patterns">PATTERNS</router-link></li>
+                <li><router-link to="/upgrades">UPGRADES</router-link></li>
+                <li><router-link to="/machines">MACHINES</router-link></li>
+                <li><router-link to="/inventory">INVENTORY</router-link></li>
+                <li><router-link to="/prestige">PRESTIGE</router-link></li>
+                <li><router-link to="/leaderboard">RANKING</router-link></li>
+            </ul>
         </nav>
       
         <img src="/img/Stripes.png" alt="Stripes Background" aria-hidden="true" draggable="false">
@@ -31,6 +33,15 @@
     nav {
       grid-area: nav;
       @include flexColumn(0, space-around);
+
+      ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        width: 100%;
+        height: 100%;
+        @include flexColumn(0, space-around);
+      }
 
       li {
         width: 100%;

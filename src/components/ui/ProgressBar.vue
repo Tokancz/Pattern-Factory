@@ -1,5 +1,12 @@
 <template>
-  <div class="progress">
+  <div
+    class="progress"
+    role="progressbar"
+    :aria-valuenow="game.exp"
+    :aria-valuemin="0"
+    :aria-valuemax="game.expToNextLevel"
+    :aria-label="`Level ${game.level} experience: ${game.exp} of ${game.expToNextLevel}`"
+  >
     {{ bar }}
   </div>
 </template>

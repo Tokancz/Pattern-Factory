@@ -3,7 +3,7 @@
     <hr>
     <div class="panelHeader">
       <h2>{{ title }}</h2>
-      <p>X</p>
+      <p aria-hidden="true">X</p>
     </div>
     <div class="content">
       <slot></slot>

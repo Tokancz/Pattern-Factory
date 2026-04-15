@@ -2,23 +2,30 @@
   <div
     class="slot"
     :class="{ locked: !slot.unlocked, flash: slotFlash }"
+    role="button"
+    :tabindex="slot.unlocked ? 0 : -1"
+    :aria-label="slotLabel"
+    :aria-disabled="!slot.unlocked"
     @click="handleClick"
+    @keydown.enter.prevent="handleKeyActivate"
+    @keydown.space.prevent="handleKeyActivate"
     @wheel.prevent="handleWheel"
   >
-    <img src="/img/Slot.png" alt="slot background" aria-hidden="true" :class="{selected: slot.id === slots.selectedSlotId }">
+    <img src="/img/Slot.png" alt="" aria-hidden="true" :class="{selected: slot.id === slots.selectedSlotId }">
 
     <div v-if="slot.patternId" class="slotPattern">
-      <img v-if="patternData" :src="patternData.visuals.slot" alt="pattern image" draggable="false">
-      <p>{{ slot.patternId.toUpperCase() }}</p>
-      <p class="progressBar">{{ bar }}</p>
+      <img v-if="patternData" :src="patternData.visuals.slot" :alt="slot.patternId" draggable="false">
+      <p aria-hidden="true">{{ slot.patternId.toUpperCase() }}</p>
+      <p class="progressBar" aria-hidden="true">{{ bar }}</p>
     </div>
 
-    <img v-else class="empty" src="/img/icons/lock-alert.svg" alt="empty slot" aria-hidden="true">
+    <img v-else class="empty" src="/img/icons/lock-alert.svg" alt="" aria-hidden="true">
 
     <div
       v-for="text in floatingTexts"
       :key="text.id"
       class="floating-text"
+      aria-hidden="true"
       :style="{ left: text.x + 'px', top: text.y + 'px' }"
     >
       {{ text.value }}
@@ -69,6 +76,17 @@ const maxProgress = computed(() => {
 const bar = computed(() =>
   generateBar(props.slot.progress, maxProgress.value, 8)
 )
+
+const slotLabel = computed(() => {
+  if (!props.slot.unlocked) return "Locked slot"
+  if (!props.slot.patternId) return "Empty slot — click to assign a pattern"
+  return `${props.slot.patternId} slot — click to produce`
+})
+
+function handleKeyActivate(event: KeyboardEvent) {
+  if (!props.slot.unlocked) return
+  handleClick(event as unknown as MouseEvent)
+}
 
 const availablePatterns = computed(() => patternStore.unlockedPatterns)
 

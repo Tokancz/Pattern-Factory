@@ -26,34 +26,37 @@
       </div>
 
       <!-- Table -->
-      <section v-else class="table-wrapper">
-        <div class="lb-row lb-header">
-          <span class="rank">#</span>
-          <span class="name">Factory</span>
-          <span class="player">Player</span>
-          <span class="prestige">PP</span>
-          <span class="money">IGM</span>
-          <span class="level">Level</span>
-        </div>
-
-        <div
-          v-for="entry in entries"
-          :key="entry.rank"
-          class="lb-row"
-          :class="{ 'is-me': entry.username === user.user?.username }"
-        >
-          <span class="rank">{{ entry.rank }}</span>
-          <span class="name">{{ entry.factoryName }}</span>
-          <span class="player">{{ entry.username }}</span>
-          <span class="prestige">{{ formatNumber(entry.prestigePoints) }}</span>
-          <span class="money">{{ formatNumber(entry.money) }}</span>
-          <span class="level">Lvl {{ entry.level }}</span>
-        </div>
-
-        <div v-if="entries.length === 0" class="empty">
-          No entries yet. Be the first to submit!
-        </div>
-    </section>
+      <div v-else class="table-wrapper">
+        <table class="lb-table" aria-label="Leaderboard">
+          <thead>
+            <tr>
+              <th scope="col" class="rank">#</th>
+              <th scope="col" class="name">Factory</th>
+              <th scope="col" class="player">Player</th>
+              <th scope="col" class="prestige">PP</th>
+              <th scope="col" class="money">IGM</th>
+              <th scope="col" class="level">Level</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+              v-for="entry in entries"
+              :key="entry.rank"
+              :class="{ 'is-me': entry.username === user.user?.username }"
+            >
+              <td class="rank">{{ entry.rank }}</td>
+              <td class="name">{{ entry.factoryName }}</td>
+              <td class="player">{{ entry.username }}</td>
+              <td class="prestige">{{ formatNumber(entry.prestigePoints) }}</td>
+              <td class="money">{{ formatNumber(entry.money) }}</td>
+              <td class="level">Lvl {{ entry.level }}</td>
+            </tr>
+            <tr v-if="entries.length === 0">
+              <td colspan="6" class="empty">No entries yet. Be the first to submit!</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   </Panel>
 </template>
@@ -204,44 +207,60 @@ onMounted(() => {
     }
   }
 
-  .lb-row {
-    display: grid;
-    grid-template-columns: 2rem 2fr 2fr repeat(3, 1fr);
-    gap: 8px;
-    padding: 8px 12px;
-    border-bottom: 1px solid rgba(255,255,255,0.08);
+  .lb-table {
+    width: 100%;
+    border-collapse: collapse;
     font-size: 0.9em;
-    align-items: center;
 
     @media (width <= 768px) {
-      grid-template-columns: 2.5rem repeat(4, 1fr);
-      .level { display: none; }
       font-size: 0.8em;
+      .level { display: none; }
     }
 
-    &.lb-header {
-      font-weight: bold;
-      color: var(--primary);
-      border-bottom: 2px solid var(--primary);
+    thead tr {
       position: sticky;
       top: 0;
       background: var(--black);
       z-index: 1;
+
+      th {
+        font-weight: bold;
+        color: var(--primary);
+        border-bottom: 2px solid var(--primary);
+        padding: 8px 12px;
+        text-align: left;
+      }
     }
 
-    &.is-me {
-      background: rgba(192, 254, 4, 0.08);
-      color: var(--primary);
+    tbody tr {
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+
+      &.is-me {
+        background: rgba(192, 254, 4, 0.08);
+        color: var(--primary);
+      }
+
+      td {
+        padding: 8px 12px;
+      }
     }
 
     .rank {
       text-align: center;
       font-weight: bold;
+      width: 2rem;
     }
 
     .money, .prestige, .level {
       text-align: right;
       font-family: monospace;
+    }
+
+    .empty {
+      text-align: center;
+      opacity: 0.6;
+      padding: 20px;
+      font-size: 1.1em;
     }
   }
 }

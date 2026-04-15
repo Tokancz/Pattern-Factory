@@ -14,13 +14,15 @@
 
       <div class="prestige-container">
         <button
+          type="button"
           @click="prestige"
           :disabled="!game.canPrestige"
           class="prestige-button"
           :class="{ ready: game.canPrestige }"
+          :aria-label="game.canPrestige ? 'Prestige — reset your run and earn ' + game.getPrestigeGain() + ' PP' : 'Prestige locked — need 1,000,000 IGM'"
         >
-          <img src="/img/icons/connectdevelop.svg" alt="">
-          <p>PRESTIGE</p>
+          <img src="/img/icons/connectdevelop.svg" alt="" aria-hidden="true">
+          <p aria-hidden="true">PRESTIGE</p>
         </button>
         <p v-if="!game.canPrestige" class="requirement">
           Need {{ formatNumber(1_000_000) }} IGM

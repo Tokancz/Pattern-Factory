@@ -1,26 +1,32 @@
 <template>
   <div class="synergy-panel" :class="{ open: isOpen }">
 
-    <button class="toggle" @click="isOpen = !isOpen">
+    <button
+      class="toggle"
+      type="button"
+      :aria-expanded="isOpen"
+      aria-controls="synergy-panel-body"
+      @click="isOpen = !isOpen"
+    >
       SYNERGIES
-      <span v-if="synergy.activeSynergies.length" class="badge">
+      <span v-if="synergy.activeSynergies.length" class="badge" aria-label=", {{ synergy.activeSynergies.length }} active">
         {{ synergy.activeSynergies.length }}
       </span>
     </button>
 
-    <div class="panel-body">
+    <div id="synergy-panel-body" class="panel-body">
 
       <template v-if="synergy.activeSynergies.length">
-        <p class="section-label">ACTIVE</p>
-        <div
+        <h3 class="section-label">ACTIVE</h3>
+        <article
           v-for="syn in synergy.activeSynergies"
           :key="syn.id"
           class="synergy-item active"
         >
-          <div class="synergy-header">
+          <header class="synergy-header">
             <span class="synergy-name">{{ syn.name }}</span>
             <span class="type-badge" :class="syn.type">{{ syn.type }}</span>
-          </div>
+          </header>
           <p class="synergy-desc">{{ syn.description }}</p>
           <ul class="bonus-list">
             <li
@@ -28,22 +34,22 @@
               :key="pid"
             >{{ pid }}: {{ val }}</li>
           </ul>
-        </div>
+        </article>
       </template>
 
       <template v-if="synergy.pendingSynergies.length">
-        <p class="section-label">ALMOST</p>
-        <div
+        <h3 class="section-label">ALMOST</h3>
+        <article
           v-for="{ synergy: syn, missing } in synergy.pendingSynergies"
           :key="syn.id"
           class="synergy-item pending"
         >
-          <div class="synergy-header">
+          <header class="synergy-header">
             <span class="synergy-name">{{ syn.name }}</span>
             <span class="type-badge" :class="syn.type">{{ syn.type }}</span>
-          </div>
+          </header>
           <p class="missing-label">Add {{ missing }} to activate</p>
-        </div>
+        </article>
       </template>
 
       <p v-if="!synergy.activeSynergies.length && !synergy.pendingSynergies.length" class="empty">

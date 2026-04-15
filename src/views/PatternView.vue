@@ -1,10 +1,10 @@
 <template>
   <Panel title="Patterns">
-    <div class="pattern-grid">
-      <div v-for="(p, id) in PATTERNS" :key="id" class="pattern">
+    <ul class="pattern-grid">
+      <li v-for="(p, id) in PATTERNS" :key="id" class="pattern">
         <img :src="p.visuals.icon" :alt="id" class="pattern-image">
         <div class="text-container">
-          <p class="pattern-name">{{ id }}</p>
+          <h3 class="pattern-name">{{ id }}</h3>
           
           <p>
             Base value: {{ formatNumber(p.baseValue) }} 
@@ -28,8 +28,8 @@
           class="button"
         > Buy
         </button>
-      </div>
-    </div>
+      </li>
+    </ul>
   </Panel>
 </template>
 

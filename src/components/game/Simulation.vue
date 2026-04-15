@@ -25,7 +25,7 @@
   
     <aside class="nav">
       <SynergyPanel />
-      <a id="tag" @click.prevent="openTutorial">Tutorial</a>
+      <button id="tag" type="button" @click="openTutorial">Tutorial</button>
     </aside>
   </div>
 </template>

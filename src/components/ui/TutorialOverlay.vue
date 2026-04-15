@@ -1,17 +1,23 @@
 <template>
-  <div v-if="modelValue" class="tutorial-overlay">
+  <div
+    v-if="modelValue"
+    class="tutorial-overlay"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="tutorial-title"
+  >
     <div class="tutorial-box">
-      <h2>{{ step!.title }}</h2>
+      <h2 id="tutorial-title">{{ step!.title }}</h2>
       <p>{{ step!.description }}</p>
 
       <div class="tutorial-actions">
-        <button v-if="hasPrev" @click="prevStep" class="button">← Back</button>
-        <button v-if="hasNext" @click="nextStep" class="button">Next →</button>
-        <button v-else @click="close" class="button">Got it!</button>
+        <button v-if="hasPrev" type="button" @click="prevStep" class="button">← Back</button>
+        <button v-if="hasNext" type="button" @click="nextStep" class="button">Next →</button>
+        <button v-else         type="button" @click="close"    class="button">Got it!</button>
       </div>
 
       <div v-if="step!.image" class="tutorial-image">
-        <img :src="step!.image" alt="tutorial visual" />
+        <img :src="step!.image" alt="" role="presentation" />
       </div>
     </div>
 

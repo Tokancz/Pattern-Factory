@@ -37,6 +37,8 @@
       gap: 6px;
     }
 
+    &, & li { list-style: none; padding: 0; margin: 0; }
+
     .upgrade, .machine {
       width: 100%;
       height: 300px;
@@ -84,7 +86,7 @@
             font-size: .7em;
           }
 
-          &.upgrade-name, &.machine-name {
+          &.upgrade-name, &.machine-name, h3.upgrade-name, h3.machine-name {
             font-size: 1.3em;
 
             @media (width <= 768px) {
@@ -128,6 +130,8 @@
     }
   }
 }
+
+.pattern-grid, .pattern-grid li { list-style: none; padding: 0; margin: 0; }
 
 .pattern-grid {
   width: 90%;
@@ -213,6 +217,17 @@
           @media (width <= 768px) {
             font-size: 1.2em;
           }
+        }
+      }
+
+      h3.pattern-name {
+        font-size: 1.5em;
+        font-weight: bold;
+        margin: 0;
+        text-align: center;
+
+        @media (width <= 768px) {
+          font-size: 1.2em;
         }
       }
     }

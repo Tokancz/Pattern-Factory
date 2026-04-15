@@ -3,67 +3,80 @@
     <div class="admin">
 
       <!-- User list -->
-      <div class="user-list">
-        <input v-model="search" placeholder="Search username / email..." class="search" />
-        <div
-          v-for="u in filteredUsers"
-          :key="u.id"
-          class="user-row"
-          :class="{ selected: selected?.id === u.id }"
-          @click="selectUser(u.id)"
-        >
-          <span class="name">{{ u.username }}</span>
-          <span v-if="u.isAdmin" class="admin-badge">ADMIN</span>
-        </div>
+      <nav class="user-list" aria-label="Users">
+        <label for="user-search" class="sr-only">Search users</label>
+        <input
+          id="user-search"
+          v-model="search"
+          type="search"
+          placeholder="Search username / email..."
+          class="search"
+        />
+        <ul role="listbox" aria-label="User list">
+          <li
+            v-for="u in filteredUsers"
+            :key="u.id"
+            role="option"
+            :aria-selected="selected?.id === u.id"
+          >
+            <button
+              class="user-row"
+              :class="{ selected: selected?.id === u.id }"
+              @click="selectUser(u.id)"
+            >
+              <span class="name">{{ u.username }}</span>
+              <span v-if="u.isAdmin" class="admin-badge" aria-label="Admin user">ADMIN</span>
+            </button>
+          </li>
+        </ul>
         <p v-if="filteredUsers.length === 0" class="empty">No users found.</p>
-      </div>
+      </nav>
 
       <!-- Detail panel -->
-      <div v-if="selected" class="detail">
-        <div class="detail-header">
+      <section v-if="selected" class="detail" :aria-label="`Editing ${selected.username}`">
+        <header class="detail-header">
           <div>
-            <p class="detail-name">{{ selected.username }}</p>
-            <p class="detail-sub">{{ selected.email }}</p>
-            <p class="detail-sub">Factory: {{ selected.factoryName }}</p>
-            <p class="detail-sub">Joined: {{ new Date(selected.createdAt).toLocaleDateString() }}</p>
+            <h2 class="detail-name">{{ selected.username }}</h2>
+            <dl class="detail-meta">
+              <dt>Email</dt>    <dd>{{ selected.email }}</dd>
+              <dt>Factory</dt>  <dd>{{ selected.factoryName }}</dd>
+              <dt>Joined</dt>   <dd>{{ new Date(selected.createdAt).toLocaleDateString() }}</dd>
+            </dl>
           </div>
           <label class="admin-toggle">
             <input type="checkbox" :checked="selected.isAdmin" @change="toggleAdmin" />
             Admin
           </label>
-        </div>
+        </header>
 
-        <p class="section-label">GAME VALUES</p>
-        <div v-if="form" class="fields">
-          <label>
-            IGM (Money)
-            <input v-model.number="form.money" type="number" min="0" />
-          </label>
-          <label>
-            DC (Dark Coins)
-            <input v-model.number="form.dc" type="number" min="0" />
-          </label>
-          <label>
-            Prestige Points
-            <input v-model.number="form.prestige_points" type="number" min="0" />
-          </label>
-          <label>
-            Level
-            <input v-model.number="form.level" type="number" min="1" />
-          </label>
-          <label>
-            EXP
-            <input v-model.number="form.exp" type="number" min="0" />
-          </label>
-        </div>
+        <form v-if="form" class="game-values" @submit.prevent="saveChanges">
+          <h3 class="section-label">Game Values</h3>
+          <div class="fields">
+            <label for="field-money">IGM (Money)
+              <input id="field-money"       v-model.number="form.money"           type="number" min="0" />
+            </label>
+            <label for="field-dc">DC (Dark Coins)
+              <input id="field-dc"          v-model.number="form.dc"              type="number" min="0" />
+            </label>
+            <label for="field-prestige">Prestige Points
+              <input id="field-prestige"    v-model.number="form.prestige_points" type="number" min="0" />
+            </label>
+            <label for="field-level">Level
+              <input id="field-level"       v-model.number="form.level"           type="number" min="1" />
+            </label>
+            <label for="field-exp">EXP
+              <input id="field-exp"         v-model.number="form.exp"             type="number" min="0" />
+            </label>
+          </div>
 
-        <p v-if="saveError" class="error">{{ saveError }}</p>
-        <p v-if="saveSuccess" class="success">Saved.</p>
+          <p v-if="saveError"   role="alert" class="error">{{ saveError }}</p>
+          <p v-if="saveSuccess" role="status" class="success">Saved.</p>
 
-        <button class="save-btn" :disabled="saving" @click="saveChanges">
-          {{ saving ? "Saving…" : "Save Changes" }}
-        </button>
-      </div>
+          <button type="submit" class="save-btn" :disabled="saving">
+            {{ saving ? "Saving…" : "Save Changes" }}
+          </button>
+        </form>
+      </section>
 
       <p v-else class="empty-detail">Select a user to edit.</p>
 
@@ -170,6 +183,16 @@ async function toggleAdmin(e: Event) {
 </script>
 
 <style scoped lang="scss">
+.sr-only {
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip: rect(0,0,0,0);
+  white-space: nowrap;
+  border: 0;
+}
+
 .admin {
   display: grid;
   grid-template-columns: 220px 1fr;
@@ -194,15 +217,27 @@ async function toggleAdmin(e: Event) {
     width: 100%;
   }
 
+  ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    @include flexColumn(4px, start, stretch);
+  }
+
+  li { display: contents; }
+
   .user-row {
+    width: 100%;
     padding: 6px 10px;
     cursor: pointer;
-    @include flexRow(8px, space-between, center);
+    background: transparent;
+    color: var(--white);
     border: 1px solid transparent;
+    @include flexRow(8px, space-between, center);
     transition: border-color 0.15s;
 
-    &:hover     { border-color: var(--primary); }
-    &.selected  { background: var(--primary); color: var(--black); }
+    &:hover, &:focus-visible { border-color: var(--primary); outline: none; }
+    &.selected               { background: var(--primary); color: var(--black); }
 
     .name { font-size: 0.9em; }
 
@@ -223,8 +258,22 @@ async function toggleAdmin(e: Event) {
     @include flexRow(0, space-between, start);
   }
 
-  .detail-name { font-size: 1.3em; color: var(--primary); font-weight: bold; }
-  .detail-sub  { font-size: 0.8em; opacity: 0.7; }
+  .detail-name {
+    font-size: 1.3em;
+    color: var(--primary);
+    font-weight: bold;
+    margin-bottom: 6px;
+  }
+
+  .detail-meta {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 2px 10px;
+    font-size: 0.8em;
+    opacity: 0.7;
+
+    dt { font-weight: bold; }
+  }
 
   .admin-toggle {
     @include flexRow(6px, end, center);
@@ -233,12 +282,18 @@ async function toggleAdmin(e: Event) {
     input { cursor: pointer; accent-color: var(--primary); }
   }
 
+  .game-values {
+    @include flexColumn(14px, start, stretch);
+  }
+
   .section-label {
     font-size: 0.7em;
     letter-spacing: 0.15em;
+    text-transform: uppercase;
     opacity: 0.5;
     border-bottom: 1px solid var(--primary);
     padding-bottom: 4px;
+    margin: 0;
   }
 
   .fields {
@@ -275,7 +330,8 @@ async function toggleAdmin(e: Event) {
     border: none;
     transition: opacity 0.2s;
 
-    &:disabled { opacity: 0.5; cursor: not-allowed; }
+    &:disabled          { opacity: 0.5; cursor: not-allowed; }
+    &:focus-visible     { outline: 2px solid var(--white); outline-offset: 2px; }
   }
 }
 

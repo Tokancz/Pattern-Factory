@@ -1,28 +1,28 @@
 <template>
-  <div id="stat-grid">
+  <section id="stat-grid" aria-label="Player stats">
     <h3>Stats</h3>
     <div class="columns">
 
-      <div class="column">
-        <p>Click Power: {{ formatNumber(upgrades.getClickPower) }}</p>
-        <p>Speed: {{ formatNumber(upgrades.getSpeedMultiplier) }}x</p>
-        <p>Overclock: {{ formatNumber(machines.getMultiplier("slotBoost")) }}x</p>
-      </div>
+      <dl class="column">
+        <div><dt>Click Power</dt><dd>{{ formatNumber(upgrades.getClickPower) }}</dd></div>
+        <div><dt>Speed</dt><dd>{{ formatNumber(upgrades.getSpeedMultiplier) }}x</dd></div>
+        <div><dt>Overclock</dt><dd>{{ formatNumber(machines.getMultiplier("slotBoost")) }}x</dd></div>
+      </dl>
 
-      <div class="column">
-        <p>Sell Mult: {{ formatNumber(upgrades.getSellMultiplier) }}x</p>
-        <p>Output Bonus: {{ formatNumber(upgrades.getPrestigeOutputBonus) }}x</p>
-        <p>Output Boost: {{ formatNumber(machines.getMultiplier("outputBoost")) }}x</p>
-      </div>
+      <dl class="column">
+        <div><dt>Sell Mult</dt><dd>{{ formatNumber(upgrades.getSellMultiplier) }}x</dd></div>
+        <div><dt>Output Bonus</dt><dd>{{ formatNumber(upgrades.getPrestigeOutputBonus) }}x</dd></div>
+        <div><dt>Output Boost</dt><dd>{{ formatNumber(machines.getMultiplier("outputBoost")) }}x</dd></div>
+      </dl>
 
-      <div class="column">
-        <p>Synergies: {{ synergy.activeSynergies.length }} active</p>
-        <p>Prestige Gain: {{ game.canPrestige ? formatNumber(game.getPrestigeGain()) + " PP" : "—" }}</p>
-        <p>Offline Cap: {{ formatOfflineCap(upgrades.getOfflineCap) }}</p>
-      </div>
+      <dl class="column">
+        <div><dt>Synergies</dt><dd>{{ synergy.activeSynergies.length }} active</dd></div>
+        <div><dt>Prestige Gain</dt><dd>{{ game.canPrestige ? formatNumber(game.getPrestigeGain()) + " PP" : "—" }}</dd></div>
+        <div><dt>Offline Cap</dt><dd>{{ formatOfflineCap(upgrades.getOfflineCap) }}</dd></div>
+      </dl>
 
     </div>
-  </div>
+  </section>
 </template>
 
 <script setup lang="ts">
@@ -44,7 +44,7 @@ function formatOfflineCap(seconds: number): string {
 </script>
 
 <style scoped lang="scss">
-#stat-grid {
+section#stat-grid {
   grid-column: stats;
 
   display: grid;
@@ -81,10 +81,15 @@ function formatOfflineCap(seconds: number): string {
       @include flexColumn(5px, start, start);
       font-weight: bold;
       font-size: 1em;
+      margin: 0;
 
       @media (width < 768px) {
         font-size: 1em;
       }
+
+      div { @include flexRow(6px, start, baseline); }
+      dt::after { content: ":"; }
+      dt, dd { margin: 0; }
     }
   }
 }

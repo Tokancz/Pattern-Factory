@@ -1,16 +1,16 @@
 <template>
   <Panel title="Machines">
     <div class="wrapper">
-      <button class="button arrow" @click="prevPage" :class="{ disabled: page === 0 }">
-        <i class="fa-solid fa-chevron-left"></i>
+      <button class="button arrow" type="button" aria-label="Previous page" @click="prevPage" :class="{ disabled: page === 0 }">
+        <i class="fa-solid fa-chevron-left" aria-hidden="true"></i>
       </button>
 
-      <div class="grid">
-        <div v-for="machine in paginatedMachines" :key="machine.id" class="machine">
-          <img :src="machine.src" class="machine-image" />
+      <ul class="grid">
+        <li v-for="machine in paginatedMachines" :key="machine.id" class="machine">
+          <img :src="machine.src" class="machine-image" :alt="machine.name" />
 
           <div class="text-container">
-            <p class="machine-name">{{ machine.name }}</p>
+            <h3 class="machine-name">{{ machine.name }}</h3>
             <p>{{ machine.description }}</p>
             <template v-if="isMachineMaxed(machine.id)">
               <p class="tag-maxed">MAX</p>
@@ -27,15 +27,16 @@
           </div>
 
           <button
+            type="button"
             @click="buy(machine.id)"
             class="button"
             :disabled="isMachineMaxed(machine.id)"
           >Buy</button>
-        </div>
-      </div>
+        </li>
+      </ul>
 
-      <button class="button arrow" @click="nextPage" :class="{ disabled: page === totalPages - 1 }">
-        <i class="fa-solid fa-chevron-right"></i>
+      <button class="button arrow" type="button" aria-label="Next page" @click="nextPage" :class="{ disabled: page === totalPages - 1 }">
+        <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
       </button>
     </div>
   </Panel>
