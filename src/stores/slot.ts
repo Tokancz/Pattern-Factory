@@ -5,6 +5,7 @@ import { useUpgradeStore } from "./upgrade"
 import { PATTERNS } from "@/data/patterns"
 import { saveGame } from "@/utils/save"
 import { useMachineStore } from "./machine"
+import { useSynergyStore } from "./synergy"
 
 interface Slot {
   id: number
@@ -43,12 +44,18 @@ export const useSlotStore = defineStore("slots", {
         ? upgrades.getDcSpeedMultiplier(slot.patternId)
         : 1
 
+      const synergy = useSynergyStore()
+      const synergySpeedBonus = slot.patternId
+        ? synergy.getSpeedMultiplier(slot.patternId)
+        : 1
+
       let speed =
         this.baseSpeed *
         slot.speedMultiplier *
         upgrades.getSpeedMultiplier *
         machines.getMultiplier("slotBoost") *
-        dcSpeedBonus
+        dcSpeedBonus *
+        synergySpeedBonus
 
       if (slot.id === this.selectedSlotId) {
         speed *= machines.getMultiplier("targetedBoost")
@@ -102,10 +109,16 @@ export const useSlotStore = defineStore("slots", {
         ? upgrades.getDcOutputMultiplier(slot.patternId)
         : 1
 
+      const synergy = useSynergyStore()
+      const synergyOutputBonus = slot.patternId
+        ? synergy.getOutputMultiplier(slot.patternId)
+        : 1
+
       let value = patterns.getPatternValue(slot.patternId!) * slot.outputMultiplier
       value *= machines.getMultiplier("outputBoost")
       value *= upgrades.getPrestigeOutputBonus
       value *= dcOutputBonus
+      value *= synergyOutputBonus
 
       if (isNaN(value) || !isFinite(value)) return
 

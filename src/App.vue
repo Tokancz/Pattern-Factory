@@ -194,7 +194,7 @@ div#app {
     grid-area: main;
 
     display: grid;
-    grid-template-rows: 3fr 4fr 1fr 40px;
+    grid-template-rows: 3fr auto 1fr 40px;
     grid-template-areas:
       "patterns"
       "shop"
@@ -206,6 +206,7 @@ div#app {
     }
 
     #shop {
+      max-height: 50dvh;
       grid-area: shop;
       overflow: hidden;
     }

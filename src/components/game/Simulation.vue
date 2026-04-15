@@ -1,6 +1,7 @@
 <template>
   <div class="simulation">
 
+    <SynergyPanel />
     <a id="tag" @click.prevent="openTutorial">Tutorial here</a>
 
     <TutorialOverlay
@@ -32,6 +33,7 @@
 import { ref } from "vue"
 import { useSlotStore } from "@/stores/slot"
 import Slot from "./Slot.vue"
+import SynergyPanel from "./SynergyPanel.vue"
 import TutorialOverlay from "@/components/ui/TutorialOverlay.vue"
 import { TUTORIAL_STEPS } from "@/data/tutorial"
 
