@@ -8,6 +8,7 @@ CREATE TABLE users (
   password_hash VARCHAR(255) NOT NULL,
   factory_name  VARCHAR(50) NOT NULL,
   verified      BOOLEAN DEFAULT FALSE,
+  is_admin      BOOLEAN DEFAULT FALSE,
   created_at    TIMESTAMP DEFAULT NOW(),
   last_login    TIMESTAMP DEFAULT NOW()
 );

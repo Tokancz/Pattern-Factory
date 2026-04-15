@@ -6,6 +6,7 @@ import MachineView from "@/views/MachineView.vue"
 import InventoryView from "@/views/InventoryView.vue"
 import PrestigeView from "@/views/PrestigeView.vue"
 import Leaderboard from "@/views/Leaderboard.vue"
+import AdminView from "@/views/AdminView.vue"
 
 const routes = [
   { path: "/",           redirect: "/patterns" },
@@ -15,6 +16,22 @@ const routes = [
   { path: "/inventory",  component: InventoryView },
   { path: "/prestige",   component: PrestigeView },
   { path: "/leaderboard", component: Leaderboard },
+  {
+    path: "/admin",
+    component: AdminView,
+    beforeEnter: () => {
+      try {
+        const token = localStorage.getItem("token")
+        if (!token) return "/patterns"
+        const part = token.split(".")[1]
+        if (!part) return "/patterns"
+        const payload = JSON.parse(atob(part))
+        if (!payload.isAdmin) return "/patterns"
+      } catch {
+        return "/patterns"
+      }
+    }
+  },
   { path: "/:pathMatch(.*)*", redirect: "/patterns" }
 ]
 

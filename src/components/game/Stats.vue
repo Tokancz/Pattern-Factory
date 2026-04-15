@@ -7,19 +7,16 @@
         <p>Click Power: {{ formatNumber(upgrades.getClickPower) }}</p>
         <p>Speed: {{ formatNumber(upgrades.getSpeedMultiplier) }}x</p>
         <p>Overclock: {{ formatNumber(machines.getMultiplier("slotBoost")) }}x</p>
-        <p>EXP Gain: {{ formatNumber(upgrades.getExpMultiplier) }}x</p>
       </div>
 
       <div class="column">
         <p>Sell Mult: {{ formatNumber(upgrades.getSellMultiplier) }}x</p>
         <p>Output Bonus: {{ formatNumber(upgrades.getPrestigeOutputBonus) }}x</p>
         <p>Output Boost: {{ formatNumber(machines.getMultiplier("outputBoost")) }}x</p>
-        <p>EXP Machine: {{ formatNumber(machines.getMultiplier("expMachine")) }}x</p>
       </div>
 
       <div class="column">
         <p>Synergies: {{ synergy.activeSynergies.length }} active</p>
-        <p>Synergy Boost: +{{ formatNumber((synergy.synergyAmplifier - 1) * 100) }}%</p>
         <p>Prestige Gain: {{ game.canPrestige ? formatNumber(game.getPrestigeGain()) + " PP" : "—" }}</p>
         <p>Offline Cap: {{ formatOfflineCap(upgrades.getOfflineCap) }}</p>
       </div>

@@ -4,6 +4,7 @@ import jwt from "jsonwebtoken"
 export interface AuthRequest extends Request {
   userId?: number
   username?: string
+  isAdmin?: boolean
 }
 
 export function verifyToken(
@@ -23,11 +24,25 @@ export function verifyToken(
     const decoded = jwt.verify(token, process.env.JWT_SECRET ?? "fallback_secret") as {
       userId: number
       username: string
+      isAdmin: boolean
     }
     req.userId   = decoded.userId
     req.username = decoded.username
+    req.isAdmin  = decoded.isAdmin ?? false
     next()
   } catch {
     res.status(401).json({ error: "Invalid or expired token" })
   }
+}
+
+export function requireAdmin(
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction
+): void {
+  if (!req.isAdmin) {
+    res.status(403).json({ error: "Admin access required" })
+    return
+  }
+  next()
 }

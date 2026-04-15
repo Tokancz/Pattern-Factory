@@ -110,6 +110,7 @@ export async function login(req: Request<{}, {}, LoginBody>, res: Response): Pro
       factory_name: string
       password_hash: string
       verified: boolean
+      is_admin: boolean
     }>(
       "SELECT * FROM users WHERE email = $1",
       [email]
@@ -131,7 +132,7 @@ export async function login(req: Request<{}, {}, LoginBody>, res: Response): Pro
     await query("UPDATE users SET last_login = NOW() WHERE id = $1", [user.id])
 
     const token = jwt.sign(
-      { userId: user.id, username: user.username },
+      { userId: user.id, username: user.username, isAdmin: user.is_admin ?? false },
       process.env.JWT_SECRET ?? "fallback_secret",
       { expiresIn: "7d" }
     )
@@ -142,7 +143,8 @@ export async function login(req: Request<{}, {}, LoginBody>, res: Response): Pro
         id: user.id,
         username: user.username,
         email: user.email,
-        factoryName: user.factory_name
+        factoryName: user.factory_name,
+        isAdmin: user.is_admin ?? false
       }
     })
   } catch (err) {
@@ -191,9 +193,10 @@ export async function getMe(req: Request, res: Response): Promise<void> {
       email: string
       factory_name: string
       verified: boolean
+      is_admin: boolean
       created_at: string
     }>(
-      "SELECT id, username, email, factory_name, verified, created_at FROM users WHERE id = $1",
+      "SELECT id, username, email, factory_name, verified, is_admin, created_at FROM users WHERE id = $1",
       [authReq.userId]
     )
 
@@ -208,6 +211,7 @@ export async function getMe(req: Request, res: Response): Promise<void> {
       username: u.username,
       email: u.email,
       factoryName: u.factory_name,
+      isAdmin: u.is_admin ?? false,
       verified: u.verified,
       createdAt: u.created_at
     })

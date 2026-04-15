@@ -6,6 +6,7 @@ interface User {
   username: string
   email: string
   factoryName: string
+  isAdmin?: boolean
 }
 
 interface LoginPayload {

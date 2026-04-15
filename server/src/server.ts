@@ -5,6 +5,7 @@ import { errorHandler } from "./middleware/errorHandler.js"
 import authRoutes        from "./routes/auth.js"
 import saveRoutes        from "./routes/save.js"
 import leaderboardRoutes from "./routes/leaderboard.js"
+import adminRoutes       from "./routes/admin.js"
 
 dotenv.config()
 
@@ -17,6 +18,7 @@ app.use(express.json())
 app.use("/auth",        authRoutes)
 app.use("/save",        saveRoutes)
 app.use("/leaderboard", leaderboardRoutes)
+app.use("/admin",       adminRoutes)
 
 app.get("/health", (_req, res) => res.json({ status: "ok" }))
 
