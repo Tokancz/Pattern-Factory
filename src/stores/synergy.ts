@@ -57,15 +57,16 @@ export const useSynergyStore = defineStore("synergy", () => {
       .flatMap(syn => {
         const missing = syn.required.filter(p => !active.includes(p))
         if (missing.length !== 1) return []
+        const missingId = missing[0] as PatternId
 
         // Level-gated synergies: only show pending if level req would be met once pattern added
         if (syn.minAvgLevel !== undefined) {
           const presentLevels = syn.required.filter(p => active.includes(p)).map(p => levels[p] ?? 1)
-          const avgIfAdded = [...presentLevels, levels[missing[0]] ?? 1].reduce((a, b) => a + b, 0) / syn.required.length
+          const avgIfAdded = [...presentLevels, levels[missingId] ?? 1].reduce((a, b) => a + b, 0) / syn.required.length
           if (avgIfAdded < syn.minAvgLevel) return []
         }
 
-        return [{ synergy: syn, missing: missing[0] }]
+        return [{ synergy: syn, missing: missingId }]
       })
   })
 
