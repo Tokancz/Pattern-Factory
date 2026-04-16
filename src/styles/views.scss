@@ -86,20 +86,21 @@
             font-size: .7em;
           }
 
-          &.upgrade-name, &.machine-name, h3.upgrade-name, h3.machine-name {
-            font-size: 1.3em;
-
-            @media (width <= 768px) {
-              font-size: 1.1em;
-            }
-
-            @media (width <= 480px) {
-              font-size: 1em;
-            }
-          }
-
           &.upgrade-cost, &.machine-cost {
             color: var(--secondary);
+          }
+        }
+        
+        h3.upgrade-name, h3.machine-name {
+          font-size: 1.3em;
+          text-align: center;
+
+          @media (width <= 768px) {
+            font-size: 1.1em;
+          }
+
+          @media (width <= 480px) {
+            font-size: 1em;
           }
         }
       }

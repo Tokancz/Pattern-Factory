@@ -17,8 +17,9 @@ defineProps<{ title: string }>()
 
 <style scoped lang="scss">
 .panel {
+  position: relative;
   width: 100%;
-  @include flexColumn(0px, start);
+  @include flexColumn(20px, start);
   padding: 20px 40px;
 
   @media (width < 1024px) {
@@ -26,7 +27,8 @@ defineProps<{ title: string }>()
   }
 
   hr {
-    width: 100%;
+    position: absolute;
+    width: 90%;
     border: 1px solid var(--white);
   }
 

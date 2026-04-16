@@ -194,10 +194,11 @@ async function toggleAdmin(e: Event) {
 }
 
 .admin {
+  width: 100%;
+  height: 100%;
   display: grid;
   grid-template-columns: 220px 1fr;
   gap: 20px;
-  height: 100%;
   overflow: hidden;
 }
 
@@ -259,7 +260,7 @@ async function toggleAdmin(e: Event) {
   }
 
   .detail-name {
-    font-size: 1.3em;
+    font-size: 1.75em;
     color: var(--primary);
     font-weight: bold;
     margin-bottom: 6px;
@@ -269,10 +270,10 @@ async function toggleAdmin(e: Event) {
     display: grid;
     grid-template-columns: auto 1fr;
     gap: 2px 10px;
-    font-size: 0.8em;
+    font-size: 1em;
     opacity: 0.7;
 
-    dt { font-weight: bold; }
+    dt { font-size: 1.2em; opacity: 1; }
   }
 
   .admin-toggle {
@@ -304,20 +305,19 @@ async function toggleAdmin(e: Event) {
     label {
       @include flexColumn(4px, start, stretch);
       font-size: 0.8em;
-      opacity: 0.8;
 
       input {
-        padding: 6px 8px;
+        padding: 8px 14px;
         background: transparent;
         border: 1px solid var(--primary);
         color: var(--white);
-        font-size: 1em;
+        font-size: 1.25em;
         width: 100%;
       }
     }
   }
 
-  .error   { color: #f44; font-size: 0.85em; }
+  .error   { color: var(--error); font-size: 0.85em; }
   .success { color: #4f4; font-size: 0.85em; }
 
   .save-btn {

@@ -25,7 +25,7 @@
   
     <aside class="nav">
       <SynergyPanel />
-      <button id="tag" type="button" @click="openTutorial">Tutorial</button>
+      <button type="button" @click="openTutorial">Tutorial</button>
     </aside>
   </div>
 </template>
@@ -114,11 +114,13 @@ function openTutorial() {
     @include flexColumn(0px, start, end);
     z-index: 10;
 
-    #tag {
+    button {
       width: 100%;
+      height: 40px;
       font-size: 1.25em;
       color: var(--white);
-      background-color: var(--black);
+      background: var(--black);
+      border: none;
       padding: 10px 20px;
       cursor: pointer;
       

@@ -102,6 +102,8 @@ function getDisplayBonuses(syn: SynergyDef): Record<string, string> {
 <style scoped lang="scss">
 .synergy-panel {
   width: 100%;
+  max-height: calc(100% - 40px);
+  background: var(--black);
 
   .toggle {
     width: 100%;
@@ -144,23 +146,20 @@ function getDisplayBonuses(syn: SynergyDef): Record<string, string> {
   .panel-body {
     display: none;
 
-    background: var(--black);
-    border: 2px solid var(--primary);
     padding: 12px;
     max-width: 280px;
-    max-height: 300px;
+    max-height: calc(100% - 40px);
     overflow-y: auto;
   }
 
   &.open .panel-body {
-    @include flexColumn(8px, center, stretch);
+    @include flexColumn(8px, start, stretch);
   }
 
   .section-label {
     font-size: 1em;
     letter-spacing: 0.05em;
     color: var(--primary);
-    opacity: 0.6;
     margin-bottom: 2px;
   }
 
@@ -181,7 +180,6 @@ function getDisplayBonuses(syn: SynergyDef): Record<string, string> {
 
   .synergy-header {
     @include flexRow(10px, space-between, center);
-    margin-bottom: 4px;
   }
 
   .synergy-name {

@@ -143,7 +143,7 @@ div#app {
     font-size: .65em;
   }
 
-  header {
+  > header {
     height: 100px;
 
     @include flexRow(0, space-between);
