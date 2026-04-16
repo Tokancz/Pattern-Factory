@@ -3,8 +3,13 @@ import { usePatternStore } from "@/stores/pattern"
 import { useSlotStore }    from "@/stores/slot"
 import { useUpgradeStore } from "@/stores/upgrade"
 import { useMachineStore } from "@/stores/machine"
-import { api }             from "@/utils/api"
+import { api, ApiError }   from "@/utils/api"
 import type { SavePayload } from "../../shared/types"
+
+// Tracks the save_version we last received from the server.
+// Every successful save/load updates this so the next save can
+// pass the correct version for the optimistic-lock check.
+let saveVersion = 0
 
 function buildSavePayload(): SavePayload {
   const game     = useGameStore()
@@ -33,6 +38,7 @@ function buildSavePayload(): SavePayload {
     exp:            game.exp,
     unlockedSlots:  game.unlockedSlots,
     lastPlayed:     Date.now(),
+    saveVersion,
     slots: slots.slots.map(s => ({
       slotIndex:        s.id,
       patternId:        s.patternId,
@@ -56,12 +62,20 @@ function buildSavePayload(): SavePayload {
 
 export async function saveGame(): Promise<void> {
   const token = localStorage.getItem("token")
-  if (!token) return // not logged in, skip
+  if (!token) return
 
   try {
-    await api.put("/save", buildSavePayload())
+    const res = await api.put<{ saveVersion: number }>("/save", buildSavePayload())
+    saveVersion = res.saveVersion
   } catch (err) {
-    console.error("Save failed:", err)
+    if (err instanceof ApiError && err.status === 409) {
+      // Another session (or admin) has a newer save — reload from DB so we
+      // stay in sync instead of blindly overwriting.
+      console.warn("Save conflict detected — reloading from server")
+      await loadGame()
+    } else {
+      console.error("Save failed:", err)
+    }
   }
 }
 
@@ -71,6 +85,9 @@ export async function loadGame(): Promise<number | null> {
 
   try {
     const data = await api.get<SavePayload & { lastPlayed: number }>("/save")
+
+    // Sync our local version with what the server has
+    saveVersion = data.saveVersion ?? 0
 
     const game = useGameStore()
     const patterns = usePatternStore()

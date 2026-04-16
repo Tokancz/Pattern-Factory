@@ -133,8 +133,8 @@ function getDisplayBonuses(syn: SynergyDef): Record<string, string> {
       background: var(--primary);
       color: var(--black);
       border-radius: 50%;
-      width: 18px;
-      height: 18px;
+      width: 20px;
+      height: 20px;
       font-size: 0.85em;
       display: flex;
       align-items: center;

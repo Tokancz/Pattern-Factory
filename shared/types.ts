@@ -52,6 +52,7 @@ export interface SavePayload {
   exp: number
   unlockedSlots: number
   lastPlayed: number
+  saveVersion: number
   slots: SlotStatePayload[]
   upgrades: UpgradeLevelPayload[]
   machines: MachineLevelPayload[]

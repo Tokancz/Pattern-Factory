@@ -84,7 +84,8 @@ export async function patchUserSave(req: AuthRequest, res: Response): Promise<vo
          dc               = COALESCE($2, dc),
          prestige_points  = COALESCE($3, prestige_points),
          level            = COALESCE($4, level),
-         exp              = COALESCE($5, exp)
+         exp              = COALESCE($5, exp),
+         save_version     = save_version + 1
        WHERE user_id = $6`,
       [money ?? null, dc ?? null, prestige_points ?? null, level ?? null, exp ?? null, id]
     )

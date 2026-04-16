@@ -1,5 +1,13 @@
 const BASE = import.meta.env.VITE_API_URL ?? "http://localhost:3001"
 
+export class ApiError extends Error {
+  status: number
+  constructor(message: string, status: number) {
+    super(message)
+    this.status = status
+  }
+}
+
 function getToken(): string | null {
   return localStorage.getItem("token")
 }
@@ -16,7 +24,7 @@ async function request<T>(
 
   if (requiresAuth) {
     const token = getToken()
-    if (!token) throw new Error("Not authenticated")
+    if (!token) throw new ApiError("Not authenticated", 401)
     headers["Authorization"] = `Bearer ${token}`
   }
 
@@ -28,7 +36,7 @@ async function request<T>(
 
   if (!res.ok) {
     const err = await res.json().catch(() => ({ error: "Unknown error" }))
-    throw new Error(err.error ?? "Request failed")
+    throw new ApiError(err.error ?? "Request failed", res.status)
   }
 
   return res.json() as Promise<T>

@@ -32,7 +32,8 @@ CREATE TABLE game_saves (
   level          INTEGER DEFAULT 1,
   exp            DOUBLE PRECISION DEFAULT 0,
   unlocked_slots INTEGER DEFAULT 1,
-  last_played    BIGINT DEFAULT EXTRACT(EPOCH FROM NOW()) * 1000
+  last_played    BIGINT DEFAULT EXTRACT(EPOCH FROM NOW()) * 1000,
+  save_version   INTEGER DEFAULT 0
 );
 
 -- Slot states (4 per save)

@@ -36,6 +36,7 @@ interface SavePayload {
   exp: number
   unlockedSlots: number
   lastPlayed: number
+  saveVersion: number
   slots: SlotStatePayload[]
   upgrades: UpgradeLevelPayload[]
   machines: MachineLevelPayload[]
@@ -47,7 +48,7 @@ export async function getSave(req: AuthRequest, res: Response): Promise<void> {
     const saveResult = await query<{
       id: number; money: number; dc: number
       prestige_points: number; level: number; exp: number
-      unlocked_slots: number; last_played: number
+      unlocked_slots: number; last_played: number; save_version: number
     }>(
       "SELECT * FROM game_saves WHERE user_id = $1",
       [req.userId]
@@ -76,6 +77,7 @@ export async function getSave(req: AuthRequest, res: Response): Promise<void> {
       exp:            save.exp,
       unlockedSlots:  save.unlocked_slots,
       lastPlayed:     save.last_played,
+      saveVersion:    save.save_version,
       slots:    slots.rows,
       upgrades: upgrades.rows,
       machines: machines.rows,
@@ -89,35 +91,66 @@ export async function getSave(req: AuthRequest, res: Response): Promise<void> {
 
 export async function upsertSave(req: AuthRequest, res: Response): Promise<void> {
   const payload = req.body as SavePayload
+  const clientVersion = payload.saveVersion ?? 0
 
   try {
-    // Update or insert game_saves
-    const saveResult = await query<{ id: number }>(
-      `INSERT INTO game_saves
-         (user_id, money, dc, prestige_points, level, exp, unlocked_slots, last_played)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
-       ON CONFLICT (user_id) DO UPDATE SET
-         money          = EXCLUDED.money,
-         dc             = EXCLUDED.dc,
-         prestige_points = EXCLUDED.prestige_points,
-         level          = EXCLUDED.level,
-         exp            = EXCLUDED.exp,
-         unlocked_slots = EXCLUDED.unlocked_slots,
-         last_played    = EXCLUDED.last_played
-       RETURNING id`,
+    // Try a version-gated update first
+    const updateResult = await query<{ id: number; save_version: number }>(
+      `UPDATE game_saves SET
+         money           = $1,
+         dc              = $2,
+         prestige_points = $3,
+         level           = $4,
+         exp             = $5,
+         unlocked_slots  = $6,
+         last_played     = $7,
+         save_version    = save_version + 1
+       WHERE user_id = $8 AND save_version = $9
+       RETURNING id, save_version`,
       [
-        req.userId,
-        payload.money,
-        payload.dc,
-        payload.prestigePoints,
-        payload.level,
-        payload.exp,
-        payload.unlockedSlots,
-        payload.lastPlayed
+        payload.money, payload.dc, payload.prestigePoints,
+        payload.level, payload.exp, payload.unlockedSlots,
+        payload.lastPlayed, req.userId, clientVersion
       ]
     )
 
-    const saveId = saveResult.rows[0].id
+    let saveId: number
+    let newVersion: number
+
+    if (updateResult.rows.length > 0) {
+      // Version matched — update succeeded
+      saveId     = updateResult.rows[0].id
+      newVersion = updateResult.rows[0].save_version
+    } else {
+      // No rows updated: either first-ever save, or version conflict
+      const existsResult = await query<{ id: number; save_version: number }>(
+        "SELECT id, save_version FROM game_saves WHERE user_id = $1",
+        [req.userId]
+      )
+
+      if (existsResult.rows.length > 0) {
+        // Row exists but version didn't match → conflict
+        res.status(409).json({
+          error: "Save conflict",
+          serverVersion: existsResult.rows[0].save_version
+        })
+        return
+      }
+
+      // No save at all — create the first one
+      const insertResult = await query<{ id: number; save_version: number }>(
+        `INSERT INTO game_saves
+           (user_id, money, dc, prestige_points, level, exp, unlocked_slots, last_played, save_version)
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,1)
+         RETURNING id, save_version`,
+        [
+          req.userId, payload.money, payload.dc, payload.prestigePoints,
+          payload.level, payload.exp, payload.unlockedSlots, payload.lastPlayed
+        ]
+      )
+      saveId     = insertResult.rows[0].id
+      newVersion = insertResult.rows[0].save_version
+    }
 
     // Upsert slots
     for (const slot of payload.slots) {
@@ -171,7 +204,7 @@ export async function upsertSave(req: AuthRequest, res: Response): Promise<void>
       )
     }
 
-    res.json({ message: "Save successful" })
+    res.json({ saveVersion: newVersion })
   } catch (err) {
     console.error(err)
     res.status(500).json({ error: "Failed to save game" })
