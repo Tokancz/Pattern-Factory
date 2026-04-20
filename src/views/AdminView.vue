@@ -88,6 +88,10 @@
 import { ref, computed, onMounted } from "vue"
 import Panel from "@/components/system/Panel.vue"
 import { api } from "@/utils/api"
+import { useUserStore } from "@/stores/user"
+import { loadGame } from "@/utils/save"
+
+const userStore = useUserStore()
 
 interface AdminUser {
   id: number
@@ -157,7 +161,11 @@ async function saveChanges() {
   try {
     await api.patch(`/admin/users/${selected.value.id}/save`, form.value)
     saveSuccess.value = true
-    // refresh list entry if it carries visible state
+    // If we just edited our own save, resync the running game session so
+    // the next autosave doesn't collide with the bumped save_version.
+    if (selected.value.id === userStore.user?.id) {
+      await loadGame()
+    }
     await selectUser(selected.value.id)
   } catch (err) {
     saveError.value = err instanceof Error ? err.message : "Save failed"
