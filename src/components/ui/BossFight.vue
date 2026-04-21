@@ -52,7 +52,7 @@ const bossName = computed(() => {
   return boss.activeBossId.charAt(0).toUpperCase() + boss.activeBossId.slice(1)
 })
 
-const bossIcon = computed(() => boss.activePattern?.visuals.icon ?? "")
+const bossIcon = computed(() => boss.activeTuning?.icon ?? "")
 
 const stealLabel = computed(() => STEAL_LABELS[boss.stealType] ?? boss.stealType)
 
