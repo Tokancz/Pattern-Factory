@@ -78,10 +78,7 @@ const timerPercent = computed(() => {
   padding: 40px 60px;
   min-width: 420px;
   max-width: 90vw;
-  background-color: rgba(0, 0, 0, 0.8);
-  border: 3px solid var(--error);
-  border-radius: 8px;
-  box-shadow: 0 0 50px rgba(255, 68, 68, 0.55);
+  background-color: var(--black);
 
   @media (width < 1024px) {
     padding: 28px 32px;
@@ -90,7 +87,6 @@ const timerPercent = computed(() => {
   }
 
   h2 {
-    font-family: "ivy-presto", serif;
     font-size: 3em;
     color: var(--error);
     text-transform: uppercase;
@@ -120,7 +116,6 @@ const timerPercent = computed(() => {
     img {
       width: 200px;
       height: 200px;
-      filter: drop-shadow(0 0 24px rgba(255, 68, 68, 0.75));
       pointer-events: none;
       user-select: none;
       -webkit-user-drag: none;
@@ -142,14 +137,14 @@ const timerPercent = computed(() => {
     width: 100%;
     height: 24px;
     background-color: rgba(255, 255, 255, 0.08);
-    border: 2px solid var(--white);
+    border: 2px solid var(--primary);
     border-radius: 4px;
     position: relative;
     overflow: hidden;
 
     .boss-timer-bar {
       height: 100%;
-      background-color: var(--error);
+      background-color: var(--primary);
       transition: width 0.1s linear;
     }
 
@@ -171,18 +166,15 @@ const timerPercent = computed(() => {
   z-index: 501;
   pointer-events: none;
   @include flexRow(0, center, center);
-  font-family: "ivy-presto", serif;
   font-size: 6em;
   letter-spacing: 8px;
 
   &.victory {
     color: var(--primary);
-    text-shadow: 0 0 30px var(--primary);
   }
 
   &.defeat {
     color: var(--error);
-    text-shadow: 0 0 30px var(--error);
   }
 }
 
