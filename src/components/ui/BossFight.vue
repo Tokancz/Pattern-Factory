@@ -35,7 +35,9 @@
       :class="boss.lastResult"
       aria-live="polite"
     >
-      {{ boss.lastResult === 'victory' ? 'VICTORY' : 'DEFEATED' }}
+      <p>
+        {{ boss.lastResult === 'victory' ? 'VICTORY' : 'DEFEATED' }}
+      </p>
     </div>
   </Transition>
 </template>
@@ -74,11 +76,17 @@ const timerPercent = computed(() => {
 }
 
 .boss-panel {
-  @include flexColumn(24px, center, center);
+  @include flexColumn(20px, center, center);
   padding: 40px 60px;
+
+  width: 600px;
+  height: 600px;
+
   min-width: 420px;
   max-width: 90vw;
+
   background-color: var(--black);
+  border-radius: 300px;
 
   @media (width < 1024px) {
     padding: 28px 32px;
@@ -87,7 +95,7 @@ const timerPercent = computed(() => {
   }
 
   h2 {
-    font-size: 3em;
+    font-size: 2.5em;
     color: var(--error);
     text-transform: uppercase;
     letter-spacing: 4px;
@@ -95,7 +103,7 @@ const timerPercent = computed(() => {
   }
 
   .boss-warning {
-    font-size: 1.2em;
+    font-size: 1em;
     color: var(--white);
     text-align: center;
 
@@ -122,19 +130,18 @@ const timerPercent = computed(() => {
     }
 
     &:active {
-      transform: scale(0.9);
+      transform: scale(0.95);
     }
   }
 
   .boss-progress {
-    font-size: 2em;
-    font-weight: bold;
+    font-size: 1.5em;
     color: var(--primary);
     font-variant-numeric: tabular-nums;
   }
 
   .boss-timer {
-    width: 100%;
+    width: 70%;
     height: 24px;
     background-color: rgba(255, 255, 255, 0.08);
     border: 2px solid var(--primary);
@@ -155,7 +162,6 @@ const timerPercent = computed(() => {
       color: var(--white);
       font-weight: bold;
       font-variant-numeric: tabular-nums;
-      text-shadow: 0 0 4px var(--black);
     }
   }
 }
@@ -167,14 +173,19 @@ const timerPercent = computed(() => {
   pointer-events: none;
   @include flexRow(0, center, center);
   font-size: 6em;
-  letter-spacing: 8px;
+  background-color: rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(2px);
 
   &.victory {
     color: var(--primary);
   }
-
   &.defeat {
     color: var(--error);
+  }
+
+  p {
+    background-color: var(--black);
+    padding: 40px 60px;
   }
 }
 
@@ -189,7 +200,7 @@ const timerPercent = computed(() => {
 
 .boss-result-fade-enter-active,
 .boss-result-fade-leave-active {
-  transition: opacity 0.4s ease;
+  transition: opacity 0.8s ease;
 }
 .boss-result-fade-enter-from,
 .boss-result-fade-leave-to {

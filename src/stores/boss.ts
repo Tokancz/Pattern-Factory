@@ -8,7 +8,7 @@ import {
 import type { BossId } from "@/data/bosses"
 import { usePatternStore } from "./pattern"
 import { useGameStore } from "./game"
-import { playSound } from "@/utils/sound"
+import { playSound, startBossLoop, stopBossLoop } from "@/utils/sound"
 
 type BossResult = "victory" | "defeat" | null
 
@@ -86,12 +86,13 @@ export const useBossStore = defineStore("boss", {
       this.timeLeft = BOSSES[id].timeLimit
       this.lastResult = null
       playSound("magic")
+      startBossLoop()
     },
 
     registerClick() {
       if (!this.activeBossId) return
       this.clicks++
-      playSound("click")
+      playSound("hit")
       if (this.clicks >= BOSSES[this.activeBossId].clicksRequired) {
         this.victory()
       }
@@ -101,7 +102,8 @@ export const useBossStore = defineStore("boss", {
       this.activeBossId = null
       this.lastResult = "victory"
       this.nextSpawnDelayMs = randomSpawnDelay()
-      playSound("buy")
+      stopBossLoop()
+      playSound("victory")
       this.scheduleResultClear()
     },
 
@@ -120,7 +122,8 @@ export const useBossStore = defineStore("boss", {
       this.activeBossId = null
       this.lastResult = "defeat"
       this.nextSpawnDelayMs = randomSpawnDelay()
-      playSound("error")
+      stopBossLoop()
+      playSound("defeat")
       this.scheduleResultClear()
     },
 

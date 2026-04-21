@@ -17,8 +17,8 @@ export const BOSSES: Record<BossId, BossTuning> = {
   cross:    { clicksRequired: 200, timeLimit: 60, icon: `${BASE}img/patterns/bossCross.svg` }
 }
 
-export const BOSS_MIN_INTERVAL_MS = 3 * 60 * 1000
-export const BOSS_MAX_INTERVAL_MS = 10 * 60 * 1000
+export const BOSS_MIN_INTERVAL_MS = 5 * 60 * 1000
+export const BOSS_MAX_INTERVAL_MS = 15 * 60 * 1000
 
 export const STEAL_LABELS: Record<string, string> = {
   money:    "money",

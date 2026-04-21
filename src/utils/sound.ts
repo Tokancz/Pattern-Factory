@@ -1,6 +1,6 @@
 import { ref, watch } from "vue"
 
-export type SoundName = "click" | "error" | "magic" | "pop" | "buy" | "tabClick"
+export type SoundName = "click" | "error" | "magic" | "pop" | "buy" | "tabClick" | "hit" | "victory" | "defeat"
 export type LoopTrack = 1 | 2 | 3
 
 const BASE = import.meta.env.BASE_URL
@@ -18,6 +18,9 @@ const sounds: Record<SoundName, HTMLAudioElement> = {
   pop:      makeAudio("pop.wav",      0.5),
   buy:      makeAudio("buy.wav",      0.55),
   tabClick: makeAudio("tabClick.wav", 0.4),
+  hit:      makeAudio("hit.wav",      0.6),
+  victory:  makeAudio("victory.mp3",  0.7),
+  defeat:   makeAudio("defeat.mp3",   0.7),
 }
 
 // Background loop tracks — selectable via setLoopTrack()
@@ -27,6 +30,17 @@ const loopTracks: Record<LoopTrack, HTMLAudioElement> = {
   3: makeAudio("loop3.wav", 0.15),
 }
 for (const a of Object.values(loopTracks)) a.loop = true
+
+// Boss loops — one is picked at random when a boss fight starts; replaces the BG loop while active.
+const bossLoops: HTMLAudioElement[] = [
+  makeAudio("bossloop.wav",  0.2),
+  makeAudio("bossloop2.wav", 0.2),
+  makeAudio("bossloop3.wav", 0.2),
+  makeAudio("bossloop4.wav", 0.2),
+  makeAudio("bossloop5.wav", 0.2),
+]
+for (const a of bossLoops) a.loop = true
+let activeBossLoop: HTMLAudioElement | null = null
 
 const storedTrack = Number(localStorage.getItem("loopTrack") ?? "1") as LoopTrack
 const currentTrack = ref<LoopTrack>(loopTracks[storedTrack] ? storedTrack : 1)
@@ -45,8 +59,10 @@ watch(muted, v => {
   if (v) {
     loop.pause()
     boost.pause()
+    activeBossLoop?.pause()
   } else {
-    loop.play().catch(() => {})
+    if (activeBossLoop) activeBossLoop.play().catch(() => {})
+    else loop.play().catch(() => {})
     if (boostWanted) boost.play().catch(() => {})
   }
 })
@@ -63,6 +79,26 @@ export function playSound(name: SoundName): void {
   clone.play().catch(() => {})
 }
 
+export function startBossLoop(): void {
+  const pick = bossLoops[Math.floor(Math.random() * bossLoops.length)]
+  if (activeBossLoop && activeBossLoop !== pick) {
+    activeBossLoop.pause()
+    activeBossLoop.currentTime = 0
+  }
+  activeBossLoop = pick
+  loop.pause()
+  if (!muted.value) activeBossLoop.play().catch(() => {})
+}
+
+export function stopBossLoop(): void {
+  if (activeBossLoop) {
+    activeBossLoop.pause()
+    activeBossLoop.currentTime = 0
+    activeBossLoop = null
+  }
+  if (!muted.value) loop.play().catch(() => {})
+}
+
 export function setBoostActive(active: boolean): void {
   boostWanted = active
   if (active && !muted.value) {
@@ -76,13 +112,12 @@ export function setBoostActive(active: boolean): void {
 export function setLoopTrack(track: LoopTrack): void {
   const next = loopTracks[track]
   if (!next || next === loop) return
-  const wasPlaying = !loop.paused
   loop.pause()
   loop.currentTime = 0
   loop = next
   currentTrack.value = track
   localStorage.setItem("loopTrack", String(track))
-  if ((wasPlaying || !muted.value) && !muted.value) loop.play().catch(() => {})
+  if (!muted.value && !activeBossLoop) loop.play().catch(() => {})
 }
 
 export function cycleLoopTrack(dir: 1 | -1): void {
