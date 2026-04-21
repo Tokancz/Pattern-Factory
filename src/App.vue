@@ -32,6 +32,8 @@
 
     <Navbar v-if="!mobileLayout" />
 
+    <BossFight />
+
     <!-- Mobile burger menu overlay -->
     <Transition name="menu-fade">
       <div
@@ -70,10 +72,13 @@ import Simulation from "@/components/game/Simulation.vue"
 import Stats from "./components/game/Stats.vue"
 import Login from "./components/ui/Login.vue"
 import Navbar from "./components/game/Navbar.vue"
+import BossFight from "@/components/ui/BossFight.vue"
+import { useBossStore } from "@/stores/boss"
 
 const slotStore = useSlotStore()
 const upgradeStore = useUpgradeStore()
 const user = useUserStore()
+const bossStore = useBossStore()
 
 const { width } = useWindowSize()
 const mobileLayout = computed(() => width.value < 1024)
@@ -113,6 +118,7 @@ onMounted(async () => {
 
   startAutoSave()
   startGameLoop()
+  bossStore.start()
 })
 </script>
 

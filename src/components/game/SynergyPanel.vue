@@ -102,7 +102,7 @@ function getDisplayBonuses(syn: SynergyDef): Record<string, string> {
 <style scoped lang="scss">
 .synergy-panel {
   width: 100%;
-  max-height: calc(100% - 40px);
+  max-height: calc(100% - 80px);
   background: var(--black);
 
   .toggle {
@@ -149,7 +149,7 @@ function getDisplayBonuses(syn: SynergyDef): Record<string, string> {
 
     padding: 12px;
     max-width: 280px;
-    max-height: calc(100%);
+    max-height: calc(100% - 40px);
     overflow-y: auto;
   }
 

@@ -147,6 +147,7 @@ function openTutorial() {
     .audio-controls {
       @include flexRow(0, end, stretch);
       width: 100%;
+      background-color: var(--black);
 
       .arrow {
         width: 40px;
@@ -157,6 +158,7 @@ function openTutorial() {
 
       .mute {
         flex: 1;
+        text-align: center;
       }
     }
   }

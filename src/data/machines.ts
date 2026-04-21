@@ -53,7 +53,7 @@ export const MACHINES = {
   synergyBoost: {
     name: "Pattern Resonator",
     description: "Amplifies every active synergy's bonus by 15%",
-    src: `${BASE}img/icons/connectdevelop.svg`,
+    src: `${BASE}img/icons/hubspot.svg`,
     baseCost: 1500,
     scale: 6,
     type: "synergyAmp",
