@@ -26,6 +26,9 @@
     <aside class="nav">
       <SynergyPanel />
       <button type="button" @click="openTutorial">Tutorial</button>
+      <button type="button" @click="toggleMute" :aria-pressed="muted">
+        {{ muted ? "Unmute" : "Mute" }}
+      </button>
     </aside>
   </div>
 </template>
@@ -37,10 +40,12 @@ import Slot from "./Slot.vue"
 import SynergyPanel from "./SynergyPanel.vue"
 import TutorialOverlay from "@/components/ui/TutorialOverlay.vue"
 import { TUTORIAL_STEPS } from "@/data/tutorial"
+import { useMuted, toggleMute } from "@/utils/sound"
 
 const slots = useSlotStore()
 const tutorialVisible = ref(false)
 const tutorialSteps = TUTORIAL_STEPS
+const muted = useMuted()
 
 function openTutorial() {
   tutorialVisible.value = true

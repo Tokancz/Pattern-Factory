@@ -48,5 +48,15 @@ export const MACHINES = {
     scale: 5,
     type: "expBoost",
     value: 1.3
+  },
+
+  synergyBoost: {
+    name: "Pattern Resonator",
+    description: "Amplifies every active synergy's bonus by 15%",
+    src: `${BASE}img/icons/connectdevelop.svg`,
+    baseCost: 1500,
+    scale: 6,
+    type: "synergyAmp",
+    value: 1.15
   }
 }

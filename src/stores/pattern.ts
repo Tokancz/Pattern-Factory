@@ -3,6 +3,7 @@ import { PATTERNS } from "@/data/patterns"
 import { useUpgradeStore } from "./upgrade"
 import { useGameStore } from "./game"
 import { saveGame } from "@/utils/save"
+import { playSound } from "@/utils/sound"
 
 export const usePatternStore = defineStore("patterns", {
   state: () => ({
@@ -89,9 +90,9 @@ export const usePatternStore = defineStore("patterns", {
 
       const req = p.requirements
 
-      if (req && "money" in req && game.money < req.money) return false
-      if (req && "dc" in req && game.dc < req.dc) return false
-      if (req && "level" in req && game.level < req.level) return false
+      if (req && "money" in req && game.money < req.money) { playSound("error"); return false }
+      if (req && "dc" in req && game.dc < req.dc) { playSound("error"); return false }
+      if (req && "level" in req && game.level < req.level) { playSound("error"); return false }
 
       if ("money" in req && req.money !== undefined) game.money -= req.money
       if ("dc" in req && req.dc !== undefined) game.dc -= req.dc

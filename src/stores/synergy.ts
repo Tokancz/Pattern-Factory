@@ -1,18 +1,22 @@
 import { defineStore } from "pinia"
 import { computed } from "vue"
-import { SYNERGIES, type PatternId, type SynergyDef } from "@/data/synergies"
+import { SYNERGIES, ALL_PATTERNS, type PatternId, type SynergyDef } from "@/data/synergies"
 import { useSlotStore }    from "./slot"
 import { usePatternStore } from "./pattern"
 import { useMachineStore } from "./machine"
 
 export const useSynergyStore = defineStore("synergy", () => {
 
-  // Which patterns are currently placed in unlocked slots
-  const activePatternsInSlots = computed((): PatternId[] => {
+  // Current slot composition: how many unlocked, filled slots hold each pattern
+  const slotCounts = computed((): Record<PatternId, number> => {
     const slots = useSlotStore()
-    return slots.slots
-      .filter(s => s.unlocked && s.patternId)
-      .map(s => s.patternId as PatternId)
+    const counts: Record<PatternId, number> = { square: 0, triangle: 0, circle: 0, cross: 0 }
+    for (const s of slots.slots) {
+      if (s.unlocked && s.patternId && s.patternId in counts) {
+        counts[s.patternId as PatternId]++
+      }
+    }
+    return counts
   })
 
   const patternLevels = computed((): Record<PatternId, number> => {
@@ -25,48 +29,63 @@ export const useSynergyStore = defineStore("synergy", () => {
     }
   })
 
-  // Each Overclock (slotBoost) level adds 8% to synergy bonus magnitude
+  // Pattern Resonator amplifies the delta of every synergy bonus.
+  // Each level adds 15% to the magnitude of the bonus above 1.
   const synergyAmplifier = computed((): number => {
     const machines = useMachineStore()
-    return 1 + machines.getLevel("slotBoost") * 0.08
+    return 1 + machines.getLevel("synergyBoost") * 0.15
   })
 
-  // Synergies whose required patterns are all present in active slots
+  // Exact-match: synergy fires only when slot counts match requiredCounts for every pattern.
+  // Patterns absent from requiredCounts must have count 0 in slots.
   const activeSynergies = computed((): SynergyDef[] => {
-    const active = activePatternsInSlots.value
+    const counts = slotCounts.value
     const levels = patternLevels.value
 
     return SYNERGIES.filter(syn => {
-      if (!syn.required.every(p => active.includes(p))) return false
+      for (const p of ALL_PATTERNS) {
+        const need = syn.requiredCounts[p] ?? 0
+        if (counts[p] !== need) return false
+      }
       if (syn.minAvgLevel !== undefined) {
-        const avg = syn.required.reduce((s, p) => s + (levels[p] ?? 1), 0) / syn.required.length
+        const present = ALL_PATTERNS.filter(p => (syn.requiredCounts[p] ?? 0) > 0)
+        const avg = present.reduce((s, p) => s + (levels[p] ?? 1), 0) / present.length
         if (avg < syn.minAvgLevel) return false
       }
       return true
     })
   })
 
-  // Synergies that are exactly one pattern away from activating
+  // Pending = exactly one more slot placement would satisfy requiredCounts.
+  // Reports which pattern to add.
   const pendingSynergies = computed((): Array<{ synergy: SynergyDef; missing: PatternId }> => {
-    const active = activePatternsInSlots.value
+    const counts = slotCounts.value
     const levels = patternLevels.value
     const activeIds = new Set(activeSynergies.value.map(s => s.id))
 
     return SYNERGIES
       .filter(syn => !activeIds.has(syn.id))
       .flatMap(syn => {
-        const missing = syn.required.filter(p => !active.includes(p))
-        if (missing.length !== 1) return []
-        const missingId = missing[0] as PatternId
+        let deficitTotal = 0
+        let missing: PatternId | null = null
+        let overfull = false
+        for (const p of ALL_PATTERNS) {
+          const need = syn.requiredCounts[p] ?? 0
+          const have = counts[p]
+          if (have > need) { overfull = true; break }
+          const diff = need - have
+          if (diff === 1) missing = p
+          deficitTotal += diff
+        }
+        if (overfull || deficitTotal !== 1 || !missing) return []
 
-        // Level-gated synergies: only show pending if level req would be met once pattern added
         if (syn.minAvgLevel !== undefined) {
-          const presentLevels = syn.required.filter(p => active.includes(p)).map(p => levels[p] ?? 1)
-          const avgIfAdded = [...presentLevels, levels[missingId] ?? 1].reduce((a, b) => a + b, 0) / syn.required.length
-          if (avgIfAdded < syn.minAvgLevel) return []
+          const present = ALL_PATTERNS.filter(p => (syn.requiredCounts[p] ?? 0) > 0)
+          const avg = present.reduce((s, p) => s + (levels[p] ?? 1), 0) / present.length
+          if (avg < syn.minAvgLevel) return []
         }
 
-        return [{ synergy: syn, missing: missingId }]
+        return [{ synergy: syn, missing }]
       })
   })
 
@@ -97,7 +116,7 @@ export const useSynergyStore = defineStore("synergy", () => {
   }
 
   return {
-    activePatternsInSlots,
+    slotCounts,
     patternLevels,
     synergyAmplifier,
     activeSynergies,

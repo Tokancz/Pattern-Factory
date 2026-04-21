@@ -2,9 +2,11 @@ const BASE = import.meta.env.VITE_API_URL ?? "http://localhost:3001"
 
 export class ApiError extends Error {
   status: number
-  constructor(message: string, status: number) {
+  body?: any
+  constructor(message: string, status: number, body?: any) {
     super(message)
     this.status = status
+    this.body = body
   }
 }
 
@@ -36,7 +38,7 @@ async function request<T>(
 
   if (!res.ok) {
     const err = await res.json().catch(() => ({ error: "Unknown error" }))
-    throw new ApiError(err.error ?? "Request failed", res.status)
+    throw new ApiError(err.error ?? "Request failed", res.status, err)
   }
 
   return res.json() as Promise<T>

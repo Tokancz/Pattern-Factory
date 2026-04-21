@@ -3,6 +3,7 @@ import { useGameStore } from "./game"
 import { useSlotStore } from "./slot"
 import { MACHINES } from "@/data/machines"
 import { saveGame } from "@/utils/save"
+import { playSound } from "@/utils/sound"
 
 const MAX_SLOTS = 4
 
@@ -13,7 +14,8 @@ export const useMachineStore = defineStore("machines", {
       slotBoost: 0,
       targetedBoost: 0,
       outputBoost: 0,
-      expMachine: 0
+      expMachine: 0,
+      synergyBoost: 0
     } as Record<string, number>
   }),
 
@@ -54,11 +56,11 @@ export const useMachineStore = defineStore("machines", {
       // Prevent buying more slot unlocks if all slots are already unlocked
       if (id === "slotUnlock") {
         const unlockedCount = slots.slots.filter(s => s.unlocked).length
-        if (unlockedCount >= MAX_SLOTS) return
+        if (unlockedCount >= MAX_SLOTS) { playSound("error"); return }
       }
 
       const cost = this.getCost(id)
-      if (game.money < cost) return
+      if (game.money < cost) { playSound("error"); return }
 
       game.money -= cost
 

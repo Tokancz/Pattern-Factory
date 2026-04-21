@@ -11,6 +11,10 @@ import type { SavePayload } from "../../shared/types"
 // pass the correct version for the optimistic-lock check.
 let saveVersion = 0
 
+// Serialize saves — if one is already in flight, new callers await it.
+// Prevents races where two concurrent PUTs fight for the same version.
+let inFlight: Promise<void> | null = null
+
 function buildSavePayload(): SavePayload {
   const game     = useGameStore()
   const patterns = usePatternStore()
@@ -60,23 +64,39 @@ function buildSavePayload(): SavePayload {
   }
 }
 
-export async function saveGame(): Promise<void> {
+export function saveGame(): Promise<void> {
   const token = localStorage.getItem("token")
-  if (!token) return
+  if (!token) return Promise.resolve()
 
-  try {
-    const res = await api.put<{ saveVersion: number }>("/save", buildSavePayload())
-    saveVersion = res.saveVersion
-  } catch (err) {
-    if (err instanceof ApiError && err.status === 409) {
-      // Another session (or admin) has a newer save — reload from DB so we
-      // stay in sync instead of blindly overwriting.
-      console.warn("Save conflict detected — reloading from server")
-      await loadGame()
-    } else {
-      console.error("Save failed:", err)
-    }
+  // If a save is already running, wait for it and then start a fresh one so
+  // the latest local state gets persisted. This serializes concurrent callers.
+  if (inFlight) {
+    return inFlight.then(() => saveGame())
   }
+
+  inFlight = (async () => {
+    for (let attempt = 0; attempt < 3; attempt++) {
+      try {
+        const res = await api.put<{ saveVersion: number }>("/save", buildSavePayload())
+        saveVersion = res.saveVersion
+        return
+      } catch (err) {
+        if (err instanceof ApiError && err.status === 409) {
+          const serverVersion = err.body?.serverVersion
+          if (typeof serverVersion === "number") {
+            saveVersion = serverVersion
+            continue
+          }
+          await loadGame()
+          return
+        }
+        console.error("Save failed:", err)
+        return
+      }
+    }
+  })().finally(() => { inFlight = null })
+
+  return inFlight
 }
 
 export async function loadGame(): Promise<number | null> {

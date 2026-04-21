@@ -2,6 +2,7 @@ import { defineStore } from "pinia"
 import { useGameStore } from "./game"
 import { UPGRADES, DC_UPGRADES, PRESTIGE_UPGRADES } from "@/data/upgrades"
 import { saveGame } from "@/utils/save"
+import { playSound } from "@/utils/sound"
 
 export const useUpgradeStore = defineStore("upgrades", {
   state: () => ({
@@ -104,10 +105,13 @@ export const useUpgradeStore = defineStore("upgrades", {
       const upgrade = UPGRADES[id as keyof typeof UPGRADES]
       if (!upgrade) return
 
-      if ("maxLevel" in upgrade && (this.levels[id] ?? 0) >= (upgrade.maxLevel as number)) return
+      if ("maxLevel" in upgrade && (this.levels[id] ?? 0) >= (upgrade.maxLevel as number)) {
+        playSound("error")
+        return
+      }
 
       const cost = this.getCost(id)
-      if (game.money < cost) return
+      if (game.money < cost) { playSound("error"); return }
 
       game.money -= cost
       this.levels[id] = (this.levels[id] ?? 0) + 1
@@ -120,7 +124,7 @@ export const useUpgradeStore = defineStore("upgrades", {
       if (!upgrade) return
 
       const cost = this.getDcCost(id)
-      if (game.dc < cost) return
+      if (game.dc < cost) { playSound("error"); return }
 
       game.dc -= cost
       this.dcLevels[id] = (this.dcLevels[id] ?? 0) + 1
@@ -133,7 +137,7 @@ export const useUpgradeStore = defineStore("upgrades", {
       if (!upgrade) return
 
       const cost = this.getPrestigeCost(id)
-      if (game.prestigePoints < cost) return
+      if (game.prestigePoints < cost) { playSound("error"); return }
 
       game.prestigePoints -= cost
       this.prestigeLevels[id] = (this.prestigeLevels[id] ?? 0) + 1

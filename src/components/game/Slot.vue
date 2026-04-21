@@ -42,6 +42,7 @@ import { usePatternStore } from "@/stores/pattern"
 import { useUpgradeStore } from "@/stores/upgrade"
 import { useMachineStore } from "@/stores/machine"
 import { formatNumber } from "@/utils/format"
+import { playSound } from "@/utils/sound"
 
 type FloatingText = {
   id: number
@@ -97,13 +98,17 @@ function selectPattern(patternId: string) {
 }
 
 function handleClick(event: MouseEvent) {
-  if (!props.slot.unlocked) return
+  if (!props.slot.unlocked) {
+    playSound("error")
+    return
+  }
 
   const machines = useMachineStore()
 
   if (event.shiftKey) {
     if (machines.getLevel("targetedBoost") < 1) {
       spawnFloatingText(event, "Machine required")
+      playSound("error")
       return
     }
     slots.selectSlot(props.slot.id)
@@ -119,6 +124,7 @@ function handleClick(event: MouseEvent) {
   if (props.slot.patternId === "cross") return
 
   slots.clickSlot(props.slot.id)
+  playSound("click")
   spawnFloatingText(event, `+${ formatNumber(upgrades.getClickPower) }`)
 }
 

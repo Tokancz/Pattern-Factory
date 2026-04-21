@@ -194,9 +194,11 @@ function getDisplayBonuses(syn: SynergyDef): Record<string, string> {
     padding: 2px 6px;
     border: 1px solid;
 
-    &.pair   { border-color: #4fc; color: #4fc; }
-    &.triple { border-color: #f94; color: #f94; }
-    &.full   { border-color: #f4f; color: #f4f; }
+    &.pair     { border-color: var(--tertiary1); color: var(--tertiary1); }
+    &.triple   { border-color: var(--tertiary2); color: var(--tertiary2); }
+    &.dual     { border-color: var(--tertiary2); color: var(--tertiary2); }
+    &.dominant { border-color: var(--tertiary3); color: var(--tertiary3); }
+    &.full     { border-color: var(--tertiary3); color: var(--tertiary3); }
   }
 
   .synergy-desc {

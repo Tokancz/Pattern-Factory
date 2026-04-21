@@ -4,6 +4,7 @@ import { usePatternStore } from "./pattern"
 import { saveGame } from "@/utils/save"
 import { useUpgradeStore } from "./upgrade"
 import { useMachineStore } from "./machine"
+import { playSound } from "@/utils/sound"
 
 export const useGameStore = defineStore("game", {
   state: () => ({
@@ -51,11 +52,14 @@ export const useGameStore = defineStore("game", {
 
     checkLevelUp() {
       let safety = 0
+      let leveled = false
       while (this.exp >= this.expToNextLevel && safety < 1000) {
         this.exp -= this.expToNextLevel
         this.level++
+        leveled = true
         safety++
       }
+      if (leveled) playSound("magic")
     },
 
     setActivePattern(patternId: string) {

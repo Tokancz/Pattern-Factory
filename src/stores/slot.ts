@@ -6,6 +6,7 @@ import { PATTERNS } from "@/data/patterns"
 import { saveGame } from "@/utils/save"
 import { useMachineStore } from "./machine"
 import { useSynergyStore } from "./synergy"
+import { playSound } from "@/utils/sound"
 
 interface Slot {
   id: number
@@ -140,6 +141,7 @@ export const useSlotStore = defineStore("slots", {
       }
 
       slot.progress = 0
+      playSound("pop")
     },
 
     assignPattern(slotId: number, patternId: string) {
