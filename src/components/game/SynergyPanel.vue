@@ -135,6 +135,7 @@ function getDisplayBonuses(syn: SynergyDef): Record<string, string> {
       border-radius: 50%;
       width: 20px;
       height: 20px;
+      font-family: Arial, Helvetica, sans-serif;
       font-size: 0.85em;
       display: flex;
       align-items: center;
@@ -148,7 +149,7 @@ function getDisplayBonuses(syn: SynergyDef): Record<string, string> {
 
     padding: 12px;
     max-width: 280px;
-    max-height: calc(100% - 40px);
+    max-height: calc(100%);
     overflow-y: auto;
   }
 

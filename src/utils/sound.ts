@@ -29,15 +29,16 @@ const loopTracks: Record<LoopTrack, HTMLAudioElement> = {
 for (const a of Object.values(loopTracks)) a.loop = true
 
 const storedTrack = Number(localStorage.getItem("loopTrack") ?? "1") as LoopTrack
-let loop: HTMLAudioElement = loopTracks[storedTrack] ?? loopTracks[1]
+const currentTrack = ref<LoopTrack>(loopTracks[storedTrack] ? storedTrack : 1)
+let loop: HTMLAudioElement = loopTracks[currentTrack.value]
 
 // Boost layer — plays on top of the BG loop while targeted overclock is active.
 const boost = makeAudio("boost.wav", 0.25)
 boost.loop = true
 let boostWanted = false
 
-// Default: unmuted. Persisted in localStorage so the user's choice sticks.
-const muted = ref(localStorage.getItem("muted") === "true")
+// Default: muted. Persisted in localStorage so the user's choice sticks.
+const muted = ref(localStorage.getItem("muted") !== "false")
 
 watch(muted, v => {
   localStorage.setItem("muted", String(v))
@@ -79,8 +80,20 @@ export function setLoopTrack(track: LoopTrack): void {
   loop.pause()
   loop.currentTime = 0
   loop = next
+  currentTrack.value = track
   localStorage.setItem("loopTrack", String(track))
-  if (wasPlaying && !muted.value) loop.play().catch(() => {})
+  if ((wasPlaying || !muted.value) && !muted.value) loop.play().catch(() => {})
+}
+
+export function cycleLoopTrack(dir: 1 | -1): void {
+  const tracks: LoopTrack[] = [1, 2, 3]
+  const idx = tracks.indexOf(currentTrack.value)
+  const next = tracks[(idx + dir + tracks.length) % tracks.length] as LoopTrack
+  setLoopTrack(next)
+}
+
+export function useLoopTrack() {
+  return currentTrack
 }
 
 export function toggleMute(): void {

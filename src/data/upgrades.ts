@@ -94,26 +94,6 @@ export const DC_UPGRADES = {
     pattern: "triangle",
     stat: "output"
   },
-  circleSpeed: {
-    name: "Circle Throughput",
-    description: "Circle patterns complete faster",
-    src: `${BASE}img/icons/Circle Speed.svg`,
-    baseCost: 50,
-    scale: 2.0,
-    currency: "dc",
-    pattern: "circle",
-    stat: "speed"
-  },
-  circleOutput: {
-    name: "Circle Yield",
-    description: "Circle patterns produce more DC",
-    src: `${BASE}img/icons/Circle Output.svg`,
-    baseCost: 75,
-    scale: 2.0,
-    currency: "dc",
-    pattern: "circle",
-    stat: "output"
-  },
   crossSpeed: {
     name: "Cross Throughput",
     description: "Cross patterns complete faster",

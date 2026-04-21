@@ -20,8 +20,6 @@ export const useUpgradeStore = defineStore("upgrades", {
       squareOutput: 0,
       triangleSpeed: 0,
       triangleOutput: 0,
-      circleSpeed: 0,
-      circleOutput: 0,
       crossSpeed: 0,
       crossOutput: 0
     } as Record<string, number>,

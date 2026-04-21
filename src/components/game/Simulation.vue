@@ -25,10 +25,16 @@
   
     <aside class="nav">
       <SynergyPanel />
+      <div class="audio-controls">
+        <button type="button" class="arrow" aria-label="Previous track" @click="cycleLoopTrack(-1)">‹</button>
+        <button type="button" class="mute" @click="toggleMute" :aria-pressed="muted" :aria-label="muted ? 'Unmute' : 'Mute'">
+          <i v-if="muted" class="fa-solid fa-volume-xmark" aria-hidden="true"></i>
+          <i v-else class="fa-solid fa-volume" aria-hidden="true"></i>
+          ({{ loopTrack }})
+        </button>
+        <button type="button" class="arrow" aria-label="Next track" @click="cycleLoopTrack(1)">›</button>
+      </div>
       <button type="button" @click="openTutorial">Tutorial</button>
-      <button type="button" @click="toggleMute" :aria-pressed="muted">
-        {{ muted ? "Unmute" : "Mute" }}
-      </button>
     </aside>
   </div>
 </template>
@@ -40,12 +46,13 @@ import Slot from "./Slot.vue"
 import SynergyPanel from "./SynergyPanel.vue"
 import TutorialOverlay from "@/components/ui/TutorialOverlay.vue"
 import { TUTORIAL_STEPS } from "@/data/tutorial"
-import { useMuted, toggleMute } from "@/utils/sound"
+import { useMuted, toggleMute, useLoopTrack, cycleLoopTrack } from "@/utils/sound"
 
 const slots = useSlotStore()
 const tutorialVisible = ref(false)
 const tutorialSteps = TUTORIAL_STEPS
 const muted = useMuted()
+const loopTrack = useLoopTrack()
 
 function openTutorial() {
   tutorialVisible.value = true
@@ -128,12 +135,28 @@ function openTutorial() {
       border: none;
       padding: 10px 20px;
       cursor: pointer;
-      
+
       text-align: end;
 
       &:hover {
         background: var(--primary);
         color: var(--black);
+      }
+    }
+
+    .audio-controls {
+      @include flexRow(0, end, stretch);
+      width: 100%;
+
+      .arrow {
+        width: 40px;
+        padding: 10px 0;
+        text-align: center;
+        font-size: 1.25em;
+      }
+
+      .mute {
+        flex: 1;
       }
     }
   }
