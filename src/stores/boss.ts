@@ -80,7 +80,7 @@ export const useBossStore = defineStore("boss", {
         return
       }
 
-      const id = available[Math.floor(Math.random() * available.length)]
+      const id = available[Math.floor(Math.random() * available.length)]!
       this.activeBossId = id
       this.clicks = 0
       this.timeLeft = BOSSES[id].timeLimit

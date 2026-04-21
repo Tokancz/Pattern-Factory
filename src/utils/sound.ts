@@ -80,14 +80,14 @@ export function playSound(name: SoundName): void {
 }
 
 export function startBossLoop(): void {
-  const pick = bossLoops[Math.floor(Math.random() * bossLoops.length)]
+  const pick = bossLoops[Math.floor(Math.random() * bossLoops.length)]!
   if (activeBossLoop && activeBossLoop !== pick) {
     activeBossLoop.pause()
     activeBossLoop.currentTime = 0
   }
   activeBossLoop = pick
   loop.pause()
-  if (!muted.value) activeBossLoop.play().catch(() => {})
+  if (!muted.value) pick.play().catch(() => {})
 }
 
 export function stopBossLoop(): void {
