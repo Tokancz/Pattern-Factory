@@ -1,6 +1,7 @@
 import { ref, watch } from "vue"
 
-export type SoundName = "click" | "error" | "magic" | "pop"
+export type SoundName = "click" | "error" | "magic" | "pop" | "buy" | "tabClick"
+export type LoopTrack = 1 | 2 | 3
 
 const BASE = import.meta.env.BASE_URL
 
@@ -11,22 +12,42 @@ function makeAudio(file: string, volume: number): HTMLAudioElement {
 }
 
 const sounds: Record<SoundName, HTMLAudioElement> = {
-  click: makeAudio("click.wav", 0.5),
-  error: makeAudio("error.wav", 0.6),
-  magic: makeAudio("magic.wav", 0.7),
-  pop:   makeAudio("pop.wav",   0.5),
+  click:    makeAudio("click.wav",    0.5),
+  error:    makeAudio("error.wav",    0.6),
+  magic:    makeAudio("magic.wav",    0.7),
+  pop:      makeAudio("pop.wav",      0.5),
+  buy:      makeAudio("buy.wav",      0.55),
+  tabClick: makeAudio("tabClick.wav", 0.4),
 }
 
-const loop = makeAudio("loop.wav", 0.15)
-loop.loop = true
+// Background loop tracks — selectable via setLoopTrack()
+const loopTracks: Record<LoopTrack, HTMLAudioElement> = {
+  1: makeAudio("loop.wav",  0.15),
+  2: makeAudio("loop2.wav", 0.15),
+  3: makeAudio("loop3.wav", 0.15),
+}
+for (const a of Object.values(loopTracks)) a.loop = true
+
+const storedTrack = Number(localStorage.getItem("loopTrack") ?? "1") as LoopTrack
+let loop: HTMLAudioElement = loopTracks[storedTrack] ?? loopTracks[1]
+
+// Boost layer — plays on top of the BG loop while targeted overclock is active.
+const boost = makeAudio("boost.wav", 0.25)
+boost.loop = true
+let boostWanted = false
 
 // Default: unmuted. Persisted in localStorage so the user's choice sticks.
 const muted = ref(localStorage.getItem("muted") === "true")
 
 watch(muted, v => {
   localStorage.setItem("muted", String(v))
-  if (v) loop.pause()
-  else   loop.play().catch(() => {})
+  if (v) {
+    loop.pause()
+    boost.pause()
+  } else {
+    loop.play().catch(() => {})
+    if (boostWanted) boost.play().catch(() => {})
+  }
 })
 
 export function playSound(name: SoundName): void {
@@ -39,6 +60,27 @@ export function playSound(name: SoundName): void {
   const clone = template.cloneNode() as HTMLAudioElement
   clone.volume = template.volume
   clone.play().catch(() => {})
+}
+
+export function setBoostActive(active: boolean): void {
+  boostWanted = active
+  if (active && !muted.value) {
+    boost.play().catch(() => {})
+  } else {
+    boost.pause()
+    boost.currentTime = 0
+  }
+}
+
+export function setLoopTrack(track: LoopTrack): void {
+  const next = loopTracks[track]
+  if (!next || next === loop) return
+  const wasPlaying = !loop.paused
+  loop.pause()
+  loop.currentTime = 0
+  loop = next
+  localStorage.setItem("loopTrack", String(track))
+  if (wasPlaying && !muted.value) loop.play().catch(() => {})
 }
 
 export function toggleMute(): void {

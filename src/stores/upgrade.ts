@@ -115,6 +115,7 @@ export const useUpgradeStore = defineStore("upgrades", {
 
       game.money -= cost
       this.levels[id] = (this.levels[id] ?? 0) + 1
+      playSound("buy")
       saveGame()
     },
 
@@ -128,6 +129,7 @@ export const useUpgradeStore = defineStore("upgrades", {
 
       game.dc -= cost
       this.dcLevels[id] = (this.dcLevels[id] ?? 0) + 1
+      playSound("buy")
       saveGame()
     },
 
@@ -141,6 +143,7 @@ export const useUpgradeStore = defineStore("upgrades", {
 
       game.prestigePoints -= cost
       this.prestigeLevels[id] = (this.prestigeLevels[id] ?? 0) + 1
+      playSound("buy")
       saveGame()
     },
 

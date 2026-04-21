@@ -55,13 +55,14 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, computed, ref } from "vue"
+import { onMounted, computed, ref, watch } from "vue"
 import { useWindowSize } from "@vueuse/core"
 import { useSlotStore } from "@/stores/slot"
 import { useUpgradeStore } from "@/stores/upgrade"
 import { useUserStore } from "@/stores/user"
 import { loadGame, startAutoSave } from "@/utils/save"
 import { startGameLoop } from "@/composables/gameLoop"
+import { setBoostActive } from "@/utils/sound"
 
 import CurrencyDisplay from "@/components/ui/CurrencyDisplay.vue"
 import ProgressBar from "@/components/ui/ProgressBar.vue"
@@ -77,6 +78,12 @@ const user = useUserStore()
 const { width } = useWindowSize()
 const mobileLayout = computed(() => width.value < 1024)
 const mobileMenuOpened = ref(false)
+
+// Boost loop plays while a slot is selected for targeted overclock.
+watch(
+  () => slotStore.selectedSlotId,
+  id => setBoostActive(id !== null)
+)
 
 async function initGame() {
   const lastPlayed = await loadGame()

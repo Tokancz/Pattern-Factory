@@ -98,6 +98,7 @@ export const usePatternStore = defineStore("patterns", {
       if ("dc" in req && req.dc !== undefined) game.dc -= req.dc
 
       this.unlockPattern(id)
+      playSound("buy")
       saveGame()
       return true
     },

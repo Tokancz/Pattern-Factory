@@ -74,6 +74,7 @@ export const useMachineStore = defineStore("machines", {
         slots.unlockSlot()
       }
 
+      playSound("buy")
       saveGame()
     },
 

@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from "vue-router"
+import { playSound } from "@/utils/sound"
 
 import PatternView from "@/views/PatternView.vue"
 import UpgradeView from "@/views/UpgradeView.vue"
@@ -38,4 +39,8 @@ const routes = [
 export const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes
+})
+
+router.afterEach((to, from) => {
+  if (from.path && to.path !== from.path) playSound("tabClick")
 })
