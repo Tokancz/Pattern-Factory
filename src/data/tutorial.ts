@@ -28,17 +28,17 @@ export const TUTORIAL_STEPS = [
   {
     title: "Synergies",
     description: "Some pattern combinations unlock synergy wich will boost specific patterns.",
-    image: `${BASE}img/tutorial/Tutorial 4.png`,
+    image: `${BASE}img/tutorial/Tutorial 5.png`,
   },
   {
     title: "Bosses",
     description: "In random intervals, a boss will appear. Defeat it by clicking to secure your money, EXP, DC or prestige.",
-    image: `${BASE}img/tutorial/Tutorial 4.png`,
+    image: `${BASE}img/tutorial/Tutorial 6.png`,
   },
   {
     title: "Global Ranking",
     description: "Compare your progress with others by submiting yout score.",
-    image: `${BASE}img/tutorial/Tutorial 4.png`,
+    image: `${BASE}img/tutorial/Tutorial 7.png`,
   },
   {
     title: "Enjoy!",
