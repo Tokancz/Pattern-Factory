@@ -7,8 +7,7 @@
           <h3 class="pattern-name">{{ id }}</h3>
           <p>Lvl: {{ patterns.getPattern(id)?.level }}</p>
           <p>
-            EXP: {{ formatNumber( patterns.getPattern(id)?.exp! ) }} /
-            {{ formatNumber( expToNext(patterns.getPattern(id)!.level) ) }}
+            EXP: {{ formatNumber( Math.floor(patterns.getPattern(id)?.exp ?? 0) ) }} / {{ formatNumber( Math.floor(expToNext(patterns.getPattern(id)!.level)) ) }}
           </p>
           <p class="pattern-value">
             Value: {{ formatNumber(getValue(id)) }} 

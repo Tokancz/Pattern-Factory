@@ -11,9 +11,9 @@ export const MACHINES = {
   },
 
   slotBoost: {
-    name: "Overclock",
+    name: "Advanced Engineering",
     description: "Boosts all slot speed by 25%",
-    src: `${BASE}img/icons/flame.svg`,
+    src: `${BASE}img/icons/flask-outline.svg`,
     baseCost: 500,
     scale: 8,
     type: "globalSpeed",
@@ -21,9 +21,9 @@ export const MACHINES = {
   },
 
   targetedBoost: {
-    name: "Advanced Engineering",
-    description: "Boosts selected slot speed by 75% (Shift + click to select)",
-    src: `${BASE}img/icons/flask-outline.svg`,
+    name: "Overclock",
+    description: "Boosts slot speed by 75% (Shift + click to select)",
+    src: `${BASE}img/icons/flame.svg`,
     baseCost: 800,
     scale: 4,
     type: "targetedBoost",

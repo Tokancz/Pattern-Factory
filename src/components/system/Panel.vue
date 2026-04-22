@@ -3,7 +3,6 @@
     <hr>
     <div class="panelHeader">
       <h2>{{ title }}</h2>
-      <p aria-hidden="true">X</p>
     </div>
     <div class="content">
       <slot></slot>
@@ -23,7 +22,7 @@ defineProps<{ title: string }>()
   padding: 20px 40px;
 
   @media (width < 1024px) {
-    padding: 0 16px;
+    padding: 10px 16px;
   }
 
   hr {
@@ -46,15 +45,6 @@ defineProps<{ title: string }>()
 
       @media (width <= 480px) {
         font-size: 2.5em;
-      }
-    }
-
-    p {
-      font-size: 3em;
-      cursor: pointer;
-
-      @media (width < 1024px) {
-        font-size: 2em;
       }
     }
   }

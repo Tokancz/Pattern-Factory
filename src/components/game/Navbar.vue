@@ -4,6 +4,7 @@
             <ul>
                 <li><router-link to="/patterns">PATTERNS</router-link></li>
                 <li><router-link to="/upgrades">UPGRADES</router-link></li>
+                <li><router-link to="/synergies">SYNERGIES</router-link></li>
                 <li><router-link to="/machines">MACHINES</router-link></li>
                 <li><router-link to="/inventory">INVENTORY</router-link></li>
                 <li><router-link to="/prestige">PRESTIGE</router-link></li>

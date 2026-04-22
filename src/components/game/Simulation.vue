@@ -24,7 +24,7 @@
     </div>
   
     <aside class="nav">
-      <SynergyPanel />
+      <button type="button" @click="openTutorial">Tutorial</button>
       <div class="audio-controls">
         <button type="button" class="arrow" aria-label="Previous track" @click="cycleLoopTrack(-1)">‹</button>
         <button type="button" class="mute" @click="toggleMute" :aria-pressed="muted" :aria-label="muted ? 'Unmute' : 'Mute'">
@@ -34,7 +34,6 @@
         </button>
         <button type="button" class="arrow" aria-label="Next track" @click="cycleLoopTrack(1)">›</button>
       </div>
-      <button type="button" @click="openTutorial">Tutorial</button>
     </aside>
   </div>
 </template>
@@ -43,7 +42,6 @@
 import { ref } from "vue"
 import { useSlotStore } from "@/stores/slot"
 import Slot from "./Slot.vue"
-import SynergyPanel from "./SynergyPanel.vue"
 import TutorialOverlay from "@/components/ui/TutorialOverlay.vue"
 import { TUTORIAL_STEPS } from "@/data/tutorial"
 import { useMuted, toggleMute, useLoopTrack, cycleLoopTrack } from "@/utils/sound"

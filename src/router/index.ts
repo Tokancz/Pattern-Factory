@@ -3,6 +3,7 @@ import { playSound } from "@/utils/sound"
 
 import PatternView from "@/views/PatternView.vue"
 import UpgradeView from "@/views/UpgradeView.vue"
+import SynergyView from "@/views/SynergyView.vue"
 import MachineView from "@/views/MachineView.vue"
 import InventoryView from "@/views/InventoryView.vue"
 import PrestigeView from "@/views/PrestigeView.vue"
@@ -13,6 +14,7 @@ const routes = [
   { path: "/",           redirect: "/patterns" },
   { path: "/patterns",   component: PatternView },
   { path: "/upgrades",   component: UpgradeView },
+  { path: "/synergies",  component: SynergyView },
   { path: "/machines",   component: MachineView },
   { path: "/inventory",  component: InventoryView },
   { path: "/prestige",   component: PrestigeView },

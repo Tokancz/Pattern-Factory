@@ -159,7 +159,7 @@ const timerPercent = computed(() => {
       position: absolute;
       inset: 0;
       @include flexRow(0, center, center);
-      color: var(--white);
+      color: var(--black);
       font-weight: bold;
       font-variant-numeric: tabular-nums;
     }

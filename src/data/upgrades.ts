@@ -3,32 +3,32 @@ const BASE = import.meta.env.BASE_URL
 export const UPGRADES = {
   clickingPower: {
     name: "Muscle Up!",
-    description: "Increases click power (caps at level 10)",
+    description: "Increases click power",
     src: `${BASE}img/icons/hand-pointer.svg`,
     baseCost: 15,
-    scale: 2.2,
+    scale: 2.4,
     currency: "money",
     maxLevel: 10
   },
   sellMultiplier: {
     name: "Worthy Squares",
-    description: "Sell patterns for more IGM",
+    description: "Squares make more IGM",
     src: `${BASE}img/icons/bx-dollar-circle.svg`,
     baseCost: 80,
     scale: 2.5,
     currency: "money"
   },
   creationSpeed: {
-    name: "Hardware Upgrade",
-    description: "Creates patterns slightly faster",
+    name: "Hardware Acceleration",
+    description: "Automatic creation is faster",
     src: `${BASE}img/icons/speedometer.svg`,
     baseCost: 50,
-    scale: 2.0,
+    scale: 2.2,
     currency: "money"
   },
   expGain: {
     name: "Learning Algorithm",
-    description: "Patterns gain more EXP",
+    description: "Patterns level up faster",
     src: `${BASE}img/icons/brain.svg`,
     baseCost: 60,
     scale: 2.0,
@@ -55,8 +55,8 @@ export const UPGRADES = {
 // DC upgrades — per pattern, speed + output, survive prestige (DC never resets)
 export const DC_UPGRADES = {
   squareSpeed: {
-    name: "Square Throughput",
-    description: "Square patterns complete faster",
+    name: "Square Speed",
+    description: "Squares are created faster",
     src: `${BASE}img/icons/Square Speed.svg`,
     baseCost: 50,
     scale: 2.0,
@@ -65,8 +65,8 @@ export const DC_UPGRADES = {
     stat: "speed"
   },
   squareOutput: {
-    name: "Square Yield",
-    description: "Square patterns produce more IGM",
+    name: "Square Value",
+    description: "Squares make more IGM",
     src: `${BASE}img/icons/Square Output.svg`,
     baseCost: 75,
     scale: 2.0,
@@ -75,8 +75,8 @@ export const DC_UPGRADES = {
     stat: "output"
   },
   triangleSpeed: {
-    name: "Triangle Throughput",
-    description: "Triangle patterns complete faster",
+    name: "Triangle Speed",
+    description: "Triangles are created faster",
     src: `${BASE}img/icons/Triangle Speed.svg`,
     baseCost: 50,
     scale: 2.0,
@@ -85,8 +85,8 @@ export const DC_UPGRADES = {
     stat: "speed"
   },
   triangleOutput: {
-    name: "Triangle Yield",
-    description: "Triangle patterns produce more EXP",
+    name: "Triangle Value",
+    description: "Triangles produce more EXP",
     src: `${BASE}img/icons/Triangle Output.svg`,
     baseCost: 75,
     scale: 2.0,
@@ -95,8 +95,8 @@ export const DC_UPGRADES = {
     stat: "output"
   },
   crossSpeed: {
-    name: "Cross Throughput",
-    description: "Cross patterns complete faster",
+    name: "Cross Speed",
+    description: "Crosses are created faster",
     src: `${BASE}img/icons/Cross Speed.svg`,
     baseCost: 50,
     scale: 2.0,
@@ -105,8 +105,8 @@ export const DC_UPGRADES = {
     stat: "speed"
   },
   crossOutput: {
-    name: "Cross Yield",
-    description: "Cross patterns produce more PP",
+    name: "Cross Value",
+    description: "Crosses produce more PP",
     src: `${BASE}img/icons/Cross Output.svg`,
     baseCost: 75,
     scale: 2.0,

@@ -7,12 +7,12 @@ export const TUTORIAL_STEPS = [
   },
   {
     title: "Selecting Slots",
-    description: "Click a slot to assign a pattern. Hold SHIFT to select a slot for targeted boosts.",
+    description: "By hovering on slot and scrolling you can choose from different pattern types. SHIFT + CLICK on slot to activate overclock.",
     image: `${BASE}img/tutorial/Tutorial 1.png`,
   },
   {
-    title: "Assigning Patterns",
-    description: "Available patterns give different outputs: money, EXP, DC or prestige.",
+    title: "Pattern Types",
+    description: "Patterns give different resources: money, EXP, DC or prestige.",
     image: `${BASE}img/tutorial/Tutorial 2.png`,
   },
   {
@@ -23,6 +23,21 @@ export const TUTORIAL_STEPS = [
   {
     title: "Machines",
     description: "Machines provide special effects. Example: Slot unlock, global speed, targeted boost.",
+    image: `${BASE}img/tutorial/Tutorial 4.png`,
+  },
+  {
+    title: "Synergies",
+    description: "Some pattern combinations unlock synergy wich will boost specific patterns.",
+    image: `${BASE}img/tutorial/Tutorial 4.png`,
+  },
+  {
+    title: "Bosses",
+    description: "In random intervals, a boss will appear. Defeat it by clicking to secure your money, EXP, DC or prestige.",
+    image: `${BASE}img/tutorial/Tutorial 4.png`,
+  },
+  {
+    title: "Global Ranking",
+    description: "Compare your progress with others by submiting yout score.",
     image: `${BASE}img/tutorial/Tutorial 4.png`,
   },
   {

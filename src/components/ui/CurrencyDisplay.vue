@@ -4,9 +4,9 @@
       LVL.{{ game.level }}
       <span class="level-bar" aria-hidden="true">{{ levelBar }}</span>
     </p>
-    <p><abbr title="In-Game Money">IGM</abbr> - {{ formatNumber(game.money) }}</p>
-    <p><abbr title="Dark Coins">DC</abbr> - {{ formatNumber(game.dc) }}</p>
-    <p><abbr title="Prestige Points">PP</abbr> - {{ formatNumber(game.prestigePoints) }}</p>
+    <p><abbr title="In-Game Money">IGM</abbr> {{ formatNumber(game.money) }}</p>
+    <p><abbr title="Dark Coins">DC</abbr> {{ formatNumber(game.dc) }}</p>
+    <p><abbr title="Prestige Points">PP</abbr> {{ formatNumber(game.prestigePoints) }}</p>
   </div>
 </template>
 

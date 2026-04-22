@@ -17,7 +17,7 @@
       </div>
 
       <div v-if="step!.image" class="tutorial-image">
-        <img :src="step!.image" alt="" role="presentation" />
+        <img :src="step!.image" alt="" role="presentation" draggable="false"/>
       </div>
     </div>
 
@@ -115,7 +115,7 @@ watch(step, () => nextTick(updateHighlight))
       button { border: none; }
     }
 
-    .tutorial-image { margin-top: 1rem; img { width: 300px; } }
+    .tutorial-image { margin-top: 1rem; img { width: 300px; user-select: none; } }
   }
 
   .tutorial-highlight {

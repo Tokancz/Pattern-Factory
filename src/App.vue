@@ -44,6 +44,7 @@
         <nav class="mobile-menu" @click="mobileMenuOpened = false">
           <router-link to="/patterns">PATTERNS</router-link>
           <router-link to="/upgrades">UPGRADES</router-link>
+          <router-link to="/synergies">SYNERGIES</router-link>
           <router-link to="/machines">MACHINES</router-link>
           <router-link to="/inventory">INVENTORY</router-link>
           <router-link to="/prestige">PRESTIGE</router-link>
