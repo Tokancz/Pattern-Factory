@@ -114,6 +114,8 @@ watch(() => boss.isActive, (active) => {
 </script>
 
 <style scoped lang="scss">
+@use "sass:color";
+
 .takeover {
   position: fixed;
   inset: 0;
@@ -294,7 +296,7 @@ watch(() => boss.isActive, (active) => {
   > .fill {
     height: 100%;
     width: 100%;
-    background: linear-gradient(180deg, lighten($danger, 8%) 0%, $danger 50%, darken($danger, 12%) 100%);
+    background: linear-gradient(180deg, color.adjust($danger, $lightness: 8%) 0%, $danger 50%, color.adjust($danger, $lightness: -12%) 100%);
     box-shadow: 0 0 16px rgba($danger, .6);
     transition: width .3s $ease-out;
   }

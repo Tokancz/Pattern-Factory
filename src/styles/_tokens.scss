@@ -3,6 +3,8 @@
 //  Globally injected via vite preprocessorOptions.additionalData
 // ===========================================================
 
+@use "sass:color";
+
 // ── color
 $bg:            #0A0E1F;
 $bg-2:          #0F1428;
@@ -82,7 +84,7 @@ $rail-w:  320px;
 }
 
 @mixin panel($bg: $surface, $radius: $r-lg) {
-  background: linear-gradient(180deg, lighten($bg, 2%) 0%, $bg 100%);
+  background: linear-gradient(180deg, color.adjust($bg, $lightness: 2%) 0%, $bg 100%);
   border: 1px solid $border;
   border-radius: $radius;
   box-shadow: $shadow-2;
@@ -142,7 +144,7 @@ $rail-w:  320px;
 
 @mixin btn-primary {
   @include btn-base;
-  background: linear-gradient(180deg, $accent 0%, darken($accent, 14%) 100%);
+  background: linear-gradient(180deg, $accent 0%, color.adjust($accent, $lightness: -14%) 100%);
   color: $bg;
   border-color: rgba(#FFFFFF, .25);
   box-shadow: $glow-cyan, $shadow-2;
@@ -156,14 +158,14 @@ $rail-w:  320px;
 }
 @mixin btn-warning {
   @include btn-base;
-  background: linear-gradient(180deg, $warm 0%, darken($warm, 14%) 100%);
+  background: linear-gradient(180deg, $warm 0%, color.adjust($warm, $lightness: -14%) 100%);
   color: $bg;
   border-color: rgba(#FFFFFF, .25);
   box-shadow: $glow-amber, $shadow-2;
 }
 @mixin btn-danger {
   @include btn-base;
-  background: linear-gradient(180deg, $danger 0%, darken($danger, 14%) 100%);
+  background: linear-gradient(180deg, $danger 0%, color.adjust($danger, $lightness: -14%) 100%);
   color: $ink;
   border-color: rgba(#FFFFFF, .25);
   box-shadow: $glow-danger, $shadow-2;
@@ -195,7 +197,7 @@ $rail-w:  320px;
   > .fill {
     position: absolute; inset: 0; right: auto;
     border-radius: inherit;
-    background: linear-gradient(90deg, darken($color, 15%) 0%, $color 50%, lighten($color, 8%) 100%);
+    background: linear-gradient(90deg, color.adjust($color, $lightness: -15%) 0%, $color 50%, color.adjust($color, $lightness: 8%) 100%);
     box-shadow: 0 0 12px rgba($color, .55);
     transition: width .4s $ease-out;
   }
