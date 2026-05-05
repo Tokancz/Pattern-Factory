@@ -1,0 +1,500 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Pattern Factory — v3 (Soft Sci-Fi Cut)</title>
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="PatternFactory3.0.css">
+</head>
+<body>
+
+<div class="frame">
+
+  <!-- ─────────── HEADER ─────────── -->
+  <div class="header">
+
+    <div class="brand">
+      <div class="brand__mark">PF</div>
+      <div>
+        <div class="brand__name">Pattern Factory</div>
+        <div class="brand__sub">CTRL · 001</div>
+      </div>
+    </div>
+
+    <div class="level">
+      <div class="level__row">
+        <span class="level__num">LVL 01</span>
+        <span class="level__session">SESSION 00:14:32</span>
+        <span class="level__cps">+4.2 / SEC</span>
+      </div>
+      <div class="level__bar">
+        <div class="level__progress">
+          <div class="fill" style="width: 8%"></div>
+        </div>
+        <span class="level__fraction">8 / 120</span>
+      </div>
+    </div>
+
+    <div class="resources">
+      <div class="res res--primary">
+        <span class="res__code">IGH</span>
+        <span class="res__val">1,248</span>
+        <span class="res__delta">+4.2/s</span>
+      </div>
+      <div class="res">
+        <span class="res__code">DC</span>
+        <span class="res__val">0</span>
+      </div>
+      <div class="res res--gold">
+        <span class="res__code">PP</span>
+        <span class="res__val">0</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─────────── NAV ─────────── -->
+  <nav class="nav">
+    <div class="nav__group">▸ Play</div>
+    <div class="nav__item is-active">
+      <img class="nav__item__icon" src="public/img/icons/factory-building.svg" alt="">
+      <span class="nav__item__label">Factory</span>
+      <span class="nav__item__meta">●</span>
+    </div>
+    <div class="nav__item">
+      <img class="nav__item__icon" src="public/img/icons/connectdevelop.svg" alt="">
+      <span class="nav__item__label">Patterns</span>
+      <span class="nav__item__meta">1/4</span>
+    </div>
+    <div class="nav__item">
+      <img class="nav__item__icon" src="public/img/icons/cpu.svg" alt="">
+      <span class="nav__item__label">Upgrades</span>
+      <span class="nav__item__meta"></span>
+    </div>
+
+    <div class="nav__group">▸ Progress</div>
+    <div class="nav__item">
+      <img class="nav__item__icon" src="public/img/icons/bx-git-repo-forked.svg" alt="">
+      <span class="nav__item__label">Synergies</span>
+      <span class="nav__item__badge">2</span>
+    </div>
+    <div class="nav__item">
+      <img class="nav__item__icon" src="public/img/icons/server-plus.svg" alt="">
+      <span class="nav__item__label">Machines</span>
+      <span class="nav__item__meta"></span>
+    </div>
+    <div class="nav__item">
+      <img class="nav__item__icon" src="public/img/icons/diamond.svg" alt="">
+      <span class="nav__item__label">Inventory</span>
+      <span class="nav__item__meta"></span>
+    </div>
+
+    <div class="nav__group">▸ Meta</div>
+    <div class="nav__item is-muted">
+      <img class="nav__item__icon" src="public/img/icons/brain.svg" alt="">
+      <span class="nav__item__label">Prestige</span>
+      <span class="nav__item__meta">—</span>
+    </div>
+    <div class="nav__item">
+      <img class="nav__item__icon" src="public/img/icons/hubspot.svg" alt="">
+      <span class="nav__item__label">Ranking</span>
+      <span class="nav__item__meta"></span>
+    </div>
+
+    <div class="tutorial">
+      <div class="tutorial__head">
+        <span class="tutorial__step">▸ TUTORIAL</span>
+        <span class="tutorial__counter">2 / 7</span>
+      </div>
+      <div class="tutorial__title">Selecting slots.</div>
+      <div class="tutorial__actions">
+        <button class="tutorial__btn">← Back</button>
+        <button class="tutorial__btn--primary">Next →</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ─────────── MAIN ─────────── -->
+  <main class="main">
+
+    <div class="stats">
+      <div class="stat">
+        <div class="stat__lbl">Click<br/>Power</div>
+        <div class="stat__num">4</div>
+        <div class="stat__sub">
+          <span>per tap</span>
+          <span>· 4× base</span>
+        </div>
+      </div>
+      <div class="stat stat--combo">
+        <div class="stat__lbl">Combo</div>
+        <div class="stat__num">×3</div>
+        <div class="stat__sub">
+          <span>2.4s left</span>
+          <div class="combo-bar"><div class="fill" style="width: 60%"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FACTORY -->
+    <div class="factory" id="factory">
+      <img class="corner corner--tl" src="public/img/patterns/Square.svg"   alt="">
+      <img class="corner corner--tr" src="public/img/patterns/Circle.svg"   alt="">
+      <img class="corner corner--bl" src="public/img/patterns/Cross.svg"    alt="">
+      <img class="corner corner--br" src="public/img/patterns/Triangle.svg" alt="">
+
+      <div class="float float--f1">+4</div>
+      <div class="float float--f2">+4</div>
+      <div class="float float--f3">+1</div>
+      <div class="float float--f4">+1</div>
+
+      <div class="combo-flag">COMBO ×3</div>
+
+      <div class="slots">
+
+        <div class="slot is-active">
+          <span class="slot__tag">SLOT 1</span>
+          <div class="slot__tile">
+            <img src="public/img/patterns/Square.svg" alt="" style="width:88px;height:88px">
+          </div>
+          <div class="slot__name">Square</div>
+          <div class="slot__progress">
+            <div class="slot__progressBar"><div class="fill" style="width: 51%"></div></div>
+            <span class="slot__progressTxt">51 / 100</span>
+          </div>
+        </div>
+
+        <div class="slot is-buy">
+          <span class="slot__tag">SLOT 2</span>
+          <div class="slot__tile">
+            <img src="public/img/patterns/Triangle.svg" alt="" style="width:60px;height:60px">
+          </div>
+          <div class="slot__name">Buy · 200 IGH</div>
+        </div>
+
+        <div class="slot is-buy">
+          <span class="slot__tag">SLOT 3</span>
+          <div class="slot__tile">
+            <img src="public/img/patterns/Circle.svg" alt="" style="width:60px;height:60px">
+          </div>
+          <div class="slot__name">Buy · 500 IGH</div>
+        </div>
+
+        <div class="slot is-locked">
+          <span class="slot__tag">SLOT 4</span>
+          <div class="slot__tile">
+            <img src="public/img/icons/lock-alert.svg" alt="" style="width:48px;height:48px">
+          </div>
+          <div class="slot__name">Locked</div>
+          <div class="slot__req">REQUIRES LVL 3</div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- STRIP -->
+    <div class="strip">
+      <div style="display:flex;align-items:center;gap:18px">
+        <span class="strip__count">1 / 4 SLOTTED</span>
+        <span class="strip__hint">scroll a slot to swap pattern · shift+click to overclock</span>
+      </div>
+      <button class="strip__cta">Open Pattern Library →</button>
+    </div>
+  </main>
+
+  <!-- ─────────── RIGHT RAIL ─────────── -->
+  <aside class="rail">
+
+    <div class="rail-section">
+      <div class="rail-section__head">
+        <span class="rail-section__tag">⚑ Almost</span>
+        <span class="rail-section__title">there.</span>
+      </div>
+
+      <div class="almost">
+        <div class="almost__head">
+          <span class="almost__label">Triangle unlock</span>
+          <span class="almost__pct">41%</span>
+        </div>
+        <div class="almost__bar"><div class="fill" style="width:41%"></div></div>
+        <div class="almost__foot">
+          <span class="almost__sub">49 clicks left</span>
+        </div>
+      </div>
+
+      <div class="almost">
+        <div class="almost__head">
+          <span class="almost__label">Muscle Up!</span>
+          <span class="almost__pct">7%</span>
+        </div>
+        <div class="almost__bar"><div class="fill" style="width:7%"></div></div>
+        <div class="almost__foot">
+          <span class="almost__sub">15 IGH to buy</span>
+          <button class="almost__buy">Buy</button>
+        </div>
+      </div>
+
+      <div class="almost">
+        <div class="almost__head">
+          <span class="almost__label">Research Lab</span>
+          <span class="almost__pct">50%</span>
+        </div>
+        <div class="almost__bar"><div class="fill" style="width:50%"></div></div>
+        <div class="almost__foot">
+          <span class="almost__sub">needs 1× Triangle</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="rail-section" style="flex:1;min-height:0;overflow:hidden">
+      <div class="rail-section__head">
+        <span class="rail-section__tag">⏱ Live</span>
+        <span class="rail-section__title">feed.</span>
+      </div>
+      <div class="feed">
+        <div class="feed__line"><span class="feed__t">0:14</span><span class="feed__x feed__x--gain">+1 IGH</span></div>
+        <div class="feed__line"><span class="feed__t">0:13</span><span class="feed__x feed__x--gain">+4 IGH</span><span class="feed__tag">×3</span></div>
+        <div class="feed__line"><span class="feed__t">0:12</span><span class="feed__x feed__x--combo">COMBO ×3 !</span></div>
+        <div class="feed__line"><span class="feed__t">0:11</span><span class="feed__x feed__x--gain">+1 IGH</span></div>
+        <div class="feed__line"><span class="feed__t">0:10</span><span class="feed__x feed__x--gain">+1 IGH</span></div>
+        <div class="feed__line"><span class="feed__t">0:08</span><span class="feed__x feed__x--gain">+1 IGH</span></div>
+        <div class="feed__line"><span class="feed__t">0:06</span><span class="feed__x feed__x--gain">+1 IGH</span></div>
+        <div class="feed__line"><span class="feed__t">0:02</span><span class="feed__x feed__x--start">▶ SESSION START</span></div>
+      </div>
+    </div>
+
+    <!-- BOSS CARD (idle countdown) -->
+    <div class="boss-card" id="bossCard">
+      <img class="boss-card__art" src="public/img/patterns/bossSquare.svg" alt="">
+      <div class="boss-card__head">
+        <span class="a">BOSS</span>
+        <span class="b" id="bossCardWord">incoming</span>
+      </div>
+      <div class="boss-card__meta">
+        <span class="boss-card__name">SQUARE BOSS</span>
+        <span class="boss-card__time" id="bossCardTime">0:08</span>
+      </div>
+      <div class="boss-card__warn">defeat or lose all IGH</div>
+    </div>
+  </aside>
+
+  <!-- ─────────── FOOTER ─────────── -->
+  <div class="footer">
+    <div class="footer__title">STATS</div>
+    <div class="footer__stats">
+      <div class="footer__stat"><span class="l">CLICK</span><span class="v">4</span></div>
+      <div class="footer__stat"><span class="l">SPEED</span><span class="v">1×</span></div>
+      <div class="footer__stat"><span class="l">O/CLK</span><span class="v">1×</span></div>
+      <div class="footer__stat"><span class="l">SELL</span><span class="v">1×</span></div>
+      <div class="footer__stat"><span class="l">OUT+</span><span class="v">1×</span></div>
+      <div class="footer__stat"><span class="l">OUT↑</span><span class="v">1×</span></div>
+      <div class="footer__stat"><span class="l">SYN</span><span class="v">0</span></div>
+      <div class="footer__stat"><span class="l">PRG</span><span class="v">—</span></div>
+      <div class="footer__stat"><span class="l">OFFLN</span><span class="v">1H</span></div>
+    </div>
+    <div class="footer__mark">CREATED BY MATES</div>
+  </div>
+
+  <!-- ─────────── BOSS TAKEOVER ─────────── -->
+  <div class="takeover" id="takeover">
+    <div class="tk-vignette"></div>
+    <div class="tk-grid"></div>
+    <div class="tk-scanlines"></div>
+    <div class="tk-hazard tk-hazard--top"></div>
+    <div class="tk-hazard tk-hazard--bot"></div>
+
+    <!-- countdown -->
+    <div class="tk-countdown" id="tkCountdown">
+      <div class="tk-countdown__tag">⚠ INCOMING ⚠</div>
+      <div class="tk-countdown__num anim" id="tkNum">3</div>
+      <div class="tk-countdown__rings" id="tkRings"></div>
+      <div class="tk-countdown__sub">SQUARE BOSS APPROACHING</div>
+    </div>
+
+    <!-- reveal -->
+    <div class="tk-reveal" id="tkReveal" style="display:none">
+      <div class="tk-corner tk-corner--tl">▌ ENC-001</div>
+      <div class="tk-corner tk-corner--tr">SECTOR · 01</div>
+      <div class="tk-corner tk-corner--bl">THREAT · A</div>
+      <div class="tk-corner tk-corner--br">⚠ DEFEND</div>
+
+      <div class="tk-head">
+        <div class="tk-tag">⚠ BOSS ENCOUNTER</div>
+        <div class="tk-meta">LVL.1 · WAVE 01 · TIMER 0:30</div>
+      </div>
+
+      <div class="tk-body">
+        <div class="tk-art-wrap">
+          <img class="tk-art" src="public/img/patterns/bossSquare.svg" alt="">
+        </div>
+      </div>
+
+      <div class="tk-foot">
+        <div class="tk-title-row">
+          <div class="tk-title"><span class="accent">SQUARE</span> BOSS</div>
+        </div>
+        <div class="tk-hp-row">
+          <span class="tk-hp-label">HP</span>
+          <div class="tk-hp-bar">
+            <div class="fill" id="bossHpFill"></div>
+            <div class="ticks">
+              <span></span><span></span><span></span><span></span><span></span>
+              <span></span><span></span><span></span><span></span><span></span>
+            </div>
+          </div>
+          <span class="tk-hp-num" id="bossHpNum">500 / 500</span>
+        </div>
+        <div class="tk-actions">
+          <div class="tk-reward">REWARD: +250 IGH · +1 DC<span class="pen">PENALTY: −ALL IGH</span></div>
+          <div style="display:flex;gap:10px;align-items:center">
+            <button class="tk-flee" id="btFlee">FLEE</button>
+            <button class="tk-fight" id="btFight">FIGHT →</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tk-flash"></div>
+  </div>
+
+  <!-- dev trigger -->
+  <button class="dev-trigger" id="bossTrigger">▶ TRIGGER BOSS</button>
+</div>
+
+<script>
+/* ── click juice on the factory ── */
+(function () {
+  const factory = document.getElementById('factory');
+  if (!factory) return;
+  function spawn(x, y, val) {
+    const f = document.createElement('div');
+    f.textContent = '+' + val;
+    f.style.cssText = `
+      position:absolute; left:${x - 20}px; top:${y - 30}px;
+      font-family:"Space Grotesk",sans-serif; font-weight:700;
+      font-size:42px; color:#F0F4FF; pointer-events:none; z-index:10;
+      text-shadow:0 0 16px rgba(0,217,255,.55);
+      transform:rotate(${(Math.random() * 16) - 8}deg);
+      transition:transform .7s ease-out, opacity .7s ease-out, top .7s ease-out;
+    `;
+    factory.appendChild(f);
+    requestAnimationFrame(() => {
+      f.style.top = (y - 110) + 'px';
+      f.style.opacity = '0';
+    });
+    setTimeout(() => f.remove(), 720);
+  }
+  factory.addEventListener('click', (e) => {
+    const r = factory.getBoundingClientRect();
+    spawn(e.clientX - r.left, e.clientY - r.top, 4);
+    factory.animate(
+      [{ transform: 'translate(0,0)' }, { transform: 'translate(2px,-2px)' }, { transform: 'translate(-1px,1px)' }, { transform: 'translate(0,0)' }],
+      { duration: 140 }
+    );
+  });
+})();
+
+/* ── boss sequence ── */
+(function () {
+  const overlay   = document.getElementById('takeover');
+  const cdStage   = document.getElementById('tkCountdown');
+  const reveal    = document.getElementById('tkReveal');
+  const numEl     = document.getElementById('tkNum');
+  const rings     = document.getElementById('tkRings');
+  const card      = document.getElementById('bossCard');
+  const cardTime  = document.getElementById('bossCardTime');
+  const cardWord  = document.getElementById('bossCardWord');
+  const trigger   = document.getElementById('bossTrigger');
+  const hpFill    = document.getElementById('bossHpFill');
+  const hpNum     = document.getElementById('bossHpNum');
+  const fightBtn  = document.getElementById('btFight');
+  const fleeBtn   = document.getElementById('btFlee');
+
+  let timers = [];
+  const clearTimers = () => { timers.forEach(t => clearTimeout(t)); timers = []; };
+  const later = (fn, ms) => { const t = setTimeout(fn, ms); timers.push(t); return t; };
+
+  function showCount(label, isGo) {
+    cdStage.style.display = 'grid';
+    reveal.style.display = 'none';
+    overlay.classList.remove('is-bossOn', 'is-shake');
+    numEl.classList.remove('anim');
+    numEl.classList.toggle('is-go', !!isGo);
+    numEl.textContent = label;
+    rings.style.animation = 'none';
+    void rings.offsetWidth;
+    rings.style.animation = '';
+    void numEl.offsetWidth;
+    numEl.classList.add('anim');
+  }
+
+  function showReveal() {
+    cdStage.style.display = 'none';
+    reveal.style.display = 'grid';
+    overlay.classList.add('is-bossOn', 'is-shake', 'is-flash');
+    later(() => overlay.classList.remove('is-flash'), 280);
+    let hp = 500;
+    hpFill.style.width = '100%';
+    hpNum.textContent = hp + ' / 500';
+    fightBtn.onclick = () => {
+      hp = Math.max(0, hp - 50);
+      hpFill.style.width = (hp / 500 * 100) + '%';
+      hpNum.textContent = hp + ' / 500';
+      overlay.classList.add('is-flash');
+      later(() => overlay.classList.remove('is-flash'), 240);
+      if (hp === 0) later(closeOverlay, 350);
+    };
+  }
+
+  function closeOverlay() {
+    overlay.classList.remove('is-on', 'is-bossOn', 'is-shake', 'is-flash');
+    clearTimers();
+    resetCard();
+  }
+
+  function resetCard() {
+    card.classList.remove('is-warn', 'is-imminent');
+    cardWord.textContent = 'incoming';
+    cardTime.textContent = '0:08';
+  }
+
+  fleeBtn.onclick = closeOverlay;
+
+  function startSequence() {
+    clearTimers();
+    overlay.classList.remove('is-on');
+    let t = 8;
+    cardTime.textContent = '0:0' + t;
+    cardWord.textContent = 'incoming';
+    card.classList.remove('is-warn', 'is-imminent');
+
+    function tickCard() {
+      t -= 1;
+      cardTime.textContent = (t < 10 ? '0:0' : '0:') + t;
+      if (t <= 5 && t > 3) { card.classList.add('is-warn'); cardWord.textContent = 'approach'; }
+      if (t <= 3)          { card.classList.add('is-imminent'); cardWord.textContent = 'imminent'; }
+      if (t <= 0)          { runTakeover(); return; }
+      later(tickCard, 1000);
+    }
+    later(tickCard, 1000);
+  }
+
+  function runTakeover() {
+    overlay.classList.add('is-on');
+    showCount('3', false);
+    later(() => showCount('2', false),       900);
+    later(() => showCount('1', false),       1800);
+    later(() => showCount('DEFEND!', true),  2700);
+    later(() => showReveal(),                3700);
+  }
+
+  trigger.addEventListener('click', startSequence);
+  later(startSequence, 1200);
+})();
+</script>
+</body>
+</html>

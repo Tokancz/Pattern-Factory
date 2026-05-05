@@ -1,0 +1,1376 @@
+// ===========================================================
+//  PATTERN FACTORY — v3 design
+//  "Soft Sci-Fi / Command Center" aesthetic
+//  Compile:  npx sass PatternFactory3.0.scss PatternFactory3.0.css
+// ===========================================================
+
+
+// -----------------------------------------------------------
+//  1. TOKENS
+// -----------------------------------------------------------
+
+// ── color
+$bg:            #0A0E1F;          // deep space background
+$bg-2:          #0F1428;          // page chrome
+$surface:       #161C36;          // base panel
+$surface-2:     #1F2647;          // raised panel
+$surface-3:     #2A3360;          // hovered / nested
+
+$ink:           #F0F4FF;          // primary text
+$ink-2:         #B0BBE0;          // dim text
+$ink-3:         #6772A0;          // very dim, captions
+$ink-4:         #3F4870;          // borders rendered as ink
+
+$accent:        #00D9FF;          // electric cyan — primary
+$accent-2:      #5B8DFF;           // blue
+$accent-deep:   #003D8F;
+$warm:          #FFB13D;          // amber — secondary
+$success:       #7DFFA8;          // green — gains
+$danger:        #FF4B6E;          // coral red — boss / penalty
+$purple:        #8E5BFF;          // factory accent
+
+$border:        rgba(#FFFFFF, .08);
+$border-strong: rgba($accent, .35);
+
+// alpha helpers
+$accent-15:     rgba($accent, .15);
+$accent-25:     rgba($accent, .25);
+$warm-20:       rgba($warm, .20);
+$danger-15:     rgba($danger, .15);
+$danger-30:     rgba($danger, .30);
+
+
+// ── spacing (8-pt scale)
+$s-1: 4px;
+$s-2: 8px;
+$s-3: 12px;
+$s-4: 16px;
+$s-5: 20px;
+$s-6: 24px;
+$s-7: 32px;
+$s-8: 48px;
+$s-9: 64px;
+
+// ── radius
+$r-xs: 4px;
+$r-sm: 6px;
+$r-md: 10px;
+$r-lg: 14px;
+$r-xl: 20px;
+$r-pill: 999px;
+
+// ── elevation (layered shadows, no harsh offsets)
+$shadow-1: 0 1px 2px rgba(#000, .35);
+$shadow-2: 0 4px 14px rgba(#000, .35), 0 1px 0 rgba(#FFF, .03) inset;
+$shadow-3: 0 12px 32px rgba(#000, .45), 0 1px 0 rgba(#FFF, .04) inset;
+
+$glow-cyan:   0 0 0 1px rgba($accent, .35), 0 0 24px rgba($accent, .25);
+$glow-amber:  0 0 0 1px rgba($warm, .35),   0 0 24px rgba($warm, .22);
+$glow-danger: 0 0 0 1px rgba($danger, .45), 0 0 28px rgba($danger, .35);
+
+// ── motion
+$ease:        cubic-bezier(.4, 0, .2, 1);
+$ease-out:    cubic-bezier(.16, 1, .3, 1);
+
+// ── type
+$ff-display: "Space Grotesk", "Inter", system-ui, sans-serif;
+$ff-ui:      "Inter", system-ui, sans-serif;
+$ff-mono:    "JetBrains Mono", ui-monospace, Menlo, monospace;
+
+// ── frame
+$frame-w: 1280px;
+$frame-h: 820px;
+$nav-w:   232px;
+$rail-w:  320px;
+
+
+// -----------------------------------------------------------
+//  2. MIXINS
+// -----------------------------------------------------------
+
+@mixin flex-row($gap: 0, $justify: flex-start, $align: center) {
+  display: flex;
+  flex-direction: row;
+  justify-content: $justify;
+  align-items: $align;
+  gap: $gap;
+}
+
+@mixin flex-col($gap: 0, $justify: flex-start, $align: stretch) {
+  display: flex;
+  flex-direction: column;
+  justify-content: $justify;
+  align-items: $align;
+  gap: $gap;
+}
+
+// glass surface — base for any panel
+@mixin panel($bg: $surface, $radius: $r-lg) {
+  background: linear-gradient(180deg, lighten($bg, 2%) 0%, $bg 100%);
+  border: 1px solid $border;
+  border-radius: $radius;
+  box-shadow: $shadow-2;
+}
+
+// hairline divider
+@mixin hairline($side: bottom, $color: $border) {
+  @if $side == bottom { border-bottom: 1px solid $color; }
+  @if $side == top    { border-top: 1px solid $color; }
+  @if $side == left   { border-left: 1px solid $color; }
+  @if $side == right  { border-right: 1px solid $color; }
+}
+
+// monospace label (small, tracked, all-caps)
+@mixin label($size: 11px, $color: $ink-3) {
+  font-family: $ff-mono;
+  font-weight: 600;
+  font-size: $size;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: $color;
+}
+
+// chip / tag pill
+@mixin chip($fg: $accent, $bg: $accent-15) {
+  display: inline-flex;
+  align-items: center;
+  gap: $s-1;
+  padding: 3px 8px;
+  font-family: $ff-mono;
+  font-weight: 700;
+  font-size: 10px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: $fg;
+  background: $bg;
+  border: 1px solid rgba($fg, .35);
+  border-radius: $r-sm;
+}
+
+// button base
+@mixin btn-base {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: $s-2;
+  padding: 9px 16px;
+  font-family: $ff-mono;
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  border-radius: $r-sm;
+  border: 1px solid $border;
+  cursor: pointer;
+  transition: transform .12s $ease, background .15s $ease, border-color .15s $ease, color .15s $ease, box-shadow .15s $ease;
+  user-select: none;
+  &:active { transform: translateY(1px); }
+}
+
+// button variants
+@mixin btn-primary {
+  @include btn-base;
+  background: linear-gradient(180deg, $accent 0%, darken($accent, 14%) 100%);
+  color: $bg;
+  border-color: rgba(#FFFFFF, .25);
+  box-shadow: $glow-cyan, $shadow-2;
+  &:hover { box-shadow: $glow-cyan, $shadow-3; transform: translateY(-1px); }
+}
+
+@mixin btn-ghost {
+  @include btn-base;
+  background: transparent;
+  color: $ink-2;
+  &:hover { color: $ink; border-color: $border-strong; background: $accent-15; }
+}
+
+@mixin btn-warning {
+  @include btn-base;
+  background: linear-gradient(180deg, $warm 0%, darken($warm, 14%) 100%);
+  color: $bg;
+  border-color: rgba(#FFFFFF, .25);
+  box-shadow: $glow-amber, $shadow-2;
+}
+
+@mixin btn-danger {
+  @include btn-base;
+  background: linear-gradient(180deg, $danger 0%, darken($danger, 14%) 100%);
+  color: $ink;
+  border-color: rgba(#FFFFFF, .25);
+  box-shadow: $glow-danger, $shadow-2;
+}
+
+// soft glow ring on a focused / selected element
+@mixin glow($color: $accent) {
+  box-shadow: 0 0 0 1px rgba($color, .55), 0 0 24px rgba($color, .35);
+}
+
+// dotted starfield / grid background — for the factory stage
+@mixin grid-bg($size: 24px, $color: rgba($accent, .08)) {
+  background-image:
+    linear-gradient($color 1px, transparent 1px),
+    linear-gradient(90deg, $color 1px, transparent 1px);
+  background-size: $size $size;
+}
+
+// tabular nums — always use on counters
+@mixin tab-nums {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+}
+
+// progress bar (track + striped fill)
+@mixin progress($height: 6px, $color: $accent) {
+  position: relative;
+  height: $height;
+  border-radius: $r-pill;
+  background: rgba($color, .1);
+  border: 1px solid rgba($color, .25);
+  overflow: hidden;
+  > .fill {
+    position: absolute; inset: 0; right: auto;
+    border-radius: inherit;
+    background: linear-gradient(90deg, darken($color, 15%) 0%, $color 50%, lighten($color, 8%) 100%);
+    box-shadow: 0 0 12px rgba($color, .55);
+    transition: width .4s $ease-out;
+  }
+}
+
+
+// -----------------------------------------------------------
+//  3. BASE / RESET
+// -----------------------------------------------------------
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: $bg;
+  color: $ink;
+  font-family: $ff-ui;
+  font-size: 14px;
+  line-height: 1.4;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  // ambient page glow behind the frame
+  background:
+    radial-gradient(ellipse 80% 50% at 50% 0%,    rgba($accent, .06)  0%, transparent 60%),
+    radial-gradient(ellipse 60% 40% at 100% 100%, rgba($purple, .07) 0%, transparent 60%),
+    $bg;
+  display: grid;
+  place-items: center;
+  padding: 24px 0;
+}
+
+button { font: inherit; color: inherit; }
+img { display: block; max-width: 100%; }
+
+
+// -----------------------------------------------------------
+//  4. FRAME (the cartridge)
+// -----------------------------------------------------------
+
+.frame {
+  width: $frame-w;
+  height: $frame-h;
+  display: grid;
+  grid-template-columns: $nav-w 1fr $rail-w;
+  grid-template-rows: auto 1fr auto;
+  grid-template-areas:
+    "header header header"
+    "nav    main   rail"
+    "footer footer footer";
+  background: linear-gradient(180deg, $bg-2 0%, $bg 100%);
+  border: 1px solid $border;
+  border-radius: $r-xl;
+  box-shadow: $shadow-3, 0 0 0 1px rgba($accent, .06);
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+
+// -----------------------------------------------------------
+//  5. HEADER
+// -----------------------------------------------------------
+
+.header {
+  grid-area: header;
+  @include flex-row(0, flex-start, stretch);
+  @include hairline(bottom);
+  position: relative;
+}
+
+.brand {
+  @include flex-row($s-3, flex-start, center);
+  padding: $s-4 $s-5;
+  @include hairline(right);
+  min-width: $nav-w;
+  &__mark {
+    width: 32px; height: 32px;
+    border-radius: $r-sm;
+    background: linear-gradient(135deg, $accent 0%, $purple 100%);
+    box-shadow: $glow-cyan;
+    display: grid; place-items: center;
+    color: $bg;
+    font-family: $ff-display;
+    font-weight: 700;
+    font-size: 18px;
+  }
+  &__name {
+    font-family: $ff-display;
+    font-weight: 700;
+    font-size: 18px;
+    letter-spacing: -.01em;
+    line-height: 1;
+    color: $ink;
+  }
+  &__sub {
+    @include label(10px, $accent);
+    margin-top: 2px;
+  }
+}
+
+.level {
+  @include flex-col($s-2);
+  flex: 1;
+  padding: $s-4 $s-6;
+  @include hairline(right);
+  min-width: 0;
+
+  &__row {
+    @include flex-row($s-3, space-between, baseline);
+  }
+  &__num {
+    font-family: $ff-display;
+    font-weight: 700;
+    font-size: 16px;
+    color: $ink;
+    @include tab-nums;
+  }
+  &__session {
+    @include label(10px);
+  }
+  &__cps {
+    @include label(11px, $success);
+    @include tab-nums;
+  }
+  &__bar {
+    @include flex-row($s-3, flex-start, center);
+  }
+  &__progress {
+    flex: 1;
+    @include progress(8px, $accent);
+  }
+  &__fraction {
+    font-family: $ff-mono;
+    font-weight: 700;
+    font-size: 12px;
+    color: $ink-2;
+    @include tab-nums;
+    min-width: 64px;
+    text-align: right;
+  }
+}
+
+.resources {
+  @include flex-row(0, flex-end, stretch);
+}
+
+.res {
+  @include flex-col(2px, center, center);
+  padding: $s-3 $s-5;
+  min-width: 96px;
+  @include hairline(left);
+  position: relative;
+
+  &__code { @include label(10px, $ink-3); }
+  &__val {
+    font-family: $ff-display;
+    font-weight: 700;
+    font-size: 22px;
+    color: $ink;
+    @include tab-nums;
+    line-height: 1;
+  }
+  &__delta {
+    @include label(9px, $success);
+    @include tab-nums;
+  }
+
+  &--primary .res__val { color: $accent; }
+  &--gold    .res__val { color: $warm; }
+}
+
+
+// -----------------------------------------------------------
+//  6. NAV
+// -----------------------------------------------------------
+
+.nav {
+  grid-area: nav;
+  @include hairline(right);
+  @include flex-col(0, flex-start, stretch);
+  background: rgba($surface, .35);
+  min-height: 0;
+}
+
+.nav__group {
+  padding: $s-4 $s-3 $s-2;
+  @include label(10px);
+}
+
+.nav__item {
+  position: relative;
+  @include flex-row($s-3, flex-start, center);
+  padding: 10px $s-4;
+  margin: 2px $s-2;
+  border-radius: $r-sm;
+  color: $ink-2;
+  cursor: pointer;
+  transition: background .15s $ease, color .15s $ease;
+  user-select: none;
+
+  &::before {
+    content: "";
+    position: absolute;
+    left: -2px; top: 25%; bottom: 25%;
+    width: 2px;
+    background: transparent;
+    border-radius: $r-pill;
+    transition: background .15s $ease;
+  }
+
+  &__icon {
+    width: 16px; height: 16px;
+    flex-shrink: 0;
+    opacity: .65;
+    filter: invert(85%) sepia(11%) saturate(220%) hue-rotate(190deg) brightness(95%);
+  }
+  &__label {
+    flex: 1;
+    font-family: $ff-ui;
+    font-weight: 500;
+    font-size: 14px;
+    letter-spacing: .005em;
+  }
+  &__meta {
+    font-family: $ff-mono;
+    font-weight: 600;
+    font-size: 11px;
+    color: $ink-3;
+    @include tab-nums;
+  }
+  &__badge {
+    @include chip($danger, rgba($danger, .15));
+    font-size: 9px;
+    padding: 1px 6px;
+  }
+
+  &:hover {
+    background: rgba($accent, .06);
+    color: $ink;
+    .nav__item__icon { opacity: 1; }
+  }
+  &.is-active {
+    background: linear-gradient(90deg, rgba($accent, .12) 0%, rgba($accent, .04) 100%);
+    color: $ink;
+    &::before { background: $accent; box-shadow: 0 0 8px rgba($accent, .8); }
+    .nav__item__icon { opacity: 1; filter: invert(80%) sepia(80%) saturate(2000%) hue-rotate(140deg); }
+    .nav__item__meta { color: $accent; }
+  }
+  &.is-muted {
+    color: $ink-4;
+    .nav__item__icon { opacity: .35; }
+  }
+}
+
+.tutorial {
+  margin-top: auto;
+  padding: $s-4;
+  @include hairline(top);
+  @include flex-col($s-3);
+
+  &__head { @include flex-row($s-2); }
+  &__step { @include label(10px, $accent); }
+  &__counter {
+    @include label(10px, $ink-3);
+    margin-left: auto;
+  }
+  &__title {
+    font-family: $ff-display;
+    font-weight: 600;
+    font-size: 16px;
+    color: $ink;
+    line-height: 1.25;
+  }
+  &__actions { @include flex-row($s-2); }
+  &__btn {
+    flex: 1;
+    @include btn-ghost;
+    padding: 7px 10px;
+    font-size: 10px;
+  }
+  &__btn--primary { @include btn-primary; padding: 7px 10px; font-size: 10px; flex: 1; }
+}
+
+
+// -----------------------------------------------------------
+//  7. CENTER COLUMN
+// -----------------------------------------------------------
+
+.main {
+  grid-area: main;
+  @include flex-col($s-4);
+  padding: $s-5 $s-5 $s-4;
+  min-height: 0;
+}
+
+// stat row (click power / combo)
+.stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: $s-4;
+}
+
+.stat {
+  @include panel($surface);
+  @include flex-row($s-4, flex-start, center);
+  padding: $s-4 $s-5;
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse 60% 100% at 100% 50%, rgba($accent, .08) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  &__lbl {
+    @include label(10px);
+    line-height: 1.2;
+    flex-shrink: 0;
+  }
+  &__num {
+    font-family: $ff-display;
+    font-weight: 700;
+    font-size: 38px;
+    line-height: 1;
+    color: $accent;
+    @include tab-nums;
+    text-shadow: 0 0 16px rgba($accent, .35);
+  }
+  &__sub {
+    margin-left: auto;
+    @include flex-col(4px, center, flex-end);
+    font-family: $ff-mono;
+    font-size: 10px;
+    color: $ink-3;
+    text-align: right;
+    letter-spacing: .04em;
+  }
+
+  // combo variant
+  &--combo {
+    .stat__num { color: $warm; text-shadow: 0 0 16px rgba($warm, .4); }
+    &::before { background: radial-gradient(ellipse 60% 100% at 100% 50%, rgba($warm, .1) 0%, transparent 70%); }
+  }
+}
+
+.combo-bar {
+  @include progress(4px, $warm);
+  width: 96px;
+}
+
+
+// -----------------------------------------------------------
+//  8. FACTORY (the violet stage replaced — purple holographic)
+// -----------------------------------------------------------
+
+.factory {
+  flex: 1;
+  min-height: 0;
+  position: relative;
+  border-radius: $r-lg;
+  border: 1px solid rgba($purple, .35);
+  background:
+    radial-gradient(ellipse 80% 60% at 50% 0%, rgba($purple, .25) 0%, transparent 70%),
+    radial-gradient(ellipse 60% 80% at 50% 100%, rgba($accent, .18) 0%, transparent 70%),
+    linear-gradient(180deg, #1A1340 0%, #0E0A2A 100%);
+  box-shadow: $shadow-3, inset 0 0 0 1px rgba(#FFFFFF, .03);
+  overflow: hidden;
+  cursor: pointer;
+  isolation: isolate;
+  transition: transform .08s $ease;
+
+  &::before {
+    content: "";
+    position: absolute; inset: 0;
+    @include grid-bg(28px, rgba($accent, .055));
+    mask-image: radial-gradient(ellipse 70% 60% at 50% 50%, #000 0%, transparent 90%);
+    pointer-events: none;
+  }
+  &::after {
+    content: "";
+    position: absolute; inset: 0;
+    background:
+      repeating-linear-gradient(0deg, transparent 0 3px, rgba(#FFFFFF, .025) 3px 4px);
+    mix-blend-mode: overlay;
+    pointer-events: none;
+  }
+  &:active { transform: scale(.997); }
+}
+
+.corner {
+  position: absolute;
+  width: 96px; height: 96px;
+  opacity: .12;
+  filter: brightness(0) invert(.8);
+  pointer-events: none;
+  &--tl { top: 24px;    left: 24px;   transform: rotate(-12deg); }
+  &--tr { top: 24px;    right: 24px;  transform: rotate(8deg); }
+  &--bl { bottom: 24px; left: 24px;   transform: rotate(14deg); }
+  &--br { bottom: 24px; right: 24px;  transform: rotate(-6deg); }
+}
+
+.float {
+  position: absolute;
+  font-family: $ff-display;
+  font-weight: 700;
+  color: $ink;
+  pointer-events: none;
+  z-index: 2;
+  text-shadow: 0 0 12px rgba($accent, .4);
+  &--f1 { top: 18%; left:  6%; font-size: 56px; transform: rotate(-8deg); }
+  &--f2 { top: 60%; right: 5%; font-size: 42px; transform: rotate(8deg); opacity: .7; }
+  &--f3 { top: 74%; left: 14%; font-size: 30px; transform: rotate(-3deg); opacity: .5; }
+  &--f4 { top: 32%; right:14%; font-size: 26px; transform: rotate(5deg); opacity: .55; }
+}
+
+.slots {
+  position: absolute;
+  inset: 0;
+  @include flex-row($s-5, center, center);
+  padding: 30px 50px;
+  z-index: 3;
+}
+
+.slot {
+  @include flex-col($s-3, flex-start, center);
+  position: relative;
+
+  &__tag {
+    @include chip($accent, $accent-15);
+    margin-bottom: 6px;
+  }
+
+  &__tile {
+    width: 116px; height: 116px;
+    border-radius: $r-md;
+    display: grid; place-items: center;
+    position: relative;
+    transition: transform .15s $ease, box-shadow .15s $ease;
+  }
+
+  &__name {
+    font-family: $ff-display;
+    font-weight: 700;
+    font-size: 16px;
+    letter-spacing: .04em;
+    color: $ink;
+    text-transform: uppercase;
+  }
+
+  &__progress {
+    @include flex-col(4px, center, center);
+    width: 116px;
+  }
+  &__progressBar { @include progress(4px, $accent); width: 100%; }
+  &__progressTxt {
+    font-family: $ff-mono;
+    font-weight: 600;
+    font-size: 11px;
+    color: $ink-2;
+    @include tab-nums;
+  }
+
+  // active slot — glassy raised tile
+  &.is-active &__tile {
+    background: linear-gradient(180deg, rgba(#FFFFFF, .12) 0%, rgba(#FFFFFF, .04) 100%);
+    border: 1px solid rgba($accent, .55);
+    box-shadow:
+      0 0 0 1px rgba($accent, .15) inset,
+      0 0 24px rgba($accent, .35),
+      0 12px 32px rgba(0, 0, 0, .45);
+  }
+  &.is-active &__tile:hover { transform: translateY(-2px); }
+
+  // buy slot — dashed and dim
+  &.is-buy &__tile {
+    width: 92px; height: 92px;
+    background: rgba($surface-2, .5);
+    border: 1.5px dashed rgba($accent, .3);
+    img { opacity: .35; filter: brightness(0) invert(.9); }
+  }
+  &.is-buy &__name { color: $ink-3; font-size: 13px; }
+
+  // locked
+  &.is-locked &__tile {
+    width: 92px; height: 92px;
+    background: rgba(#000, .35);
+    border: 1px solid rgba($ink-4, .6);
+    img { opacity: .4; }
+  }
+  &.is-locked &__name { color: $ink-3; font-size: 12px; }
+  &__req {
+    @include label(10px, $danger);
+  }
+  &__action { @include btn-ghost; padding: 5px 10px; font-size: 10px; }
+}
+
+.combo-flag {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translate(-50%, -45%);
+  z-index: 5;
+  padding: 6px 18px;
+  background: linear-gradient(180deg, $surface-2 0%, $surface 100%);
+  border: 1px solid rgba($warm, .55);
+  border-radius: $r-pill;
+  font-family: $ff-mono;
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: $warm;
+  box-shadow: $glow-amber;
+  @include tab-nums;
+}
+
+
+// -----------------------------------------------------------
+//  9. STRIP (under factory)
+// -----------------------------------------------------------
+
+.strip {
+  @include panel($surface);
+  @include flex-row($s-3, space-between, center);
+  padding: $s-3 $s-4;
+  flex-shrink: 0;
+
+  &__count {
+    font-family: $ff-mono;
+    font-weight: 700;
+    font-size: 12px;
+    color: $accent;
+    letter-spacing: .1em;
+    @include tab-nums;
+  }
+  &__hint { font-size: 11px; color: $ink-3; }
+  &__cta { @include btn-primary; }
+}
+
+
+// -----------------------------------------------------------
+//  10. RIGHT RAIL
+// -----------------------------------------------------------
+
+.rail {
+  grid-area: rail;
+  @include hairline(left);
+  background: rgba($surface, .25);
+  @include flex-col(0, flex-start, stretch);
+  min-height: 0;
+  overflow: hidden;
+}
+
+.rail-section {
+  padding: $s-4 $s-5;
+  @include hairline(bottom);
+  &:last-child { border-bottom: none; }
+
+  &__head {
+    @include flex-row($s-2, flex-start, center);
+    margin-bottom: $s-3;
+  }
+  &__tag { @include chip; }
+  &__title {
+    font-family: $ff-display;
+    font-weight: 600;
+    font-size: 16px;
+    color: $ink;
+    letter-spacing: -.01em;
+  }
+}
+
+// almost-there rows
+.almost {
+  @include flex-col(2px);
+  margin-bottom: $s-4;
+  &:last-child { margin-bottom: 0; }
+
+  &__head { @include flex-row($s-3, space-between, baseline); }
+  &__label {
+    font-family: $ff-ui;
+    font-weight: 500;
+    font-size: 13px;
+    color: $ink;
+  }
+  &__pct {
+    font-family: $ff-mono;
+    font-weight: 700;
+    font-size: 11px;
+    color: $ink-2;
+    @include tab-nums;
+  }
+  &__bar { @include progress(4px); margin: 4px 0 6px; }
+  &__foot {
+    @include flex-row($s-2, space-between, center);
+  }
+  &__sub {
+    font-size: 11px;
+    color: $ink-3;
+  }
+  &__buy {
+    @include btn-ghost;
+    padding: 3px 9px;
+    font-size: 9px;
+    border-color: rgba($accent, .35);
+    color: $accent;
+    &:hover { background: $accent-15; }
+  }
+}
+
+// live feed
+.feed {
+  @include flex-col(4px);
+  font-family: $ff-mono;
+  font-size: 12px;
+
+  &__line {
+    @include flex-row($s-2, flex-start, baseline);
+    padding: 3px 0;
+  }
+  &__t {
+    color: $ink-4;
+    min-width: 36px;
+    font-weight: 600;
+    @include tab-nums;
+  }
+  &__x { color: $ink-2; flex: 1; @include tab-nums; }
+  &__x--gain { color: $success; }
+  &__x--combo { color: $warm; font-weight: 700; }
+  &__x--start { color: $ink; font-weight: 700; }
+  &__tag {
+    @include chip($warm, rgba($warm, .15));
+    font-size: 9px;
+    padding: 1px 5px;
+  }
+}
+
+// boss card (idle / countdown rail card)
+.boss-card {
+  position: relative;
+  padding: $s-4 $s-5;
+  background:
+    radial-gradient(ellipse 70% 80% at 100% 100%, rgba($danger, .25) 0%, transparent 70%),
+    linear-gradient(180deg, #1B0F2E 0%, #14091F 100%);
+  overflow: hidden;
+  transition: background .25s $ease, box-shadow .25s $ease;
+  isolation: isolate;
+
+  &::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 6px;
+    background: repeating-linear-gradient(45deg, $accent 0 8px, transparent 8px 16px);
+    opacity: .5;
+    transition: background .25s $ease;
+  }
+
+  &__art {
+    position: absolute;
+    right: -8px; bottom: -10px;
+    width: 130px;
+    opacity: .8;
+    filter: drop-shadow(0 0 18px rgba($danger, .35));
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  &__head {
+    @include flex-row($s-2, flex-start, baseline);
+    position: relative;
+    z-index: 1;
+  }
+  &__head .a {
+    font-family: $ff-display;
+    font-weight: 700;
+    font-size: 22px;
+    color: $accent;
+    letter-spacing: -.01em;
+    transition: color .2s $ease;
+  }
+  &__head .b {
+    font-family: $ff-display;
+    font-weight: 600;
+    font-size: 22px;
+    color: rgba($ink, .35);
+    letter-spacing: -.01em;
+  }
+
+  &__meta {
+    @include flex-row(0, space-between, baseline);
+    margin-top: 6px;
+    position: relative;
+    z-index: 1;
+  }
+  &__name {
+    @include label(11px, $ink-2);
+    letter-spacing: .14em;
+  }
+  &__time {
+    font-family: $ff-display;
+    font-weight: 700;
+    font-size: 22px;
+    color: $accent;
+    @include tab-nums;
+    transition: color .2s $ease;
+  }
+  &__warn {
+    @include label(10px, $ink-3);
+    margin-top: 6px;
+    position: relative;
+    z-index: 1;
+  }
+
+  // warn state (5–4 sec)
+  &.is-warn {
+    background:
+      radial-gradient(ellipse 70% 80% at 100% 100%, rgba($warm, .35) 0%, transparent 70%),
+      linear-gradient(180deg, #2A1A0F 0%, #1A0E07 100%);
+    .boss-card__head .a { color: $warm; }
+    .boss-card__time   { color: $warm; }
+  }
+  // imminent (3–0 sec)
+  &.is-imminent {
+    animation: bossCardPulse .55s ease-in-out infinite alternate;
+    &::before {
+      background: repeating-linear-gradient(45deg, $danger 0 8px, $bg 8px 16px);
+      animation: stripeSlide .35s linear infinite;
+    }
+    .boss-card__head .a { color: $danger; }
+    .boss-card__time {
+      color: $danger;
+      animation: tickPop .5s ease-in-out infinite;
+    }
+  }
+}
+@keyframes bossCardPulse {
+  from { box-shadow: 0 0 0 1px rgba($danger, .25), 0 0 0 rgba($danger, 0) inset; }
+  to   { box-shadow: 0 0 0 1px rgba($danger, .8),  0 0 24px rgba($danger, .55) inset; }
+}
+@keyframes stripeSlide { from { background-position: 0 0; } to { background-position: 32px 0; } }
+@keyframes tickPop {
+  0%, 100% { transform: scale(1); }
+  50%      { transform: scale(1.18); }
+}
+
+
+// -----------------------------------------------------------
+//  11. FOOTER
+// -----------------------------------------------------------
+
+.footer {
+  grid-area: footer;
+  @include flex-row(0, flex-start, stretch);
+  @include hairline(top);
+  background: linear-gradient(180deg, $surface 0%, $bg-2 100%);
+
+  &__title {
+    @include flex-row(0, center, center);
+    padding: 0 $s-6;
+    @include hairline(right);
+    font-family: $ff-display;
+    font-weight: 700;
+    font-size: 16px;
+    letter-spacing: .04em;
+    color: $accent;
+    background: rgba($accent, .06);
+  }
+  &__stats {
+    flex: 1;
+    display: grid;
+    grid-template-columns: repeat(9, 1fr);
+    align-items: center;
+    padding: $s-3 $s-4;
+    gap: $s-2;
+  }
+  &__stat {
+    @include flex-col(2px, center, flex-start);
+    padding: 0 $s-3 0 0;
+    border-right: 1px dashed rgba($ink, .08);
+    &:last-child { border-right: none; }
+    .l { @include label(9px); }
+    .v {
+      font-family: $ff-display;
+      font-weight: 700;
+      font-size: 18px;
+      color: $ink;
+      line-height: 1;
+      @include tab-nums;
+    }
+  }
+  &__mark {
+    @include flex-row(0, center, center);
+    padding: 0 $s-5;
+    @include hairline(left);
+    @include label(10px, $ink-3);
+    background: rgba(#000, .15);
+  }
+}
+
+
+// -----------------------------------------------------------
+//  12. BOSS TAKEOVER OVERLAY
+// -----------------------------------------------------------
+
+.takeover {
+  position: absolute;
+  inset: 0;
+  z-index: 100;
+  pointer-events: none;
+  opacity: 0;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border-radius: $r-xl;
+
+  &.is-on { pointer-events: auto; opacity: 1; }
+}
+
+.tk-vignette {
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse at center, rgba(0, 0, 0, .55) 0%, rgba(50, 0, 10, .92) 70%, rgba(80, 0, 14, .97) 100%);
+  opacity: 0;
+  transition: opacity .25s $ease;
+  .takeover.is-on & { opacity: 1; }
+}
+
+.tk-grid {
+  position: absolute; inset: 0;
+  @include grid-bg(40px, rgba($danger, .12));
+  mask-image: radial-gradient(ellipse 70% 60% at 50% 50%, transparent 0%, #000 80%);
+  opacity: 0;
+  transition: opacity .25s $ease;
+  .takeover.is-on & { opacity: 1; }
+}
+
+.tk-scanlines {
+  position: absolute; inset: 0;
+  background: repeating-linear-gradient(0deg, rgba(#FFFFFF, .04) 0 1px, transparent 1px 4px);
+  mix-blend-mode: overlay;
+  opacity: 0;
+  transition: opacity .25s $ease;
+  .takeover.is-on & { opacity: 1; }
+}
+
+.tk-hazard {
+  position: absolute; left: 0; right: 0;
+  height: 14px;
+  background: repeating-linear-gradient(45deg, $danger 0 14px, $bg 14px 28px);
+  transform: scaleY(0);
+  &--top { top: 0; transform-origin: top; }
+  &--bot { bottom: 0; transform-origin: bottom; }
+}
+.takeover.is-on .tk-hazard {
+  animation: hazardIn .3s ease-out forwards, hazardSlide .6s linear infinite;
+}
+@keyframes hazardIn { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+@keyframes hazardSlide { from { background-position: 0 0; } to { background-position: 56px 0; } }
+
+.tk-flash {
+  position: absolute; inset: 0;
+  background: #FFFFFF;
+  opacity: 0;
+  pointer-events: none;
+}
+.takeover.is-flash .tk-flash { animation: flashHit .25s ease-out; }
+@keyframes flashHit {
+  0%   { opacity: 0; }
+  10%  { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+// ── countdown stage ──
+.tk-countdown {
+  position: relative;
+  display: grid; place-items: center;
+  width: 100%; height: 100%;
+
+  &__tag {
+    position: absolute;
+    top: 14%;
+    @include chip($danger, rgba($danger, .15));
+    font-size: 14px;
+    padding: 8px 22px;
+    letter-spacing: .4em;
+    border-width: 2px;
+    box-shadow: 0 0 24px rgba($danger, .45);
+    background: rgba(#000, .55);
+  }
+  &__sub {
+    position: absolute;
+    bottom: 16%;
+    @include label(12px, rgba($ink, .6));
+    letter-spacing: .3em;
+  }
+  &__num {
+    font-family: $ff-display;
+    font-weight: 700;
+    font-size: 320px;
+    line-height: .85;
+    color: $ink;
+    letter-spacing: -.04em;
+    text-shadow:
+      0 0 32px rgba($danger, .55),
+      0 8px 0 rgba(#000, .8);
+    -webkit-text-stroke: 4px rgba(#000, .8);
+    position: relative;
+    @include tab-nums;
+    &.is-go {
+      font-family: $ff-display;
+      font-style: italic;
+      font-weight: 700;
+      font-size: 200px;
+      color: $danger;
+      -webkit-text-stroke: 0;
+      text-shadow: 0 0 48px rgba($danger, .6), 0 6px 0 rgba(#000, .8);
+      letter-spacing: -.02em;
+    }
+    &.anim { animation: countPulse 1s ease-out; }
+  }
+  &__rings {
+    position: absolute;
+    inset: 50% 50% auto auto;
+    width: 1px; height: 1px;
+    pointer-events: none;
+    &::before, &::after {
+      content: "";
+      position: absolute;
+      left: 50%; top: 50%;
+      border: 4px solid $accent;
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      animation: ringOut 1s ease-out forwards;
+    }
+    &::after {
+      border-color: $danger;
+      border-width: 3px;
+      animation-delay: .2s;
+    }
+  }
+}
+
+@keyframes countPulse {
+  0%   { transform: scale(.4) rotate(-6deg); opacity: 0; filter: blur(8px); }
+  20%  { transform: scale(1.25) rotate(2deg); opacity: 1; filter: blur(0); }
+  70%  { transform: scale(1) rotate(0); opacity: 1; }
+  100% { transform: scale(1.4); opacity: 0; filter: blur(2px); }
+}
+@keyframes ringOut {
+  0%   { width: 40px;  height: 40px;  opacity: 1; }
+  100% { width: 1100px; height: 1100px; opacity: 0; }
+}
+
+// ── reveal stage ──
+.tk-reveal {
+  position: relative;
+  width: 100%; height: 100%;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  padding: 40px 56px;
+  gap: $s-4;
+  opacity: 0;
+}
+.takeover.is-bossOn .tk-reveal {
+  opacity: 1;
+  animation: bossStageIn .35s ease-out;
+}
+@keyframes bossStageIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: none; }
+}
+
+.tk-corner {
+  position: absolute;
+  @include label(10px, rgba($ink, .45));
+  letter-spacing: .2em;
+  &--tl { top: 24px; left: 24px; }
+  &--tr { top: 24px; right: 24px; }
+  &--bl { bottom: 24px; left: 24px; }
+  &--br { bottom: 24px; right: 24px; color: rgba($danger, .8); }
+}
+
+.tk-head {
+  @include flex-row($s-3, space-between, center);
+}
+.tk-tag {
+  @include chip($ink, $danger);
+  font-size: 12px;
+  padding: 6px 14px;
+  letter-spacing: .2em;
+  border-color: rgba(#000, .55);
+  box-shadow: 0 0 24px rgba($danger, .45);
+}
+.tk-meta {
+  font-family: $ff-mono;
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: .18em;
+  color: rgba($ink, .7);
+}
+
+.tk-body {
+  position: relative;
+  display: grid;
+  place-items: center;
+}
+.tk-art-wrap {
+  position: relative;
+  width: 360px; height: 290px;
+  display: grid; place-items: center;
+  animation: bossFloat 2.4s ease-in-out infinite;
+
+  &::before {
+    content: "";
+    position: absolute; inset: -22px;
+    background: radial-gradient(circle, rgba($danger, .5) 0%, transparent 65%);
+    filter: blur(22px);
+    animation: bossGlow 1.4s ease-in-out infinite alternate;
+  }
+}
+.takeover.is-shake .tk-art-wrap {
+  animation: bossSpawnShake .5s ease-out, bossFloat 2.4s ease-in-out .5s infinite;
+}
+@keyframes bossFloat {
+  0%, 100% { transform: translateY(0) rotate(-1deg); }
+  50%      { transform: translateY(-10px) rotate(1deg); }
+}
+@keyframes bossGlow {
+  from { opacity: .55; }
+  to   { opacity: 1; }
+}
+@keyframes bossSpawnShake {
+  0%   { transform: scale(2.5) rotate(-15deg); opacity: 0; filter: blur(12px); }
+  50%  { transform: scale(.85) rotate(4deg); opacity: 1; filter: blur(0); }
+  70%  { transform: scale(1.05) rotate(-2deg); }
+  100% { transform: scale(1) rotate(0); }
+}
+.tk-art {
+  position: relative;
+  width: 100%;
+  max-height: 290px;
+  filter:
+    drop-shadow(0 0 28px rgba($danger, .65))
+    drop-shadow(0 12px 24px rgba(#000, .5));
+}
+
+.tk-foot {
+  display: grid;
+  gap: $s-3;
+}
+.tk-title-row {
+  @include flex-row($s-3, flex-start, baseline);
+}
+.tk-title {
+  font-family: $ff-display;
+  font-weight: 700;
+  font-size: 56px;
+  color: $ink;
+  letter-spacing: -.02em;
+  line-height: .95;
+  text-shadow: 0 4px 0 rgba(#000, .7), 0 0 32px rgba($danger, .35);
+  .accent { color: $danger; }
+}
+
+.tk-hp-row {
+  @include flex-row($s-3, flex-start, center);
+}
+.tk-hp-label { @include label(11px, $danger); letter-spacing: .2em; }
+.tk-hp-bar {
+  flex: 1;
+  height: 18px;
+  background: rgba($danger, .12);
+  border: 2px solid $danger;
+  border-radius: $r-pill;
+  position: relative;
+  overflow: hidden;
+
+  > .fill {
+    height: 100%;
+    width: 100%;
+    background: linear-gradient(180deg, lighten($danger, 8%) 0%, $danger 50%, darken($danger, 12%) 100%);
+    box-shadow: 0 0 16px rgba($danger, .6);
+    transition: width .4s $ease-out;
+  }
+  > .ticks {
+    position: absolute; inset: 0;
+    display: flex;
+    pointer-events: none;
+    span {
+      flex: 1;
+      border-right: 1px solid rgba(#000, .35);
+      &:last-child { border-right: none; }
+    }
+  }
+}
+.tk-hp-num {
+  font-family: $ff-display;
+  font-weight: 700;
+  font-size: 22px;
+  color: $ink;
+  @include tab-nums;
+  min-width: 100px;
+  text-align: right;
+}
+
+.tk-actions {
+  @include flex-row($s-3, space-between, center);
+}
+.tk-reward {
+  font-family: $ff-mono;
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: .14em;
+  color: $success;
+  .pen { color: $danger; margin-left: $s-4; }
+}
+.tk-fight  { @include btn-danger; padding: 14px 26px; font-size: 16px; font-family: $ff-display; }
+.tk-flee   { @include btn-ghost;  color: rgba($ink, .55); }
+
+
+// -----------------------------------------------------------
+//  13. DEV TRIGGER
+// -----------------------------------------------------------
+
+.dev-trigger {
+  position: fixed;
+  top: 12px; left: 12px;
+  z-index: 200;
+  @include btn-ghost;
+  background: rgba($surface-2, .9);
+  backdrop-filter: blur(8px);
+  font-size: 10px;
+  padding: 6px 12px;
+}
