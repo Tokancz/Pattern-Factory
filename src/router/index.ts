@@ -10,14 +10,16 @@ import PrestigeView from "@/views/PrestigeView.vue"
 import Leaderboard from "@/views/Leaderboard.vue"
 import AdminView from "@/views/AdminView.vue"
 
+// `/` is the factory screen (rendered by App.vue's <Simulation>) — no
+// component is needed here; App.vue conditionally swaps Simulation in.
 const routes = [
-  { path: "/",           redirect: "/patterns" },
-  { path: "/patterns",   component: PatternView },
-  { path: "/upgrades",   component: UpgradeView },
-  { path: "/synergies",  component: SynergyView },
-  { path: "/machines",   component: MachineView },
-  { path: "/inventory",  component: InventoryView },
-  { path: "/prestige",   component: PrestigeView },
+  { path: "/",            component: { template: "" } },
+  { path: "/patterns",    component: PatternView },
+  { path: "/upgrades",    component: UpgradeView },
+  { path: "/synergies",   component: SynergyView },
+  { path: "/machines",    component: MachineView },
+  { path: "/inventory",   component: InventoryView },
+  { path: "/prestige",    component: PrestigeView },
   { path: "/leaderboard", component: Leaderboard },
   {
     path: "/admin",
@@ -25,17 +27,17 @@ const routes = [
     beforeEnter: () => {
       try {
         const token = localStorage.getItem("token")
-        if (!token) return "/patterns"
+        if (!token) return "/"
         const part = token.split(".")[1]
-        if (!part) return "/patterns"
+        if (!part) return "/"
         const payload = JSON.parse(atob(part))
-        if (!payload.isAdmin) return "/patterns"
+        if (!payload.isAdmin) return "/"
       } catch {
-        return "/patterns"
+        return "/"
       }
     }
   },
-  { path: "/:pathMatch(.*)*", redirect: "/patterns" }
+  { path: "/:pathMatch(.*)*", redirect: "/" }
 ]
 
 export const router = createRouter({

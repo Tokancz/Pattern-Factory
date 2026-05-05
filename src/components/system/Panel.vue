@@ -1,57 +1,64 @@
 <template>
   <div class="panel">
-    <hr>
-    <div class="panelHeader">
-      <h2>{{ title }}</h2>
+    <div class="panel__head">
+      <span class="panel__tag">▸ {{ tag }}</span>
+      <h2 class="panel__title">{{ title }}.</h2>
     </div>
-    <div class="content">
+    <div class="panel__content">
       <slot></slot>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-defineProps<{ title: string }>()
+import { computed } from "vue"
+
+const props = defineProps<{ title: string }>()
+
+const tag = computed(() => {
+  // Strip leading icon/glyph if present and uppercase the title for the tag
+  const stripped = props.title.replace(/^[^a-zA-Z]+/, "").trim()
+  return stripped.toUpperCase()
+})
 </script>
 
 <style scoped lang="scss">
 .panel {
-  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: $s-4;
   width: 100%;
-  @include flexColumn(20px, start);
-  padding: 20px 40px;
+  height: 100%;
 
-  @media (width < 1024px) {
-    padding: 10px 16px;
+  &__head {
+    display: flex;
+    align-items: baseline;
+    gap: $s-3;
+    padding-bottom: $s-3;
+    border-bottom: 1px solid $border;
   }
-
-  hr {
-    position: absolute;
-    width: 90%;
-    border: 1px solid var(--white);
+  &__tag {
+    @include label(11px, $accent);
   }
-
-  .panelHeader {
-    width: 100%;
-    @include flexRow(0, space-between);
-
-    color: var(--white);
-    font-family: "ivy-presto";
+  &__title {
+    font-family: $ff-display;
+    font-style: italic;
+    font-weight: 700;
+    font-size: 32px;
+    color: $ink;
+    letter-spacing: -.02em;
     line-height: 1;
-
-    h2 {
-      font-size: 3em;
-      text-decoration: underline;
-
-      @media (width <= 480px) {
-        font-size: 2.5em;
-      }
-    }
+    margin: 0;
   }
-  .content {
-    width: 100%;
-    height: 100%;
-    @include flexColumn();
+  &__content {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
   }
+}
+
+@media (max-width: 768px) {
+  .panel__title { font-size: 24px; }
 }
 </style>

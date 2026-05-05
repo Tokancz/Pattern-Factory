@@ -2,35 +2,29 @@
   <Login v-if="!user.loggedIn" @logged-in="onLoggedIn" />
 
   <template v-else>
-    <header>
-      <div>
-        <h1>{{ user.user?.factoryName }}</h1>
-        <p>{{ user.user?.username }}</p>
-      </div>
-      <ProgressBar v-if="!mobileLayout" :type="'level'" :length="15"/>
-      <img
-        v-if="mobileLayout"
+    <div class="frame" :class="{ 'is-mobile': mobileLayout }">
+
+      <Header />
+
+      <Navbar v-if="!mobileLayout" />
+      <button
+        v-else
+        class="mobile-menu-btn"
         @click="mobileMenuOpened = true"
-        src="/img/icons/Menu.svg"
-        alt="Open menu"
-        class="menu-icon"
+        aria-label="Open menu"
       >
-    </header>
+        <img src="/img/icons/Menu.svg" alt="">
+      </button>
 
-    <CurrencyDisplay :show-level="mobileLayout" />
+      <main class="main">
+        <Simulation v-if="route.path === '/'" />
+        <div v-else id="shop" class="shop"><router-view /></div>
+      </main>
 
-    <main>
-      <Simulation />
-      <div id="shop">
-        <router-view />
-      </div>
+      <RightRail v-if="!mobileLayout" />
+
       <Stats />
-      <footer>
-        <p>Created by Mates</p>
-      </footer>
-    </main>
-
-    <Navbar v-if="!mobileLayout" />
+    </div>
 
     <BossFight />
 
@@ -42,6 +36,7 @@
         @click.self="mobileMenuOpened = false"
       >
         <nav class="mobile-menu" @click="mobileMenuOpened = false">
+          <router-link to="/">FACTORY</router-link>
           <router-link to="/patterns">PATTERNS</router-link>
           <router-link to="/upgrades">UPGRADES</router-link>
           <router-link to="/synergies">SYNERGIES</router-link>
@@ -49,8 +44,6 @@
           <router-link to="/inventory">INVENTORY</router-link>
           <router-link to="/prestige">PRESTIGE</router-link>
           <router-link to="/leaderboard">RANKING</router-link>
-
-          <img src="/img/Stripes.png" alt="Stripes Background" aria-hidden="true" draggable="false">
         </nav>
       </div>
     </Transition>
@@ -59,33 +52,34 @@
 
 <script setup lang="ts">
 import { onMounted, computed, ref, watch } from "vue"
+import { useRoute } from "vue-router"
 import { useWindowSize } from "@vueuse/core"
 import { useSlotStore } from "@/stores/slot"
 import { useUpgradeStore } from "@/stores/upgrade"
 import { useUserStore } from "@/stores/user"
+import { useBossStore } from "@/stores/boss"
 import { loadGame, startAutoSave } from "@/utils/save"
 import { startGameLoop } from "@/composables/gameLoop"
 import { setBoostActive } from "@/utils/sound"
 
-import CurrencyDisplay from "@/components/ui/CurrencyDisplay.vue"
-import ProgressBar from "@/components/ui/ProgressBar.vue"
+import Header from "@/components/game/Header.vue"
+import Navbar from "@/components/game/Navbar.vue"
 import Simulation from "@/components/game/Simulation.vue"
-import Stats from "./components/game/Stats.vue"
+import Stats from "@/components/game/Stats.vue"
+import RightRail from "@/components/game/RightRail.vue"
 import Login from "./components/ui/Login.vue"
-import Navbar from "./components/game/Navbar.vue"
 import BossFight from "@/components/ui/BossFight.vue"
-import { useBossStore } from "@/stores/boss"
 
 const slotStore = useSlotStore()
 const upgradeStore = useUpgradeStore()
 const user = useUserStore()
 const bossStore = useBossStore()
+const route = useRoute()
 
 const { width } = useWindowSize()
 const mobileLayout = computed(() => width.value < 1024)
 const mobileMenuOpened = ref(false)
 
-// Boost loop plays while a slot is selected for targeted overclock.
 watch(
   () => slotStore.selectedSlotId,
   id => setBoostActive(id !== null)
@@ -93,7 +87,6 @@ watch(
 
 async function initGame() {
   const lastPlayed = await loadGame()
-
   if (lastPlayed) {
     const now = Date.now()
     const rawDelta = (now - lastPlayed) / 1000
@@ -103,20 +96,15 @@ async function initGame() {
   }
 }
 
-// Called when user logs in via the Login form
 async function onLoggedIn() {
   await initGame()
 }
 
 onMounted(async () => {
-  // Restore session (JWT still valid from previous visit)
   await user.restoreSession()
-
   if (user.loggedIn) {
-    // Pull fresh save from DB — this is the source of truth
     await initGame()
   }
-
   startAutoSave()
   startGameLoop()
   bossStore.start()
@@ -124,173 +112,112 @@ onMounted(async () => {
 </script>
 
 <style lang="scss">
-div#app {
-  height: 100dvh;
+#app {
   width: 100%;
-  max-height: 1024px;
-  max-width: 1440px;
-
+  min-height: 100dvh;
   display: grid;
-  grid-template-columns: 10fr 4fr;
-  grid-template-rows: 1fr 9fr;
+  place-items: center;
+  padding: $s-5 0;
+}
+
+.frame {
+  width: min($frame-w, calc(100vw - #{$s-5} * 2));
+  height: min($frame-h, calc(100dvh - #{$s-5} * 2));
+  display: grid;
+  grid-template-columns: $nav-w 1fr $rail-w;
+  grid-template-rows: auto 1fr auto;
   grid-template-areas:
-    "header currency"
-    "main aside";
+    "header header header"
+    "nav    main   aside"
+    "stats  stats  stats";
+  background: linear-gradient(180deg, $bg-2 0%, $bg 100%);
+  border: 1px solid $border;
+  border-radius: $r-xl;
+  box-shadow: $shadow-3, 0 0 0 1px rgba($accent, .06);
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
 
-  @media (width <= 1200px) {
-    font-size: .8em;
-  }
-
-  @media (width < 1024px) {
-    max-height: none;
+  &.is-mobile {
     grid-template-columns: 1fr;
-    grid-template-rows: auto auto auto 1fr;
+    grid-template-rows: auto auto 1fr auto;
     grid-template-areas:
       "header"
-      "currency"
       "main"
-      "aside";
-    font-size: .75em;
-  }
-
-  @media (width <= 480px) {
-    font-size: .65em;
-  }
-
-  > header {
-    height: 100px;
-
-    @include flexRow(0, space-between);
-    padding: 0 40px 0 20px;
-    grid-area: header;
-    font-weight: bold;
-    color: var(--primary);
-
-    @media (width < 1024px) {
-      padding: 0 16px;
-      height: 64px;
-    }
-
-    div {
-      @include flexColumn(0, center, start);
-      line-height: 1.1;
-
-      h1 {
-        font-size: 3em;
-        text-decoration: underline;
-
-        @media (width < 1024px) {
-          font-size: 2.5em;
-        }
-      }
-      p {
-        font-size: 1.25em;
-        text-decoration: underline;
-
-        @media (width < 1024px) {
-          font-size: 1.5em;
-        }
-      }
-    }
-
-    img.menu-icon {
-      width: 48px;
-      user-select: none;
-      cursor: pointer;
-
-      @media (width < 1024px) {
-        width: 36px;
-      }
-    }
-  }
-
-  main {
-    grid-area: main;
-
-    display: grid;
-    grid-template-rows: 3fr auto 1fr 40px;
-    grid-template-areas:
-      "patterns"
-      "shop"
-      "stats"
-      "footer";
-
-    @media (width < 1024px) {
-      grid-template-rows: repeat(4, auto);
-    }
-
-    #shop {
-      grid-area: shop;
-      overflow: hidden;
-    }
-
-    footer {
-      grid-area: footer;
-      @include flexRow(30px, center, center);
-      padding: 5px 0;
-
-      > p {
-        font-size: 1.25em;
-      }
-    }
+      "aside"
+      "stats";
+    height: auto;
+    min-height: 100dvh;
+    border-radius: 0;
+    border: none;
   }
 }
 
-/* Mobile burger menu overlay */
+.main {
+  grid-area: main;
+  min-height: 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+.shop {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: $s-5;
+}
+
+.mobile-menu-btn {
+  position: fixed;
+  top: $s-3;
+  right: $s-3;
+  z-index: 50;
+  width: 44px;
+  height: 44px;
+  border-radius: $r-md;
+  background: $surface-2;
+  border: 1px solid $border;
+  display: grid;
+  place-items: center;
+  img { width: 24px; filter: invert(1); }
+}
+
 .mobile-menu-overlay {
   position: fixed;
   inset: 0;
-  background-color: rgba(0, 0, 0, 0.75);
+  background: rgba(0, 0, 0, 0.75);
   z-index: 100;
-  @include flexRow(0, flex-end, stretch);
+  display: flex;
+  justify-content: flex-end;
 }
-
 .mobile-menu {
-  width: min(400px, 80vw);
+  width: min(360px, 80vw);
   height: 100%;
-  background-color: var(--black);
-  @include flexColumn(0, start, stretch);
-  padding: 20px 0;
+  background: $bg;
+  border-left: 1px solid $border;
+  display: flex;
+  flex-direction: column;
+  padding: $s-5 0;
 
   a {
-    display: block;
-    padding: 20px 24px;
-    color: var(--primary);
-    font-family: "ivy-presto";
-    font-size: 4em;
-    text-decoration: none;
-    border-bottom: 2px solid var(--primary);
-    transition: background-color 0.2s;
-
-    &:hover,
-    &.router-link-active {
-      background-color: var(--primary);
-      color: var(--black);
+    padding: $s-4 $s-6;
+    color: $ink;
+    font-family: $ff-display;
+    font-size: 22px;
+    font-weight: 600;
+    border-bottom: 1px solid $border;
+    transition: background-color 0.2s, color 0.2s;
+    &:hover, &.router-link-active {
+      background-color: $accent-15;
+      color: $accent;
     }
   }
-  img {
-    height: 100%;
-  }
 }
 
-/* Slide-in transition */
-.menu-fade-enter-active {
-  transition: opacity 0.2s ease;
-  .mobile-menu {
-    transition: transform 0.25s ease;
-  }
-}
-.menu-fade-leave-active {
-  transition: opacity 0.2s ease 0.05s;
-  .mobile-menu {
-    transition: transform 0.2s ease;
-  }
-}
-.menu-fade-enter-from,
-.menu-fade-leave-to {
+.menu-fade-enter-active { transition: opacity 0.2s ease; .mobile-menu { transition: transform 0.25s ease; } }
+.menu-fade-leave-active { transition: opacity 0.2s ease 0.05s; .mobile-menu { transition: transform 0.2s ease; } }
+.menu-fade-enter-from, .menu-fade-leave-to {
   opacity: 0;
-  .mobile-menu {
-    transform: translateX(100%);
-  }
+  .mobile-menu { transform: translateX(100%); }
 }
 </style>

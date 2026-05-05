@@ -1,41 +1,32 @@
 <template>
-  <section id="stat-grid" aria-label="Player stats">
-    <h3>Stats</h3>
-    <div class="columns">
-
-      <dl class="column">
-        <div><dt>Click Power</dt><dd>{{ formatNumber(upgrades.getClickPower) }}</dd></div>
-        <div><dt>Speed</dt><dd>{{ formatNumber(upgrades.getSpeedMultiplier) }}x</dd></div>
-        <div><dt>Overclock</dt><dd>{{ formatNumber(machines.getMultiplier("slotBoost")) }}x</dd></div>
-      </dl>
-
-      <dl class="column">
-        <div><dt>Sell Mult</dt><dd>{{ formatNumber(upgrades.getSellMultiplier) }}x</dd></div>
-        <div><dt>Output Bonus</dt><dd>{{ formatNumber(upgrades.getPrestigeOutputBonus) }}x</dd></div>
-        <div><dt>Output Boost</dt><dd>{{ formatNumber(machines.getMultiplier("outputBoost")) }}x</dd></div>
-      </dl>
-
-      <dl class="column">
-        <div><dt>Synergies</dt><dd>{{ synergy.activeSynergies.length }} active</dd></div>
-        <div><dt>Prestige Gain</dt><dd>{{ game.canPrestige ? formatNumber(game.getPrestigeGain()) + " PP" : "—" }}</dd></div>
-        <div><dt>Offline Cap</dt><dd>{{ formatOfflineCap(upgrades.getOfflineCap) }}</dd></div>
-      </dl>
-
+  <div class="footer">
+    <div class="footer__title">STATS</div>
+    <div class="footer__stats">
+      <div class="footer__stat"><span class="l">CLICK</span><span class="v">{{ formatNumber(upgrades.getClickPower) }}</span></div>
+      <div class="footer__stat"><span class="l">SPEED</span><span class="v">{{ formatNumber(upgrades.getSpeedMultiplier) }}×</span></div>
+      <div class="footer__stat"><span class="l">O/CLK</span><span class="v">{{ formatNumber(machines.getMultiplier("slotBoost")) }}×</span></div>
+      <div class="footer__stat"><span class="l">SELL</span><span class="v">{{ formatNumber(upgrades.getSellMultiplier) }}×</span></div>
+      <div class="footer__stat"><span class="l">OUT+</span><span class="v">{{ formatNumber(upgrades.getPrestigeOutputBonus) }}×</span></div>
+      <div class="footer__stat"><span class="l">OUT↑</span><span class="v">{{ formatNumber(machines.getMultiplier("outputBoost")) }}×</span></div>
+      <div class="footer__stat"><span class="l">SYN</span><span class="v">{{ synergy.activeSynergies.length }}</span></div>
+      <div class="footer__stat"><span class="l">PRG</span><span class="v">{{ game.canPrestige ? formatNumber(game.getPrestigeGain()) : "—" }}</span></div>
+      <div class="footer__stat"><span class="l">OFFLN</span><span class="v">{{ formatOfflineCap(upgrades.getOfflineCap) }}</span></div>
     </div>
-  </section>
+    <div class="footer__mark">CREATED BY MATES</div>
+  </div>
 </template>
 
 <script setup lang="ts">
 import { useUpgradeStore } from "@/stores/upgrade"
 import { useMachineStore } from "@/stores/machine"
-import { useSynergyStore }  from "@/stores/synergy"
-import { useGameStore }     from "@/stores/game"
-import { formatNumber }     from "@/utils/format"
+import { useSynergyStore } from "@/stores/synergy"
+import { useGameStore } from "@/stores/game"
+import { formatNumber } from "@/utils/format"
 
 const upgrades = useUpgradeStore()
 const machines = useMachineStore()
-const synergy  = useSynergyStore()
-const game     = useGameStore()
+const synergy = useSynergyStore()
+const game = useGameStore()
 
 function formatOfflineCap(seconds: number): string {
   const hours = seconds / 3600
@@ -44,53 +35,76 @@ function formatOfflineCap(seconds: number): string {
 </script>
 
 <style scoped lang="scss">
-section#stat-grid {
-  grid-column: stats;
+.footer {
+  grid-area: stats;
+  display: flex;
+  align-items: stretch;
+  border-top: 1px solid $border;
+  background: linear-gradient(180deg, $surface 0%, $bg-2 100%);
+}
 
+.footer__title {
+  display: flex;
+  align-items: center;
+  padding: 0 $s-6;
+  border-right: 1px solid $border;
+  font-family: $ff-display;
+  font-weight: 700;
+  font-size: 16px;
+  letter-spacing: .04em;
+  color: $accent;
+  background: rgba($accent, .06);
+}
+
+.footer__stats {
+  flex: 1;
   display: grid;
-  grid-template-columns: 2fr 6fr;
-  background-color: var(--primary);
-  color: var(--black);
+  grid-template-columns: repeat(9, 1fr);
+  align-items: center;
+  padding: $s-3 $s-4;
+  gap: $s-2;
+  min-width: 0;
+}
 
-  @media (width < 425px) {
-    font-size: .8em;
-    grid-template-columns: 1fr;
-  }
-
-  h3 {
-    display: block;
+.footer__stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  align-items: flex-start;
+  padding: 0 $s-3 0 0;
+  border-right: 1px dashed rgba($ink, .08);
+  min-width: 0;
+  &:last-child { border-right: none; }
+  .l { @include label(9px); }
+  .v {
+    font-family: $ff-display;
+    font-weight: 700;
+    font-size: 16px;
+    color: $ink;
+    line-height: 1;
+    @include tab-nums;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
     width: 100%;
-    height: 100%;
-    font-size: 3em;
-    padding: 10px;
-    border-right: 4px solid var(--black);
-
-    @media (width < 425px) {
-      border-right: none;
-      border-bottom: 4px solid var(--black);
-      padding-bottom: 0px;
-    }
   }
+}
 
-  .columns {
-    width: 100%;
-    @include flexRow(20px, space-between, end);
-    padding: 10px 30px;
+.footer__mark {
+  display: flex;
+  align-items: center;
+  padding: 0 $s-5;
+  border-left: 1px solid $border;
+  @include label(10px, $ink-3);
+  background: rgba(#000, .15);
+}
 
-    .column {
-      @include flexColumn(5px, start, start);
-      font-weight: bold;
-      font-size: 1em;
-      margin: 0;
-
-      @media (width < 768px) {
-        font-size: 1em;
-      }
-
-      div { @include flexRow(6px, start, baseline); }
-      dt::after { content: ":"; }
-      dt, dd { margin: 0; }
-    }
-  }
+@media (max-width: 1024px) {
+  .footer__title { padding: $s-3 $s-4; font-size: 14px; }
+  .footer__stats { grid-template-columns: repeat(5, 1fr); }
+  .footer__mark { display: none; }
+}
+@media (max-width: 768px) {
+  .footer__stats { grid-template-columns: repeat(3, 1fr); }
 }
 </style>

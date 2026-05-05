@@ -1,0 +1,202 @@
+// ===========================================================
+//  PATTERN FACTORY — design tokens (v3 "Soft Sci-Fi")
+//  Globally injected via vite preprocessorOptions.additionalData
+// ===========================================================
+
+// ── color
+$bg:            #0A0E1F;
+$bg-2:          #0F1428;
+$surface:       #161C36;
+$surface-2:     #1F2647;
+$surface-3:     #2A3360;
+
+$ink:           #F0F4FF;
+$ink-2:         #B0BBE0;
+$ink-3:         #6772A0;
+$ink-4:         #3F4870;
+
+$accent:        #00D9FF;
+$accent-2:      #5B8DFF;
+$accent-deep:   #003D8F;
+$warm:          #FFB13D;
+$success:       #7DFFA8;
+$danger:        #FF4B6E;
+$purple:        #8E5BFF;
+
+$border:        rgba(#FFFFFF, .08);
+$border-strong: rgba($accent, .35);
+
+$accent-15:     rgba($accent, .15);
+$accent-25:     rgba($accent, .25);
+$warm-20:       rgba($warm, .20);
+$danger-15:     rgba($danger, .15);
+$danger-30:     rgba($danger, .30);
+
+// ── spacing
+$s-1: 4px;  $s-2: 8px;  $s-3: 12px;  $s-4: 16px;
+$s-5: 20px; $s-6: 24px; $s-7: 32px;  $s-8: 48px; $s-9: 64px;
+
+// ── radius
+$r-xs: 4px;  $r-sm: 6px;  $r-md: 10px;
+$r-lg: 14px; $r-xl: 20px; $r-pill: 999px;
+
+// ── elevation
+$shadow-1: 0 1px 2px rgba(#000, .35);
+$shadow-2: 0 4px 14px rgba(#000, .35), 0 1px 0 rgba(#FFF, .03) inset;
+$shadow-3: 0 12px 32px rgba(#000, .45), 0 1px 0 rgba(#FFF, .04) inset;
+$glow-cyan:   0 0 0 1px rgba($accent, .35), 0 0 24px rgba($accent, .25);
+$glow-amber:  0 0 0 1px rgba($warm, .35),   0 0 24px rgba($warm, .22);
+$glow-danger: 0 0 0 1px rgba($danger, .45), 0 0 28px rgba($danger, .35);
+
+// ── motion
+$ease:     cubic-bezier(.4, 0, .2, 1);
+$ease-out: cubic-bezier(.16, 1, .3, 1);
+
+// ── type
+$ff-display: "Space Grotesk", "Inter", system-ui, sans-serif;
+$ff-ui:      "Inter", system-ui, sans-serif;
+$ff-mono:    "JetBrains Mono", ui-monospace, Menlo, monospace;
+
+// ── frame
+$frame-w: 1280px;
+$frame-h: 820px;
+$nav-w:   232px;
+$rail-w:  320px;
+
+
+// ── mixins ────────────────────────────────────────────────
+
+@mixin flexRow($gap: 0, $justify: center, $align: center) {
+  display: flex;
+  flex-direction: row;
+  justify-content: $justify;
+  align-items: $align;
+  gap: $gap;
+}
+@mixin flexColumn($gap: 0, $justify: center, $align: center) {
+  display: flex;
+  flex-direction: column;
+  justify-content: $justify;
+  align-items: $align;
+  gap: $gap;
+}
+
+@mixin panel($bg: $surface, $radius: $r-lg) {
+  background: linear-gradient(180deg, lighten($bg, 2%) 0%, $bg 100%);
+  border: 1px solid $border;
+  border-radius: $radius;
+  box-shadow: $shadow-2;
+}
+
+@mixin hairline($side: bottom, $color: $border) {
+  @if $side == bottom { border-bottom: 1px solid $color; }
+  @if $side == top    { border-top: 1px solid $color; }
+  @if $side == left   { border-left: 1px solid $color; }
+  @if $side == right  { border-right: 1px solid $color; }
+}
+
+@mixin label($size: 11px, $color: $ink-3) {
+  font-family: $ff-mono;
+  font-weight: 600;
+  font-size: $size;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: $color;
+}
+
+@mixin chip($fg: $accent, $bg: $accent-15) {
+  display: inline-flex;
+  align-items: center;
+  gap: $s-1;
+  padding: 3px 8px;
+  font-family: $ff-mono;
+  font-weight: 700;
+  font-size: 10px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: $fg;
+  background: $bg;
+  border: 1px solid rgba($fg, .35);
+  border-radius: $r-sm;
+}
+
+@mixin btn-base {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: $s-2;
+  padding: 9px 16px;
+  font-family: $ff-mono;
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  border-radius: $r-sm;
+  border: 1px solid $border;
+  cursor: pointer;
+  transition: transform .12s $ease, background .15s $ease, border-color .15s $ease, color .15s $ease, box-shadow .15s $ease;
+  user-select: none;
+  &:active { transform: translateY(1px); }
+  &:disabled { opacity: .4; cursor: not-allowed; }
+}
+
+@mixin btn-primary {
+  @include btn-base;
+  background: linear-gradient(180deg, $accent 0%, darken($accent, 14%) 100%);
+  color: $bg;
+  border-color: rgba(#FFFFFF, .25);
+  box-shadow: $glow-cyan, $shadow-2;
+  &:hover { box-shadow: $glow-cyan, $shadow-3; transform: translateY(-1px); }
+}
+@mixin btn-ghost {
+  @include btn-base;
+  background: transparent;
+  color: $ink-2;
+  &:hover { color: $ink; border-color: $border-strong; background: $accent-15; }
+}
+@mixin btn-warning {
+  @include btn-base;
+  background: linear-gradient(180deg, $warm 0%, darken($warm, 14%) 100%);
+  color: $bg;
+  border-color: rgba(#FFFFFF, .25);
+  box-shadow: $glow-amber, $shadow-2;
+}
+@mixin btn-danger {
+  @include btn-base;
+  background: linear-gradient(180deg, $danger 0%, darken($danger, 14%) 100%);
+  color: $ink;
+  border-color: rgba(#FFFFFF, .25);
+  box-shadow: $glow-danger, $shadow-2;
+}
+
+@mixin glow($color: $accent) {
+  box-shadow: 0 0 0 1px rgba($color, .55), 0 0 24px rgba($color, .35);
+}
+
+@mixin grid-bg($size: 24px, $color: rgba($accent, .08)) {
+  background-image:
+    linear-gradient($color 1px, transparent 1px),
+    linear-gradient(90deg, $color 1px, transparent 1px);
+  background-size: $size $size;
+}
+
+@mixin tab-nums {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+}
+
+@mixin progress($height: 6px, $color: $accent) {
+  position: relative;
+  height: $height;
+  border-radius: $r-pill;
+  background: rgba($color, .1);
+  border: 1px solid rgba($color, .25);
+  overflow: hidden;
+  > .fill {
+    position: absolute; inset: 0; right: auto;
+    border-radius: inherit;
+    background: linear-gradient(90deg, darken($color, 15%) 0%, $color 50%, lighten($color, 8%) 100%);
+    box-shadow: 0 0 12px rgba($color, .55);
+    transition: width .4s $ease-out;
+  }
+}

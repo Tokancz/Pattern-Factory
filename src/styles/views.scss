@@ -1,129 +1,118 @@
-@use "@/styles/main.scss" as *;
+@use "./tokens" as *;
+
+// Shared layout for grid-style shop views (Patterns, Upgrades, Machines,
+// Inventory, etc.). Items are rendered as v3 panel cards.
 
 .wrapper {
+  display: flex;
+  align-items: center;
+  gap: $s-3;
   width: 100%;
   height: 100%;
-  grid-column: 1 / span 4;
-
-  @include flexRow(20px);
-
-  @media (width <= 1024px) {
-    gap: 10px;
-  }
-
-  @media (width <= 480px) {
-    gap: 6px;
-  }
 
   .grid {
-    height: 100%;
+    flex: 1;
+    list-style: none;
+    margin: 0;
+    padding: 0;
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    grid-gap: 20px;
+    gap: $s-4;
+    align-content: start;
 
-    padding: 20px 0;
+    @media (width <= 1024px) { grid-template-columns: repeat(3, 1fr); gap: $s-3; }
+    @media (width <= 768px)  { grid-template-columns: repeat(2, 1fr); gap: $s-3; }
+    @media (width <= 480px)  { grid-template-columns: repeat(2, 1fr); gap: $s-2; }
 
-    @media (width <= 1024px) {
-      gap: 10px;
+    li { list-style: none; }
+  }
+
+  // generic card used for upgrade/machine/pattern items
+  .upgrade, .machine, .pattern {
+    @include panel($surface);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: $s-3;
+    padding: $s-5 $s-3;
+    text-align: center;
+    color: $ink;
+    transition: border-color .15s $ease, transform .15s $ease;
+
+    &:hover {
+      border-color: rgba($accent, .35);
+      transform: translateY(-2px);
     }
 
-    /* 2-col layout from 768px down */
-    @media (width <= 768px) {
-      grid-template-columns: repeat(2, 1fr);
-      gap: 8px;
+    .upgrade-image, .machine-image, .pattern-image {
+      width: 56px;
+      filter: drop-shadow(0 0 12px rgba($accent, .2));
+      user-select: none;
+      @media (width <= 480px) { width: 40px; }
     }
 
-    @media (width <= 480px) {
-      gap: 6px;
-    }
-
-    &, & li { list-style: none; padding: 0; margin: 0; }
-
-    .upgrade, .machine {
+    .text-container, .text-container-inventory {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      align-items: center;
+      justify-content: flex-start;
       width: 100%;
-      height: 300px;
-      min-height: 0;
 
-      @include flexColumn(10px, start, center);
-      padding: 20px 10px;
-
-      color: var(--black);
-      background-color: var(--white);
-
-      @media (width <= 768px) {
-        height: 100%;
-        padding: 14px 8px;
-        gap: 6px;
+      h3, .pattern-name, .upgrade-name, .machine-name {
+        font-family: $ff-display;
+        font-weight: 700;
+        font-size: 18px;
+        color: $ink;
+        margin: 0;
+        text-transform: capitalize;
+        letter-spacing: -.005em;
       }
 
-      @media (width <= 480px) {
-        padding: 10px 6px;
-        gap: 4px;
+      p {
+        margin: 0;
+        font-size: 12px;
+        color: $ink-2;
+        line-height: 1.4;
+
+        &.upgrade-cost, &.machine-cost, &.pattern-value {
+          @include label(11px, $accent);
+          @include tab-nums;
+          margin-top: 4px;
+        }
+        &.dc-cost { color: $purple; }
+        &.prestige-cost { color: $warm; }
+        &.requirements {
+          @include label(10px, $danger);
+          display: flex;
+          flex-direction: column;
+          gap: 2px;
+          margin-top: 4px;
+        }
       }
 
-      .upgrade-image, .machine-image {
-        width: 64px;
-        user-select: none;
-
-        @media (width <= 768px) {
-          width: 44px;
-        }
-
-        @media (width <= 480px) {
-          width: 36px;
-        }
-      }
-
-      .text-container {
-        height: 100%;
-        @include flexColumn(5px, center, center);
-
-        p {
-          text-align: center;
-          font-size: .8em;
-
-          @media (width <= 480px) {
-            font-size: .7em;
-          }
-
-          &.upgrade-cost, &.machine-cost {
-            color: var(--secondary);
-          }
-        }
-        
-        h3.upgrade-name, h3.machine-name {
-          font-size: 1.3em;
-          text-align: center;
-
-          @media (width <= 768px) {
-            font-size: 1.1em;
-          }
-
-          @media (width <= 480px) {
-            font-size: 1em;
-          }
-        }
+      .tag-maxed {
+        @include chip($warm, rgba($warm, .15));
+        font-size: 10px;
+        margin-top: 4px;
       }
     }
+  }
 
-    .prestige {
-      border: 1px solid var(--secondary);
-      box-shadow: 0 0 5px var(--secondary);
-
-      .upgrade-name {
-        color: var(--secondary);
-      }
-    }
+  .prestige {
+    border-color: rgba($warm, .35);
+    box-shadow: 0 0 24px rgba($warm, .1), $shadow-2;
+    .upgrade-name { color: $warm; }
   }
 
   .arrow {
-    padding: 10px 5px;
     flex-shrink: 0;
-
-    @media (width <= 480px) {
-      padding: 6px 4px;
-      font-size: .8em;
-    }
+    @include btn-ghost;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    border-radius: $r-pill;
 
     &.disabled {
       opacity: 0.3;
@@ -135,138 +124,11 @@
 .pattern-grid, .pattern-grid li { list-style: none; padding: 0; margin: 0; }
 
 .pattern-grid {
-  width: 90%;
-  height: 100%;
-
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  grid-gap: 20px;
+  gap: $s-4;
+  width: 100%;
 
-  padding-top: 20px;
-
-  @media (width <= 768px) {
-    grid-template-columns: repeat(2, 1fr);
-    height: 100%;
-    width: 400px;
-    grid-gap: 10px;
-    padding: 15px 0;
-  }
-  @media (width <= 480px) {
-    width: 100%;
-    grid-gap: 8px;
-    padding: 12px 0;
-  }
-
-  .pattern {
-    width: 100%;
-    height: 300px;
-
-    @include flexColumn(10px, start, center);
-    padding: 20px 20px;
-
-    color: var(--black);
-    background-color: var(--white);
-
-    @media (width <= 768px) {
-      height: 100%;
-      padding: 12px 10px;
-      gap: 6px;
-    }
-
-    @media (width <= 480px) {
-      padding: 8px 6px;
-      gap: 4px;
-    }
-
-    .pattern-image {
-      width: 80px;
-
-      @media (width <= 768px) {
-        width: 54px;
-      }
-
-      @media (width <= 480px) {
-        width: 40px;
-      }
-    }
-
-    .text-container {
-      height: 100%;
-      @include flexColumn(5px, center, center);
-
-      p {
-        text-align: center;
-        font-size: .9em;
-
-        @media (width <= 480px) {
-          font-size: .75em;
-        }
-
-        &.pattern-value {
-          color: var(--secondary);
-        }
-
-        &.requirements {
-          @include flexColumn();
-          font-size: 0.8em;
-          color: var(--secondary);
-        }
-
-        &.pattern-name {
-          font-size: 1.5em;
-
-          @media (width <= 768px) {
-            font-size: 1.2em;
-          }
-        }
-      }
-
-      h3.pattern-name {
-        font-size: 1.5em;
-        font-weight: bold;
-        margin: 0;
-        text-align: center;
-
-        @media (width <= 768px) {
-          font-size: 1.2em;
-        }
-      }
-    }
-
-    .text-container-inventory {
-      height: 100%;
-      @include flexColumn(10px, center, center);
-
-      @media (width <= 768px) {
-        gap: 6px;
-      }
-
-      p {
-        text-align: center;
-        font-size: .9em;
-
-        @media (width <= 768px) {
-          font-size: .75em;
-        }
-
-        &.pattern-value {
-          color: var(--secondary);
-        }
-
-        &.requirements {
-          @include flexColumn();
-          font-size: 0.8em;
-          color: var(--secondary);
-        }
-
-        &.pattern-name {
-          font-size: 1.5em;
-
-          @media (width <= 768px) {
-            font-size: 1.2em;
-          }
-        }
-      }
-    }
-  }
-} 
+  @media (width <= 1024px) { grid-template-columns: repeat(3, 1fr); }
+  @media (width <= 768px)  { grid-template-columns: repeat(2, 1fr); gap: $s-3; }
+}
