@@ -286,11 +286,15 @@
   .feed-line .x.combo{color:#FF6B3D;font-weight:900}
   .feed-line .tag{margin-left:auto;background:var(--green);color:var(--ink);padding:0 5px;font-weight:800;font-size:10px;letter-spacing:0.08em}
 
-  /* boss block */
+  /* boss block (idle / countdown rail card) */
   .boss{
     position:relative;background:#1a0030;color:var(--paper);padding:14px;
     overflow:hidden;
+    transition:background .25s;
   }
+  .boss.warn{background:#3a0010}
+  .boss.imminent{background:#5a0014;animation:bossCardPulse .5s ease-in-out infinite alternate}
+  @keyframes bossCardPulse{from{background:#5a0014}to{background:#a50018}}
   .boss-art{
     position:absolute;right:-8px;bottom:-6px;width:120px;height:auto;opacity:0.85;pointer-events:none;
     filter:drop-shadow(0 0 12px rgba(197,255,0,0.25));
@@ -299,13 +303,223 @@
     position:absolute;top:0;left:0;right:0;height:10px;
     background:repeating-linear-gradient(45deg,var(--green) 0 12px,var(--ink) 12px 24px);
   }
+  .boss.imminent .boss-stripes{
+    background:repeating-linear-gradient(45deg,#FF3B1A 0 12px,var(--ink) 12px 24px);
+    animation:stripeSlide .35s linear infinite;
+  }
+  @keyframes stripeSlide{from{background-position:0 0}to{background-position:48px 0}}
   .boss-title{margin-top:10px;display:flex;align-items:baseline;gap:10px}
-  .boss-title .a{font-family:"Playfair Display",serif;font-style:italic;font-weight:900;font-size:26px;color:var(--green);letter-spacing:-0.01em}
+  .boss-title .a{font-family:"Playfair Display",serif;font-style:italic;font-weight:900;font-size:26px;color:var(--green);letter-spacing:-0.01em;transition:color .2s}
   .boss-title .b{font-family:"Playfair Display",serif;font-style:italic;font-weight:900;font-size:26px;color:var(--paper);opacity:0.45;letter-spacing:-0.01em}
+  .boss.imminent .boss-title .a{color:#FF3B1A}
   .boss-meta{display:flex;justify-content:space-between;align-items:baseline;margin-top:6px}
   .boss-name{font-family:"JetBrains Mono",monospace;font-weight:800;font-size:13px;letter-spacing:0.1em;color:var(--paper)}
-  .boss-time{font-family:"Archivo Black",sans-serif;font-size:26px;color:var(--green);letter-spacing:0.04em}
+  .boss-time{font-family:"Archivo Black",sans-serif;font-size:26px;color:var(--green);letter-spacing:0.04em;font-variant-numeric:tabular-nums}
+  .boss.warn .boss-time{color:#FFB13D}
+  .boss.imminent .boss-time{color:#FF3B1A;animation:tickPop .5s ease-in-out infinite}
+  @keyframes tickPop{0%,100%{transform:scale(1)}50%{transform:scale(1.18)}}
   .boss-warn{font-size:10px;letter-spacing:0.06em;color:rgba(255,255,255,0.6);margin-top:6px}
+
+  /* tiny dev trigger — sits OUTSIDE the frame so it never overlaps */
+  .boss-trigger{
+    position:fixed;top:12px;left:12px;z-index:50;
+    background:var(--ink);color:var(--green);border:2px solid var(--green);
+    font-family:"JetBrains Mono",monospace;font-weight:800;font-size:10px;letter-spacing:0.14em;
+    padding:6px 10px;cursor:pointer;
+  }
+  .boss-trigger:hover{background:var(--green);color:var(--ink)}
+
+  /* ════════ FULLSCREEN BOSS TAKEOVER ════════ */
+  .boss-takeover{
+    position:absolute;inset:0;z-index:100;
+    pointer-events:none;opacity:0;
+    display:grid;place-items:center;
+    overflow:hidden;
+  }
+  .boss-takeover.on{pointer-events:auto;opacity:1}
+
+  /* dimmed/red-tinted vignette over the rest of the UI */
+  .bt-vignette{
+    position:absolute;inset:0;
+    background:
+      radial-gradient(ellipse at center, rgba(0,0,0,0.55) 0%, rgba(40,0,0,0.92) 70%, rgba(80,0,10,0.97) 100%);
+    opacity:0;transition:opacity .25s;
+  }
+  .boss-takeover.on .bt-vignette{opacity:1}
+
+  /* scanlines */
+  .bt-scanlines{
+    position:absolute;inset:0;pointer-events:none;
+    background:repeating-linear-gradient(0deg,rgba(255,255,255,0.04) 0 1px,transparent 1px 4px);
+    mix-blend-mode:overlay;opacity:0;transition:opacity .25s;
+  }
+  .boss-takeover.on .bt-scanlines{opacity:1}
+
+  /* hazard stripes top + bottom */
+  .bt-hazard{
+    position:absolute;left:0;right:0;height:18px;
+    background:repeating-linear-gradient(45deg,#FF3B1A 0 18px,var(--ink) 18px 36px);
+    transform:scaleY(0);
+  }
+  .bt-hazard.top{top:0;transform-origin:top}
+  .bt-hazard.bot{bottom:0;transform-origin:bottom}
+  .boss-takeover.on .bt-hazard{animation:hazardIn .3s ease-out forwards,hazardSlide .6s linear infinite}
+  @keyframes hazardIn{from{transform:scaleY(0)}to{transform:scaleY(1)}}
+  @keyframes hazardSlide{from{background-position:0 0}to{background-position:72px 0}}
+
+  /* ── countdown stage ── */
+  .bt-countdown{
+    position:relative;display:grid;place-items:center;
+    width:100%;height:100%;
+  }
+  .bt-count-num{
+    font-family:"Archivo Black",sans-serif;
+    font-size:340px;line-height:0.85;
+    color:var(--paper);
+    text-shadow:
+      0 0 0 #FF3B1A,
+      8px 8px 0 var(--ink);
+    -webkit-text-stroke:6px var(--ink);
+    letter-spacing:-0.04em;
+    position:relative;
+  }
+  .bt-count-num.go{
+    font-family:"Playfair Display",Georgia,serif;font-style:italic;font-weight:900;
+    font-size:200px;color:#FF3B1A;letter-spacing:-0.02em;
+    -webkit-text-stroke:0;
+    text-shadow:6px 6px 0 var(--ink);
+  }
+  .bt-count-rings{
+    position:absolute;inset:50% 50% auto auto;width:1px;height:1px;pointer-events:none
+  }
+  .bt-count-rings::before,.bt-count-rings::after{
+    content:"";position:absolute;left:50%;top:50%;
+    border:6px solid var(--green);border-radius:50%;
+    transform:translate(-50%,-50%);
+    animation:ringOut 1s ease-out forwards;
+  }
+  .bt-count-rings::after{animation-delay:.2s;border-color:#FF3B1A;border-width:4px}
+  @keyframes ringOut{
+    0%{width:40px;height:40px;opacity:1}
+    100%{width:1100px;height:1100px;opacity:0}
+  }
+  .bt-count-tag{
+    position:absolute;top:14%;left:50%;transform:translateX(-50%);
+    font-family:"JetBrains Mono",monospace;font-weight:800;font-size:18px;letter-spacing:0.4em;
+    color:#FF3B1A;
+    border-top:3px solid #FF3B1A;border-bottom:3px solid #FF3B1A;padding:8px 24px;
+    background:rgba(0,0,0,0.5);
+  }
+  .bt-count-sub{
+    position:absolute;bottom:16%;left:50%;transform:translateX(-50%);
+    font-family:"JetBrains Mono",monospace;font-weight:800;font-size:13px;letter-spacing:0.3em;
+    color:rgba(255,255,255,0.55);
+  }
+  .bt-count-num-anim{animation:countPulse 1s ease-out}
+  @keyframes countPulse{
+    0%{transform:scale(0.4) rotate(-6deg);opacity:0;filter:blur(8px)}
+    20%{transform:scale(1.25) rotate(2deg);opacity:1;filter:blur(0)}
+    70%{transform:scale(1) rotate(0);opacity:1}
+    100%{transform:scale(1.4) rotate(0);opacity:0;filter:blur(2px)}
+  }
+
+  /* ── boss reveal stage ── */
+  .bt-boss-stage{
+    position:relative;width:100%;height:100%;
+    display:grid;grid-template-rows:auto 1fr auto;
+    padding:48px 60px;gap:18px;
+    opacity:0;
+  }
+  .boss-takeover.boss-on .bt-boss-stage{opacity:1;animation:bossStageIn .35s ease-out}
+  @keyframes bossStageIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  .bt-boss-head{
+    display:flex;align-items:center;justify-content:space-between;gap:18px;
+  }
+  .bt-boss-tag{
+    background:#FF3B1A;color:var(--paper);
+    padding:6px 14px;font-family:"JetBrains Mono",monospace;font-weight:800;font-size:13px;letter-spacing:0.2em;
+    border:3px solid var(--ink);
+  }
+  .bt-boss-title-row{display:flex;align-items:baseline;gap:14px}
+  .bt-boss-title{
+    font-family:"Playfair Display",serif;font-style:italic;font-weight:900;font-size:64px;
+    color:var(--paper);letter-spacing:-0.02em;line-height:0.9;
+    text-shadow:5px 5px 0 var(--ink);
+  }
+  .bt-boss-title .accent{color:#FF3B1A}
+  .bt-boss-meta-mini{font-family:"JetBrains Mono",monospace;font-weight:800;font-size:12px;letter-spacing:0.18em;color:rgba(255,255,255,0.7)}
+
+  .bt-boss-body{
+    position:relative;display:grid;place-items:center;
+  }
+  .bt-boss-art-wrap{
+    position:relative;width:380px;height:300px;display:grid;place-items:center;
+    animation:bossFloat 2.4s ease-in-out infinite;
+  }
+  @keyframes bossFloat{0%,100%{transform:translateY(0) rotate(-1deg)}50%{transform:translateY(-10px) rotate(1deg)}}
+  .bt-boss-art-wrap::before{
+    content:"";position:absolute;inset:-20px;
+    background:radial-gradient(circle,rgba(255,59,26,0.45) 0%,transparent 65%);
+    filter:blur(20px);
+    animation:bossGlow 1.4s ease-in-out infinite alternate;
+  }
+  @keyframes bossGlow{from{opacity:0.55}to{opacity:1}}
+  .bt-boss-art{
+    position:relative;width:100%;height:auto;max-height:300px;
+    filter:drop-shadow(0 0 24px rgba(255,59,26,0.6)) drop-shadow(8px 8px 0 var(--ink));
+  }
+
+  /* shake the boss when it spawns */
+  .boss-takeover.shake .bt-boss-art-wrap{animation:bossSpawnShake .5s ease-out, bossFloat 2.4s ease-in-out 0.5s infinite}
+  @keyframes bossSpawnShake{
+    0%{transform:scale(2.5) rotate(-15deg);opacity:0;filter:blur(12px)}
+    50%{transform:scale(0.85) rotate(4deg);opacity:1;filter:blur(0)}
+    70%{transform:scale(1.05) rotate(-2deg)}
+    100%{transform:scale(1) rotate(0)}
+  }
+
+  /* corner stamps for the takeover */
+  .bt-corner{position:absolute;font-family:"JetBrains Mono",monospace;font-weight:800;font-size:11px;letter-spacing:0.2em;color:rgba(255,255,255,0.45)}
+  .bt-corner.tl{top:30px;left:30px}
+  .bt-corner.tr{top:30px;right:30px}
+  .bt-corner.bl{bottom:30px;left:30px}
+  .bt-corner.br{bottom:30px;right:30px}
+
+  /* HP bar */
+  .bt-boss-foot{display:grid;gap:10px}
+  .bt-hp-row{display:flex;align-items:center;gap:14px}
+  .bt-hp-label{font-family:"JetBrains Mono",monospace;font-weight:800;font-size:12px;letter-spacing:0.2em;color:#FF3B1A}
+  .bt-hp-bar{flex:1;height:18px;background:rgba(255,59,26,0.15);border:3px solid #FF3B1A;position:relative;overflow:hidden}
+  .bt-hp-bar > .fill{height:100%;width:100%;background:repeating-linear-gradient(45deg,#FF3B1A 0 8px,#A8230E 8px 16px);transition:width .4s ease-out}
+  .bt-hp-bar > .ticks{position:absolute;inset:0;display:flex;pointer-events:none}
+  .bt-hp-bar > .ticks span{flex:1;border-right:1px solid rgba(0,0,0,0.35)}
+  .bt-hp-bar > .ticks span:last-child{border-right:none}
+  .bt-hp-num{font-family:"Archivo Black",sans-serif;font-size:22px;color:var(--paper);font-variant-numeric:tabular-nums;min-width:96px;text-align:right}
+
+  .bt-actions{display:flex;gap:10px;align-items:center;justify-content:space-between}
+  .bt-reward{font-family:"JetBrains Mono",monospace;font-weight:800;font-size:12px;letter-spacing:0.16em;color:var(--green)}
+  .bt-reward .pen{color:#FF3B1A;margin-left:18px}
+  .bt-fight{
+    background:#FF3B1A;color:var(--paper);border:3px solid var(--ink);
+    padding:10px 22px;font-family:"Archivo Black",sans-serif;font-size:22px;letter-spacing:0.06em;
+    cursor:pointer;
+    box-shadow:5px 5px 0 var(--ink);
+  }
+  .bt-fight:hover{transform:translate(-2px,-2px);box-shadow:7px 7px 0 var(--ink)}
+  .bt-fight:active{transform:translate(2px,2px);box-shadow:2px 2px 0 var(--ink)}
+  .bt-flee{
+    background:transparent;color:rgba(255,255,255,0.55);border:2px solid rgba(255,255,255,0.4);
+    padding:8px 14px;font-family:"JetBrains Mono",monospace;font-weight:800;font-size:12px;letter-spacing:0.14em;
+    cursor:pointer;
+  }
+
+  /* impact flash */
+  .bt-flash{
+    position:absolute;inset:0;background:#FFF;opacity:0;pointer-events:none;
+  }
+  .boss-takeover.flash .bt-flash{animation:flashHit .25s ease-out}
+  @keyframes flashHit{0%{opacity:0}10%{opacity:1}100%{opacity:0}}
 
   /* footer stats band */
   .footer{
@@ -471,7 +685,7 @@
             <div class="tile" style="border-color: rgb(0, 0, 0)">
               <img src="assets/Triangle.svg" alt="" style="width:72px;height:72px;display:block;filter:brightness(0) invert(96%) sepia(7%) saturate(57%) hue-rotate(13deg) brightness(99%) contrast(94%);opacity:0.7">
             </div>
-            <div class="action">BUY · 200 IGH</div>
+            <div class="action" style="visibility:hidden">BUY · 200 IGH</div>
           </div>
 
           <div class="slot buy">
@@ -479,7 +693,7 @@
             <div class="tile" style="border-color: rgb(0, 0, 0)">
               <img src="assets/Circle.svg" alt="" style="width:72px;height:72px;display:block;filter:brightness(0) invert(96%) sepia(7%) saturate(57%) hue-rotate(13deg) brightness(99%) contrast(94%);opacity:0.7">
             </div>
-            <div class="action">BUY · 500 IGH</div>
+            <div class="action" style="visibility:hidden">BUY · 500 IGH</div>
           </div>
 
           <div class="slot locked">
@@ -564,16 +778,16 @@
       </div>
     </div>
 
-    <div class="boss">
+    <div class="boss" id="bossCard">
       <img class="boss-art" src="assets/bossSquare.svg" alt="">
       <div class="boss-stripes"></div>
       <div class="boss-title">
         <span class="a">BOSS</span>
-        <span class="b">INCOMING</span>
+        <span class="b" id="bossCardWord">INCOMING</span>
       </div>
       <div class="boss-meta">
         <span class="boss-name">SQUARE BOSS</span>
-        <span class="boss-time">0:90</span>
+        <span class="boss-time" id="bossCardTime">0:08</span>
       </div>
       <div class="boss-warn">defeat or lose all IGH</div>
     </div>
@@ -596,6 +810,70 @@
     </div>
     <div class="footer-mark">CREATED BY MATES</div>
   </div>
+
+  <!-- ═══════ BOSS TAKEOVER OVERLAY ═══════ -->
+  <div class="boss-takeover" id="bossTakeover">
+    <div class="bt-vignette"></div>
+    <div class="bt-hazard top"></div>
+    <div class="bt-hazard bot"></div>
+    <div class="bt-scanlines"></div>
+
+    <!-- countdown stage -->
+    <div class="bt-countdown" id="btCountdown">
+      <div class="bt-count-tag">⚠ INCOMING ⚠</div>
+      <div class="bt-count-num bt-count-num-anim" id="btCountNum">3</div>
+      <div class="bt-count-rings" id="btRings"></div>
+      <div class="bt-count-sub">SQUARE BOSS APPROACHING</div>
+    </div>
+
+    <!-- boss reveal stage -->
+    <div class="bt-boss-stage" id="btBossStage" style="display:none">
+      <div class="bt-corner tl">▌ ENC-001</div>
+      <div class="bt-corner tr">SECTOR · 01</div>
+      <div class="bt-corner bl">THREAT · A</div>
+      <div class="bt-corner br">⚠ DEFEND</div>
+
+      <div class="bt-boss-head">
+        <div class="bt-boss-tag">⚠ BOSS ENCOUNTER</div>
+        <div class="bt-boss-meta-mini">LVL.1 · WAVE 01 · TIMER 0:30</div>
+      </div>
+
+      <div class="bt-boss-body">
+        <div class="bt-boss-art-wrap">
+          <img class="bt-boss-art" src="assets/bossSquare.svg" alt="">
+        </div>
+      </div>
+
+      <div class="bt-boss-foot">
+        <div class="bt-boss-title-row">
+          <div class="bt-boss-title"><span class="accent">SQUARE</span> BOSS</div>
+        </div>
+        <div class="bt-hp-row">
+          <span class="bt-hp-label">HP</span>
+          <div class="bt-hp-bar">
+            <div class="fill" id="bossHpFill"></div>
+            <div class="ticks">
+              <span></span><span></span><span></span><span></span><span></span>
+              <span></span><span></span><span></span><span></span><span></span>
+            </div>
+          </div>
+          <span class="bt-hp-num" id="bossHpNum">500 / 500</span>
+        </div>
+        <div class="bt-actions">
+          <div class="bt-reward">REWARD: +250 IGH · +1 DC<span class="pen">PENALTY: −ALL IGH</span></div>
+          <div style="display:flex;gap:10px;align-items:center">
+            <button class="bt-flee" id="btFlee">FLEE</button>
+            <button class="bt-fight" id="btFight">FIGHT →</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="bt-flash"></div>
+  </div>
+
+  <!-- dev preview button -->
+  <button class="boss-trigger" id="bossTrigger">▶ TRIGGER BOSS</button>
 
 </div>
 
@@ -631,6 +909,115 @@
       {duration:140}
     );
   });
+})();
+
+/* ──────── BOSS SEQUENCE ──────── */
+(function(){
+  const overlay   = document.getElementById('bossTakeover');
+  const cdStage   = document.getElementById('btCountdown');
+  const bossStage = document.getElementById('btBossStage');
+  const numEl     = document.getElementById('btCountNum');
+  const rings     = document.getElementById('btRings');
+  const card      = document.getElementById('bossCard');
+  const cardTime  = document.getElementById('bossCardTime');
+  const cardWord  = document.getElementById('bossCardWord');
+  const trigger   = document.getElementById('bossTrigger');
+  const hpFill    = document.getElementById('bossHpFill');
+  const hpNum     = document.getElementById('bossHpNum');
+  const fightBtn  = document.getElementById('btFight');
+  const fleeBtn   = document.getElementById('btFlee');
+
+  let timers = [];
+  function clearTimers(){ timers.forEach(t=>clearTimeout(t)); timers = []; }
+  function later(fn,ms){ const t=setTimeout(fn,ms); timers.push(t); return t; }
+
+  function showCount(label, isGo){
+    cdStage.style.display='grid';
+    bossStage.style.display='none';
+    overlay.classList.remove('boss-on','shake');
+    // re-trigger animation by cloning class
+    numEl.classList.remove('bt-count-num-anim');
+    numEl.classList.toggle('go', !!isGo);
+    numEl.textContent = label;
+    // burst rings
+    rings.style.animation='none';
+    void rings.offsetWidth;
+    rings.style.animation='';
+    // re-add anim
+    void numEl.offsetWidth;
+    numEl.classList.add('bt-count-num-anim');
+  }
+
+  function showBossReveal(){
+    cdStage.style.display='none';
+    bossStage.style.display='grid';
+    overlay.classList.add('boss-on','shake','flash');
+    later(()=>overlay.classList.remove('flash'), 280);
+    // reset HP
+    let hp = 500;
+    hpFill.style.width = '100%';
+    hpNum.textContent = hp + ' / 500';
+    // little nudge: clicks on fight reduce HP for demo
+    fightBtn.onclick = () => {
+      hp = Math.max(0, hp - 50);
+      hpFill.style.width = (hp/500*100) + '%';
+      hpNum.textContent = hp + ' / 500';
+      overlay.classList.add('flash');
+      later(()=>overlay.classList.remove('flash'), 240);
+      if (hp === 0){
+        later(closeOverlay, 350);
+      }
+    };
+  }
+
+  function closeOverlay(){
+    overlay.classList.remove('on','boss-on','shake','flash');
+    clearTimers();
+    resetCard();
+  }
+
+  function resetCard(){
+    card.classList.remove('warn','imminent');
+    cardWord.textContent = 'INCOMING';
+    cardTime.textContent = '0:08';
+  }
+
+  fleeBtn.onclick = closeOverlay;
+
+  // Idle countdown ticking on the rail card → triggers takeover at 0:00
+  function startSequence(){
+    clearTimers();
+    overlay.classList.remove('on');
+    let t = 8;            // 8 second lead-in on the rail card
+    cardTime.textContent = '0:0' + t;
+    cardWord.textContent = 'INCOMING';
+    card.classList.remove('warn','imminent');
+
+    function tickCard(){
+      t -= 1;
+      cardTime.textContent = (t < 10 ? '0:0' : '0:') + t;
+      if (t <= 5 && t > 3){ card.classList.add('warn'); cardWord.textContent='APPROACH'; }
+      if (t <= 3){ card.classList.add('imminent'); cardWord.textContent='IMMINENT'; }
+      if (t <= 0){ runTakeover(); return; }
+      later(tickCard, 1000);
+    }
+    later(tickCard, 1000);
+  }
+
+  function runTakeover(){
+    overlay.classList.add('on');
+    // 3 → 2 → 1 → DEFEND! → reveal
+    showCount('3', false);
+    later(()=>showCount('2', false), 900);
+    later(()=>showCount('1', false), 1800);
+    later(()=>showCount('DEFEND!', true), 2700);
+    later(()=>showBossReveal(), 3700);
+  }
+
+  trigger.addEventListener('click', startSequence);
+
+  // auto-kick once on load so the user sees it immediately
+  later(startSequence, 1200);
 })();
 </script>
 
