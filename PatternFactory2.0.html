@@ -1,0 +1,638 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>George Droys — Hi-Fi (V7 Marathon Cut)</title>
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Bebas+Neue&family=Playfair+Display:ital,wght@1,700;1,900&family=JetBrains+Mono:wght@400;500;700;800&family=Caveat:wght@700&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --bg:#000;
+    --purple:#7B1FE0;        /* factory bg */
+    --purple-dark:#5A14A8;   /* purple shadow / locked */
+    --purple-deep:#36096B;
+    --green:#C5FF00;         /* neon */
+    --green-dark:#9CCC00;
+    --ink:#000;
+    --paper:#FAFAF8;
+    --muted:rgba(197,255,0,0.55);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);min-height:100vh;color:var(--paper);font-family:"JetBrains Mono",ui-monospace,Menlo,monospace}
+  .display{font-family:"Playfair Display",Georgia,serif;font-style:italic;font-weight:900;letter-spacing:-0.01em;line-height:0.9}
+  .nav-display{font-family:"Playfair Display",Georgia,serif;font-style:italic;font-weight:900;letter-spacing:-0.01em;line-height:0.95}
+  .mono{font-family:"JetBrains Mono",ui-monospace,Menlo,monospace}
+  .hand{font-family:"Caveat",cursive;font-weight:700}
+
+  /* ─── frame layout ─── */
+  .frame{
+    width:1280px;height:820px;
+    background:var(--bg);color:var(--green);
+    display:grid;
+    grid-template-columns:1fr 320px;
+    grid-template-rows:auto 1fr auto;
+    margin:0 auto;
+    position:relative;
+    border:3px solid var(--green);
+  }
+
+  /* ─── top header strip ─── */
+  .header{
+    grid-column:1 / 3;
+    display:grid;grid-template-columns:auto 1fr auto auto auto;align-items:stretch;
+    border-bottom:3px solid var(--green);
+    background:var(--bg);
+  }
+  .logo-block{
+    background:var(--green);color:var(--ink);
+    padding:14px 24px;display:flex;flex-direction:column;justify-content:center;
+    border-right:3px solid var(--green);
+  }
+  .logo-name{font-family:"Archivo Black",sans-serif;font-size:34px;line-height:0.9;letter-spacing:-0.02em}
+  .logo-sub{font-family:"JetBrains Mono",monospace;font-weight:800;font-size:13px;letter-spacing:0.18em;border-bottom:2px solid var(--ink);width:fit-content;padding-bottom:1px;margin-top:2px}
+
+  .level-block{
+    padding:14px 22px;display:flex;flex-direction:column;justify-content:center;gap:8px;
+    border-right:3px solid var(--green);
+  }
+  .level-row{display:flex;align-items:baseline;gap:18px}
+  .level-num{font-family:"Archivo Black",sans-serif;font-size:24px;color:var(--green);letter-spacing:0.04em}
+  .level-session{font-size:12px;color:var(--muted);letter-spacing:0.06em}
+  .level-cps{margin-left:auto;font-size:13px;color:var(--green);font-weight:800;letter-spacing:0.04em}
+
+  .level-bar-wrap{display:flex;align-items:center;gap:12px}
+  .level-bar{flex:1;height:14px;border:2px solid var(--green);background:rgba(197,255,0,0.08);position:relative;overflow:hidden}
+  .level-bar > .fill{height:100%;width:8%;background:repeating-linear-gradient(45deg,var(--green) 0 6px,#9CCC00 6px 12px)}
+  .level-bar > .marks{position:absolute;inset:0;display:flex;pointer-events:none}
+  .level-bar > .marks span{flex:1;border-right:1px solid rgba(0,0,0,0.25)}
+  .level-bar > .marks span:last-child{border-right:none}
+  .level-fraction{font-size:14px;font-weight:800;color:var(--green);font-variant-numeric:tabular-nums;letter-spacing:0.04em}
+
+  .res-cell{
+    padding:10px 22px;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    border-right:3px solid var(--green);min-width:96px;
+  }
+  .res-cell:last-child{border-right:none}
+  .res-code{
+    font-family:"JetBrains Mono",monospace;font-weight:800;font-size:13px;
+    color:var(--green);letter-spacing:0.16em;border-bottom:2px solid var(--green);padding-bottom:1px
+  }
+  .res-val{font-family:"Archivo Black",sans-serif;font-size:30px;color:var(--green);margin-top:4px;line-height:1}
+
+  /* ─── columns ─── */
+  .left-nav{
+    grid-row:2;grid-column:1;
+    display:grid;grid-template-columns:240px 1fr;min-height:0;
+  }
+  .right-rail{
+    grid-row:2;grid-column:2;
+    border-left:3px solid var(--green);
+    background:var(--bg);display:flex;flex-direction:column;min-height:0;
+  }
+
+  /* nav column */
+  .nav-col{
+    border-right:3px solid var(--green);
+    display:flex;flex-direction:column;background:var(--bg);min-height:0;
+  }
+  .nav-section{
+    font-size:11px;font-weight:800;color:var(--muted);letter-spacing:0.18em;
+    padding:14px 18px 4px;
+  }
+  .nav-item{
+    display:flex;align-items:center;gap:10px;
+    padding:10px 14px 10px 18px;
+    border-left:6px solid transparent;
+    color:var(--green);
+    cursor:default;
+    position:relative;
+    transition:background .15s,color .15s;
+  }
+  .nav-item .label{font-family:"Playfair Display",Georgia,serif;font-style:italic;font-weight:900;font-size:22px;letter-spacing:-0.005em}
+  .nav-item .meta{flex:1;text-align:right;font-family:"JetBrains Mono",monospace;font-size:11px;font-weight:700;color:rgba(197,255,0,0.6)}
+  .nav-item.active{background:var(--green);color:var(--ink);border-left-color:#fff}
+  .nav-item.active .meta{color:rgba(0,0,0,0.7)}
+  .nav-item.muted{color:rgba(197,255,0,0.4)}
+  .nav-item .badge{
+    background:#FF3B1A;color:#fff;font-family:"JetBrains Mono",monospace;
+    font-size:11px;font-weight:800;padding:1px 6px;border-radius:0;line-height:1.4
+  }
+  .nav-item:hover:not(.active){background:rgba(197,255,0,0.08)}
+
+  /* tutorial sticker */
+  .tutorial{
+    margin-top:auto;
+    border-top:3px solid var(--green);
+    padding:14px;
+    background:var(--bg);
+  }
+  .tutorial-tag{font-size:11px;color:var(--muted);letter-spacing:0.16em;font-weight:800}
+  .tutorial-title{font-family:"Playfair Display",serif;font-style:italic;font-weight:900;font-size:22px;color:var(--green);margin:4px 0 10px}
+  .tutorial-actions{display:flex;gap:8px}
+  .tut-btn{
+    flex:1;text-align:center;padding:8px 0;font-family:"JetBrains Mono",monospace;font-weight:800;font-size:12px;letter-spacing:0.08em;
+    border:2px solid var(--green);background:transparent;color:var(--green);
+  }
+  .tut-btn.primary{background:var(--green);color:var(--ink)}
+
+  /* center column */
+  .center-col{
+    display:flex;flex-direction:column;gap:14px;padding:18px;min-height:0;
+  }
+  .stats-row{
+    display:grid;grid-template-columns:1fr 1fr;gap:0;
+  }
+  .stat-card{
+    border:3px solid var(--green);padding:10px 16px;
+    display:flex;align-items:center;gap:14px;background:var(--bg);
+  }
+  .stat-card .lbl{font-size:11px;font-weight:800;color:var(--muted);letter-spacing:0.16em}
+  .stat-card .num{font-family:"Archivo Black",sans-serif;font-size:36px;color:var(--green);line-height:0.9}
+  .stat-card .sub{font-size:11px;color:var(--muted);letter-spacing:0.04em;margin-left:auto;text-align:right}
+  .combo-bar{height:6px;width:90px;background:rgba(197,255,0,0.15);border:1.5px solid var(--green);position:relative}
+  .combo-bar > .fill{height:100%;width:60%;background:var(--green)}
+
+  /* the factory */
+  .factory{
+    flex:1;min-height:0;
+    background:var(--purple);
+    border:3px solid var(--green);
+    position:relative;overflow:hidden;
+    cursor:pointer;
+  }
+  .factory:active{transform:scale(0.998)}
+
+  /* corner shape stamps */
+  .corner{position:absolute;width:96px;height:96px;opacity:0.16;filter:brightness(0) saturate(100%) invert(7%) sepia(82%) saturate(4321%) hue-rotate(269deg) brightness(72%) contrast(108%);pointer-events:none}
+  .corner.tl{top:18px;left:18px;transform:rotate(-12deg)}
+  .corner.tr{top:18px;right:18px;transform:rotate(8deg)}
+  .corner.bl{bottom:18px;left:18px;transform:rotate(14deg)}
+  .corner.br{bottom:18px;right:18px;transform:rotate(-6deg)}
+
+  /* combo flag */
+  .combo-flag{
+    position:absolute;top:0;left:50%;transform:translate(-50%,-55%);
+    background:var(--ink);color:var(--green);
+    border:3px solid var(--green);
+    padding:6px 18px;
+    font-family:"JetBrains Mono",monospace;font-weight:800;font-size:14px;letter-spacing:0.1em;
+    z-index:5;
+  }
+  .combo-flag::before,.combo-flag::after{
+    content:"";position:absolute;top:50%;width:14px;height:14px;background:var(--ink);border:3px solid var(--green);transform:translateY(-50%) rotate(45deg);z-index:-1
+  }
+  .combo-flag::before{left:-10px}
+  .combo-flag::after{right:-10px}
+
+  /* slots layout inside factory */
+  .slots-wrap{
+    position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:22px;padding:30px 60px;
+    z-index:3;
+  }
+  .slot{
+    display:flex;flex-direction:column;align-items:center;gap:8px;position:relative;
+  }
+  .slot.active .tile{
+    width:128px;height:128px;background:var(--paper);border:4px solid var(--ink);
+    box-shadow:6px 6px 0 0 var(--ink);
+    display:grid;place-items:center;position:relative;
+  }
+  .slot.active .tile-tag{
+    position:absolute;top:-13px;left:50%;transform:translateX(-50%);
+    background:var(--green);color:var(--ink);padding:3px 10px;
+    font-family:"JetBrains Mono",monospace;font-weight:800;font-size:10px;letter-spacing:0.16em;
+    border:2px solid var(--ink);
+  }
+  .slot.active .name{
+    font-family:"Archivo Black",sans-serif;font-size:18px;color:var(--paper);letter-spacing:0.04em
+  }
+  .slot.active .progress{
+    display:flex;align-items:center;gap:8px;
+    font-family:"JetBrains Mono",monospace;font-weight:700;font-size:13px;color:var(--paper)
+  }
+  .slot.active .progress .ticks{color:var(--green);letter-spacing:0.05em}
+
+  .slot.locked .tile, .slot.buy .tile{
+    width:90px;height:90px;
+    background:var(--purple-dark);
+    border:3px dashed var(--paper);
+    display:grid;place-items:center;position:relative;color:var(--paper)
+  }
+  .slot.locked .tile{border-style:solid;background:var(--purple-deep);border-color:var(--purple-dark);}
+  .slot .slot-label{font-family:"JetBrains Mono",monospace;font-weight:800;font-size:10px;color:var(--paper);letter-spacing:0.16em;opacity:0.7}
+  .slot.buy .action{
+    background:var(--ink);color:var(--green);
+    padding:4px 10px;font-family:"JetBrains Mono",monospace;font-weight:800;font-size:11px;letter-spacing:0.1em;
+    border:2px solid var(--green)
+  }
+  .slot.locked .req{font-family:"JetBrains Mono",monospace;font-weight:700;font-size:10px;color:var(--paper);opacity:0.6;letter-spacing:0.1em}
+
+  /* click feedback floaters (faux) */
+  .float{position:absolute;font-family:"Caveat",cursive;font-weight:700;color:var(--paper);pointer-events:none;z-index:2}
+  .f1{top:18%;left:6%;font-size:64px;transform:rotate(-8deg)}
+  .f2{top:60%;right:5%;font-size:48px;transform:rotate(8deg);opacity:0.7}
+  .f3{top:74%;left:12%;font-size:34px;transform:rotate(-3deg);opacity:0.5}
+  .f4{top:32%;right:14%;font-size:28px;transform:rotate(5deg);opacity:0.55}
+
+  /* slim strip below factory */
+  .strip{
+    border:3px solid var(--green);
+    padding:10px 16px;
+    display:flex;align-items:center;justify-content:space-between;gap:14px;
+    background:var(--bg);
+  }
+  .strip-left{display:flex;align-items:center;gap:18px}
+  .strip-count{font-family:"JetBrains Mono",monospace;font-weight:800;font-size:13px;color:var(--green);letter-spacing:0.12em}
+  .strip-hint{font-size:11px;color:var(--muted);letter-spacing:0.04em}
+  .strip-cta{
+    background:var(--green);color:var(--ink);
+    padding:8px 14px;font-family:"JetBrains Mono",monospace;font-weight:800;font-size:12px;letter-spacing:0.08em;
+    border:2px solid var(--green);
+  }
+
+  /* right rail sections */
+  .rail-section{padding:16px;border-bottom:3px solid var(--green)}
+  .rail-section:last-child{border-bottom:none}
+  .rail-head{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+  .rail-tag{
+    background:var(--green);color:var(--ink);
+    padding:3px 9px;font-family:"JetBrains Mono",monospace;font-weight:800;font-size:11px;letter-spacing:0.14em
+  }
+  .rail-title{font-family:"Playfair Display",serif;font-style:italic;font-weight:900;font-size:22px;color:var(--green);letter-spacing:-0.005em}
+
+  .almost-row{margin-bottom:14px}
+  .almost-row:last-child{margin-bottom:0}
+  .almost-head{display:flex;justify-content:space-between;align-items:baseline}
+  .almost-label{font-family:"JetBrains Mono",monospace;font-size:13px;font-weight:800;color:var(--green);letter-spacing:0.04em}
+  .almost-pct{font-family:"JetBrains Mono",monospace;font-size:12px;font-weight:700;color:var(--muted)}
+  .almost-bar{height:6px;background:rgba(197,255,0,0.12);border:1.5px solid var(--green);margin-top:4px;position:relative}
+  .almost-bar > .fill{height:100%;background:var(--green)}
+  .almost-foot{display:flex;justify-content:space-between;align-items:center;margin-top:4px}
+  .almost-sub{font-size:11px;color:var(--muted)}
+  .almost-buy{
+    background:var(--ink);border:2px solid var(--green);color:var(--green);
+    padding:2px 9px;font-family:"JetBrains Mono",monospace;font-weight:800;font-size:10px;letter-spacing:0.12em
+  }
+
+  .feed{display:flex;flex-direction:column;gap:5px}
+  .feed-line{display:flex;gap:10px;align-items:baseline;font-family:"JetBrains Mono",monospace;font-size:12px}
+  .feed-line .t{color:rgba(197,255,0,0.5);min-width:36px;font-weight:700}
+  .feed-line .x{color:var(--green);font-weight:600}
+  .feed-line .x.bold{font-weight:900}
+  .feed-line .x.combo{color:#FF6B3D;font-weight:900}
+  .feed-line .tag{margin-left:auto;background:var(--green);color:var(--ink);padding:0 5px;font-weight:800;font-size:10px;letter-spacing:0.08em}
+
+  /* boss block */
+  .boss{
+    position:relative;background:#1a0030;color:var(--paper);padding:14px;
+    overflow:hidden;
+  }
+  .boss-art{
+    position:absolute;right:-8px;bottom:-6px;width:120px;height:auto;opacity:0.85;pointer-events:none;
+    filter:drop-shadow(0 0 12px rgba(197,255,0,0.25));
+  }
+  .boss-stripes{
+    position:absolute;top:0;left:0;right:0;height:10px;
+    background:repeating-linear-gradient(45deg,var(--green) 0 12px,var(--ink) 12px 24px);
+  }
+  .boss-title{margin-top:10px;display:flex;align-items:baseline;gap:10px}
+  .boss-title .a{font-family:"Playfair Display",serif;font-style:italic;font-weight:900;font-size:26px;color:var(--green);letter-spacing:-0.01em}
+  .boss-title .b{font-family:"Playfair Display",serif;font-style:italic;font-weight:900;font-size:26px;color:var(--paper);opacity:0.45;letter-spacing:-0.01em}
+  .boss-meta{display:flex;justify-content:space-between;align-items:baseline;margin-top:6px}
+  .boss-name{font-family:"JetBrains Mono",monospace;font-weight:800;font-size:13px;letter-spacing:0.1em;color:var(--paper)}
+  .boss-time{font-family:"Archivo Black",sans-serif;font-size:26px;color:var(--green);letter-spacing:0.04em}
+  .boss-warn{font-size:10px;letter-spacing:0.06em;color:rgba(255,255,255,0.6);margin-top:6px}
+
+  /* footer stats band */
+  .footer{
+    grid-row:3;grid-column:1 / 3;
+    background:var(--green);color:var(--ink);
+    border-top:3px solid var(--green);
+    display:grid;grid-template-columns:auto 1fr auto;align-items:stretch;
+  }
+  .footer-title{
+    background:var(--ink);color:var(--green);
+    padding:14px 26px;font-family:"Playfair Display",serif;font-style:italic;font-weight:900;font-size:30px;letter-spacing:-0.01em;
+    display:flex;align-items:center;
+    border-right:3px solid var(--green);
+  }
+  .footer-stats{
+    display:grid;grid-template-columns:repeat(9,1fr);align-items:center;padding:0 22px;gap:8px;
+  }
+  .footer-stat{display:flex;flex-direction:column;gap:2px;border-right:1.5px dashed rgba(0,0,0,0.25);padding-right:8px}
+  .footer-stat:last-child{border-right:none}
+  .footer-stat .l{font-family:"JetBrains Mono",monospace;font-weight:800;font-size:10px;letter-spacing:0.14em;color:rgba(0,0,0,0.65)}
+  .footer-stat .v{font-family:"Archivo Black",sans-serif;font-size:18px;color:var(--ink);line-height:1}
+  .footer-mark{
+    background:var(--ink);color:var(--green);padding:0 22px;display:flex;align-items:center;
+    font-family:"JetBrains Mono",monospace;font-weight:700;font-size:11px;letter-spacing:0.14em;
+    border-left:3px solid var(--green);
+  }
+
+  /* tweaks button-replacement: hide the panel by default — user may toggle on; static screen is final-ready */
+
+  /* responsive scale wrapper for small viewports */
+  @media (max-width: 1320px){
+    body{padding:0}
+    .stage{transform-origin:top left;}
+  }
+</style>
+</head>
+<body>
+
+<template id="__bundler_thumbnail">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+    <rect width="100" height="100" fill="#000"/>
+    <rect x="20" y="20" width="60" height="60" fill="#C5FF00"/>
+    <text x="50" y="58" text-anchor="middle" font-family="Georgia,serif" font-style="italic" font-weight="900" font-size="22" fill="#000">GD</text>
+  </svg>
+</template>
+
+<div class="frame" id="frame">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="logo-block">
+      <div class="logo-name">GEORGE</div>
+      <div class="logo-sub">DROYS</div>
+    </div>
+
+    <div class="level-block">
+      <div class="level-row">
+        <span class="level-num">LVL.1</span>
+        <span class="level-session">SESSION 00:14:32</span>
+        <span class="level-cps">+4.2 / SEC</span>
+      </div>
+      <div class="level-bar-wrap">
+        <div class="level-bar">
+          <div class="fill"></div>
+          <div class="marks">
+            <span></span><span></span><span></span><span></span><span></span>
+            <span></span><span></span><span></span><span></span><span></span>
+          </div>
+        </div>
+        <span class="level-fraction">8 / 120</span>
+      </div>
+    </div>
+
+    <div class="res-cell">
+      <div class="res-code">IGH</div>
+      <div class="res-val">1</div>
+    </div>
+    <div class="res-cell">
+      <div class="res-code">DC</div>
+      <div class="res-val">0</div>
+    </div>
+    <div class="res-cell">
+      <div class="res-code">PP</div>
+      <div class="res-val">0</div>
+    </div>
+  </div>
+
+  <!-- LEFT NAV + CENTER -->
+  <div class="left-nav">
+
+    <!-- NAV -->
+    <nav class="nav-col">
+      <div class="nav-section">▸ PLAY</div>
+      <div class="nav-item active"><img src="assets/factory-building.svg" alt="" style="width:18px;height:18px;display:block;flex-shrink:0"><span class="label">FACTORY</span><span class="meta">●</span></div>
+      <div class="nav-item"><span class="label">PATTERNS</span><span class="meta">1/4</span></div>
+      <div class="nav-item"><span class="label">UPGRADES</span><span class="meta"></span></div>
+
+      <div class="nav-section">▸ PROGRESS</div>
+      <div class="nav-item"><span class="label">SYNERGIES</span><span class="meta"></span><span class="badge">2</span></div>
+      <div class="nav-item"><span class="label">MACHINES</span><span class="meta"></span></div>
+      <div class="nav-item"><span class="label">INVENTORY</span><span class="meta"></span></div>
+
+      <div class="nav-section">▸ META</div>
+      <div class="nav-item muted"><span class="label">PRESTIGE</span><span class="meta"></span></div>
+      <div class="nav-item"><span class="label">RANKING</span><span class="meta"></span></div>
+
+      <div class="tutorial">
+        <div class="tutorial-tag">TUTORIAL · 2 / 7</div>
+        <div class="tutorial-title">Selecting Slots.</div>
+        <div class="tutorial-actions">
+          <button class="tut-btn">← BACK</button>
+          <button class="tut-btn primary">NEXT →</button>
+        </div>
+      </div>
+    </nav>
+
+    <!-- CENTER -->
+    <main class="center-col" style="gap: 0px; padding: 1px">
+
+      <div class="stats-row">
+        <div class="stat-card" style="border-width: 0px 3px 0px 0px">
+          <div class="lbl">CLICK<br/>POWER</div>
+          <div class="num">4</div>
+          <div class="sub">per tap<br/>· 4× base</div>
+        </div>
+        <div class="stat-card" style="border-width: 0px">
+          <div class="lbl">COMBO</div>
+          <div class="num">×3</div>
+          <div class="sub" style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
+            <span>2.4s left</span>
+            <div class="combo-bar"><div class="fill"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- FACTORY -->
+      <div class="factory" id="factory" style="border-width: 0px">
+        <!-- corner shape stamps (real brand artwork) -->
+        <img class="corner tl" src="assets/Square.svg" alt="">
+        <img class="corner tr" src="assets/Circle.svg" alt="">
+        <img class="corner bl" src="assets/Cross.svg" alt="">
+        <img class="corner br" src="assets/Triangle.svg" alt="">
+
+        <!-- click feedback floats -->
+        <div class="float f1">+4</div>
+        <div class="float f2">+4</div>
+        <div class="float f3">+1</div>
+        <div class="float f4">+1</div>
+
+        <!-- slots: 1 active + 3 buy/locked -->
+        <div class="slots-wrap" style="padding: 6px 60px 30px">
+
+          <div class="slot active">
+            <div class="tile">
+              <img src="assets/Square.svg" alt="" style="width:104px;height:104px;display:block">
+            </div>
+            <div class="name">SQUARE</div>
+            <div class="progress"><span>51 / 100</span></div>
+          </div>
+
+          <div class="slot buy">
+            <div class="slot-label">SLOT 2</div>
+            <div class="tile" style="border-color: rgb(0, 0, 0)">
+              <img src="assets/Triangle.svg" alt="" style="width:72px;height:72px;display:block;filter:brightness(0) invert(96%) sepia(7%) saturate(57%) hue-rotate(13deg) brightness(99%) contrast(94%);opacity:0.7">
+            </div>
+            <div class="action">BUY · 200 IGH</div>
+          </div>
+
+          <div class="slot buy">
+            <div class="slot-label">SLOT 3</div>
+            <div class="tile" style="border-color: rgb(0, 0, 0)">
+              <img src="assets/Circle.svg" alt="" style="width:72px;height:72px;display:block;filter:brightness(0) invert(96%) sepia(7%) saturate(57%) hue-rotate(13deg) brightness(99%) contrast(94%);opacity:0.7">
+            </div>
+            <div class="action">BUY · 500 IGH</div>
+          </div>
+
+          <div class="slot locked">
+            <div class="slot-label">SLOT 4</div>
+            <div class="tile">
+              <img src="assets/lock-alert.svg" alt="" style="width:54px;height:54px;display:block;opacity:0.55">
+            </div>
+            <div class="req">LVL 3</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- slim strip -->
+      <div class="strip" style="border-width: 0px">
+        <div class="strip-left">
+          <span class="strip-count">1 / 4 SLOTTED</span>
+          <span class="strip-hint">scroll a slot to swap pattern · shift+click to overclock</span>
+        </div>
+        <button class="strip-cta">OPEN PATTERN LIBRARY →</button>
+      </div>
+    </main>
+  </div>
+
+  <!-- RIGHT RAIL -->
+  <aside class="right-rail">
+
+    <div class="rail-section">
+      <div class="rail-head">
+        <span class="rail-tag">⚑ ALMOST</span>
+        <span class="rail-title">There.</span>
+      </div>
+
+      <div class="almost-row">
+        <div class="almost-head">
+          <span class="almost-label">Triangle unlock</span>
+          <span class="almost-pct">41%</span>
+        </div>
+        <div class="almost-bar"><div class="fill" style="width:41%"></div></div>
+        <div class="almost-foot">
+          <span class="almost-sub">49 clicks left</span>
+        </div>
+      </div>
+
+      <div class="almost-row">
+        <div class="almost-head">
+          <span class="almost-label">Muscle Up!</span>
+          <span class="almost-pct">7%</span>
+        </div>
+        <div class="almost-bar"><div class="fill" style="width:7%"></div></div>
+        <div class="almost-foot">
+          <span class="almost-sub">15 IGH to buy</span>
+          <button class="almost-buy">BUY</button>
+        </div>
+      </div>
+
+      <div class="almost-row">
+        <div class="almost-head">
+          <span class="almost-label">Research Lab</span>
+          <span class="almost-pct">50%</span>
+        </div>
+        <div class="almost-bar"><div class="fill" style="width:50%"></div></div>
+        <div class="almost-foot">
+          <span class="almost-sub">needs 1× Triangle</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="rail-section" style="flex:1;min-height:0;overflow:hidden">
+      <div class="rail-head">
+        <span class="rail-tag">⏱ LIVE</span>
+        <span class="rail-title">Feed.</span>
+      </div>
+      <div class="feed">
+        <div class="feed-line"><span class="t">0:14</span><span class="x">+1 IGH</span></div>
+        <div class="feed-line"><span class="t">0:13</span><span class="x">+4 IGH</span><span class="tag">×3</span></div>
+        <div class="feed-line"><span class="t">0:12</span><span class="x combo">COMBO ×3!</span></div>
+        <div class="feed-line"><span class="t">0:11</span><span class="x">+1 IGH</span></div>
+        <div class="feed-line"><span class="t">0:10</span><span class="x">+1 IGH</span></div>
+        <div class="feed-line"><span class="t">0:08</span><span class="x">+1 IGH</span></div>
+        <div class="feed-line"><span class="t">0:06</span><span class="x">+1 IGH</span></div>
+        <div class="feed-line"><span class="t">0:02</span><span class="x bold">▶ SESSION START</span></div>
+      </div>
+    </div>
+
+    <div class="boss">
+      <img class="boss-art" src="assets/bossSquare.svg" alt="">
+      <div class="boss-stripes"></div>
+      <div class="boss-title">
+        <span class="a">BOSS</span>
+        <span class="b">INCOMING</span>
+      </div>
+      <div class="boss-meta">
+        <span class="boss-name">SQUARE BOSS</span>
+        <span class="boss-time">0:90</span>
+      </div>
+      <div class="boss-warn">defeat or lose all IGH</div>
+    </div>
+
+  </aside>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    <div class="footer-title">STATS</div>
+    <div class="footer-stats">
+      <div class="footer-stat"><span class="l">CLICK</span><span class="v">4</span></div>
+      <div class="footer-stat"><span class="l">SPEED</span><span class="v">1×</span></div>
+      <div class="footer-stat"><span class="l">O/CLK</span><span class="v">1×</span></div>
+      <div class="footer-stat"><span class="l">SELL</span><span class="v">1×</span></div>
+      <div class="footer-stat"><span class="l">OUT+</span><span class="v">1×</span></div>
+      <div class="footer-stat"><span class="l">OUT↑</span><span class="v">1×</span></div>
+      <div class="footer-stat"><span class="l">SYN</span><span class="v">0</span></div>
+      <div class="footer-stat"><span class="l">PRG</span><span class="v">—</span></div>
+      <div class="footer-stat"><span class="l">OFFLN</span><span class="v">1H</span></div>
+    </div>
+    <div class="footer-mark">CREATED BY MATES</div>
+  </div>
+
+</div>
+
+<!-- click juice -->
+<script>
+(function(){
+  const factory = document.getElementById('factory');
+  function spawn(x,y,val){
+    const f = document.createElement('div');
+    f.className='float';
+    f.textContent='+'+val;
+    f.style.left=(x-20)+'px';
+    f.style.top=(y-30)+'px';
+    f.style.position='absolute';
+    f.style.fontSize='44px';
+    f.style.color='#FAFAF8';
+    f.style.transform='rotate('+((Math.random()*16)-8)+'deg)';
+    f.style.transition='transform 700ms ease-out, opacity 700ms ease-out, top 700ms ease-out';
+    f.style.zIndex=10;
+    f.style.pointerEvents='none';
+    factory.appendChild(f);
+    requestAnimationFrame(()=>{
+      f.style.top=(y-110)+'px';
+      f.style.opacity='0';
+    });
+    setTimeout(()=>f.remove(),720);
+  }
+  factory.addEventListener('click',(e)=>{
+    const r = factory.getBoundingClientRect();
+    spawn(e.clientX-r.left, e.clientY-r.top, 4);
+    factory.animate(
+      [{transform:'translate(0,0)'},{transform:'translate(2px,-2px)'},{transform:'translate(-1px,1px)'},{transform:'translate(0,0)'}],
+      {duration:140}
+    );
+  });
+})();
+</script>
+
+</body>
+</html>
