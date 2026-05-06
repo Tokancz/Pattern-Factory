@@ -28,6 +28,8 @@
 
     <BossFight />
 
+    <AfkReport :open="afkOpen" :report="afkReport" @close="afkOpen = false" />
+
     <!-- Mobile burger menu overlay -->
     <Transition name="menu-fade">
       <div
@@ -56,6 +58,7 @@ import { useRoute } from "vue-router"
 import { useWindowSize } from "@vueuse/core"
 import { useSlotStore } from "@/stores/slot"
 import { useUpgradeStore } from "@/stores/upgrade"
+import { useGameStore } from "@/stores/game"
 import { useUserStore } from "@/stores/user"
 import { useBossStore } from "@/stores/boss"
 import { loadGame, startAutoSave } from "@/utils/save"
@@ -72,9 +75,20 @@ import BossFight from "@/components/ui/BossFight.vue"
 
 const slotStore = useSlotStore()
 const upgradeStore = useUpgradeStore()
+const gameStore = useGameStore()
 const user = useUserStore()
 const bossStore = useBossStore()
 const route = useRoute()
+
+const afkOpen = ref(false)
+const afkReport = reactive<AfkReportData>({
+  awaySeconds: 0,
+  cappedSeconds: 0,
+  money: 0,
+  dc: 0,
+  exp: 0,
+  prestigePoints: 0
+})
 
 const { width } = useWindowSize()
 const mobileLayout = computed(() => width.value < 1024)
@@ -94,18 +108,60 @@ async function initGame() {
     const delta = Math.min(rawDelta, cap)
     slotStore.tick(delta)
   }
+
+  slotStore.tick(delta)
+
+  const mult = upgradeStore.getOfflineGainMultiplier
+  const bonus = mult - 1
+  if (bonus > 0) {
+    const moneyGained = gameStore.money - before.money
+    const dcGained    = gameStore.dc - before.dc
+    if (moneyGained > 0) gameStore.addMoney(moneyGained * bonus)
+    if (dcGained > 0)    gameStore.addDC(dcGained * bonus)
+  }
+
+  // Recompute final deltas after the bonus was applied. EXP is tricky
+  // because tick() can level up — convert level diff back into total exp.
+  const expGainedTotal = totalExpDelta(before.level, before.exp, gameStore.level, gameStore.exp)
+
+  afkReport.awaySeconds   = rawDelta
+  afkReport.cappedSeconds = cappedSeconds
+  afkReport.money         = Math.max(0, gameStore.money - before.money)
+  afkReport.dc            = Math.max(0, gameStore.dc - before.dc)
+  afkReport.exp           = Math.max(0, expGainedTotal)
+  afkReport.prestigePoints = Math.max(0, gameStore.prestigePoints - before.pp)
+
+  if (afkReport.money + afkReport.dc + afkReport.exp + afkReport.prestigePoints > 0) {
+    afkOpen.value = true
+  }
+}
+
+// Sum the exp the player accumulated even if they leveled up one or more
+// times during the offline tick. We can't ask the store for "total exp"
+// because each level resets the running counter.
+function totalExpDelta(beforeLevel: number, beforeExp: number, afterLevel: number, afterExp: number): number {
+  if (afterLevel === beforeLevel) return afterExp - beforeExp
+  let sum = -beforeExp
+  for (let lvl = beforeLevel; lvl < afterLevel; lvl++) {
+    sum += Math.floor(100 * Math.pow(1.2, lvl))
+  }
+  sum += afterExp
+  return sum
 }
 
 async function onLoggedIn() {
   await initGame()
+  startAutoSave()
 }
 
 onMounted(async () => {
   await user.restoreSession()
   if (user.loggedIn) {
     await initGame()
+    // Only start the autosave loop AFTER the load is done. Otherwise the
+    // 5s interval can fire mid-load and PUT the default empty state.
+    startAutoSave()
   }
-  startAutoSave()
   startGameLoop()
   bossStore.start()
 })

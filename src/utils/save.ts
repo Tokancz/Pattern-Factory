@@ -15,6 +15,15 @@ let saveVersion = 0
 // Prevents races where two concurrent PUTs fight for the same version.
 let inFlight: Promise<void> | null = null
 
+// Block any saves until the initial loadGame() has populated the stores.
+// Without this, a saveGame() racing with the first load would PUT the
+// default empty state and wipe the server save (see 409 path below).
+let gameLoaded = false
+
+export function isGameLoaded(): boolean {
+  return gameLoaded
+}
+
 function buildSavePayload(): SavePayload {
   const game     = useGameStore()
   const patterns = usePatternStore()
@@ -67,6 +76,7 @@ function buildSavePayload(): SavePayload {
 export function saveGame(): Promise<void> {
   const token = localStorage.getItem("token")
   if (!token) return Promise.resolve()
+  if (!gameLoaded) return Promise.resolve()
 
   // If a save is already running, wait for it and then start a fresh one so
   // the latest local state gets persisted. This serializes concurrent callers.
@@ -75,24 +85,17 @@ export function saveGame(): Promise<void> {
   }
 
   inFlight = (async () => {
-    for (let attempt = 0; attempt < 3; attempt++) {
-      try {
-        const res = await api.put<{ saveVersion: number }>("/save", buildSavePayload())
-        saveVersion = res.saveVersion
-        return
-      } catch (err) {
-        if (err instanceof ApiError && err.status === 409) {
-          const serverVersion = err.body?.serverVersion
-          if (typeof serverVersion === "number") {
-            saveVersion = serverVersion
-            continue
-          }
-          await loadGame()
-          return
-        }
-        console.error("Save failed:", err)
+    try {
+      const res = await api.put<{ saveVersion: number }>("/save", buildSavePayload())
+      saveVersion = res.saveVersion
+    } catch (err) {
+      // On version conflict the other device wrote more recently — pull
+      // server state instead of overwriting it. Last-write-wins by device.
+      if (err instanceof ApiError && err.status === 409) {
+        await loadGame()
         return
       }
+      console.error("Save failed:", err)
     }
   })().finally(() => { inFlight = null })
 
@@ -171,8 +174,15 @@ export async function loadGame(): Promise<number | null> {
 
     patterns.$patch({ patterns: patternData, unlockedPatterns })
 
+    gameLoaded = true
     return data.lastPlayed
   } catch (err) {
+    if (err instanceof ApiError && err.status === 404) {
+      // Brand-new account with no save yet — local defaults are the truth.
+      // Flip the flag so the first save can create the row.
+      gameLoaded = true
+      return null
+    }
     console.error("Load failed:", err)
     return null
   }

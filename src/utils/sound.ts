@@ -1,7 +1,7 @@
 import { ref, watch } from "vue"
 
 export type SoundName = "click" | "error" | "magic" | "pop" | "buy" | "tabClick" | "hit" | "victory" | "defeat"
-export type LoopTrack = 1 | 2 | 3
+export type LoopTrack = 1 | 2 | 3 | 4 | 5
 
 const BASE = import.meta.env.BASE_URL
 
@@ -28,6 +28,8 @@ const loopTracks: Record<LoopTrack, HTMLAudioElement> = {
   1: makeAudio("loop.wav",  0.15),
   2: makeAudio("loop2.wav", 0.15),
   3: makeAudio("loop3.wav", 0.15),
+  4: makeAudio("loop4.wav", 0.15),
+  5: makeAudio("loop5.wav", 0.15),
 }
 for (const a of Object.values(loopTracks)) a.loop = true
 
@@ -121,7 +123,7 @@ export function setLoopTrack(track: LoopTrack): void {
 }
 
 export function cycleLoopTrack(dir: 1 | -1): void {
-  const tracks: LoopTrack[] = [1, 2, 3]
+  const tracks: LoopTrack[] = [1, 2, 3, 4, 5]
   const idx = tracks.indexOf(currentTrack.value)
   const next = tracks[(idx + dir + tracks.length) % tracks.length] as LoopTrack
   setLoopTrack(next)
