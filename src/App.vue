@@ -34,7 +34,7 @@
 
     <BossFight />
 
-    <AfkReport :open="!afkOpen" :report="afkReport" @close="afkOpen = !false" />
+    <AfkReport :open="afkOpen" :report="afkReport" @close="afkOpen = false" />
 
     <!-- Mobile burger menu overlay -->
     <Transition name="menu-fade">
