@@ -131,7 +131,7 @@ export const useSlotStore = defineStore("slots", {
       else if (type === "dc") game.addDC(value)
       else if (type === "prestige") {
         const prestigeGain = Math.max(1, Math.floor(Math.log2(value + 2)))
-        game.addPrestigePoints(prestigeGain)
+        game.addPendingPrestigePoints(prestigeGain)
       }
 
       const expMultiplier = upgrades.getExpMultiplier * machines.getMultiplier("expMachine")

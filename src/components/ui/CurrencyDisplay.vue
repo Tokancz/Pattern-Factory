@@ -14,7 +14,14 @@
     </p>
     <p>
       <abbr title="Prestige Points">PP</abbr>
-      <span :class="{ 'currency-pulse': pulsePp }">{{ formatNumber(game.prestigePoints) }}</span>
+      <span :class="{ 'currency-pulse': pulsePp }">
+        {{ formatNumber(game.prestigePoints) }}<span
+          v-if="game.pendingPrestigePoints >= 1"
+          class="pending-pp"
+          :class="{ 'currency-pulse': pulsePending }"
+          title="Pending PP — convert by prestiging"
+        > (+{{ formatNumber(Math.floor(game.pendingPrestigePoints)) }})</span>
+      </span>
     </p>
   </div>
 </template>
@@ -35,9 +42,10 @@ const levelBar = computed(() =>
   generateBar(game.exp, game.expToNextLevel, 8)
 )
 
-const pulseMoney = ref(false)
-const pulseDc    = ref(false)
-const pulsePp    = ref(false)
+const pulseMoney   = ref(false)
+const pulseDc      = ref(false)
+const pulsePp      = ref(false)
+const pulsePending = ref(false)
 
 // Pulse the value briefly when it increases. Re-trigger by toggling the
 // class off-on across two animation frames so the keyframe restarts.
@@ -53,13 +61,15 @@ function makePulser(flag: { value: boolean }) {
   }
 }
 
-const pulseMoneyNow = makePulser(pulseMoney)
-const pulseDcNow    = makePulser(pulseDc)
-const pulsePpNow    = makePulser(pulsePp)
+const pulseMoneyNow   = makePulser(pulseMoney)
+const pulseDcNow      = makePulser(pulseDc)
+const pulsePpNow      = makePulser(pulsePp)
+const pulsePendingNow = makePulser(pulsePending)
 
 watch(() => game.money,          (n, p) => { if (n > p) pulseMoneyNow() })
 watch(() => game.dc,             (n, p) => { if (n > p) pulseDcNow() })
 watch(() => game.prestigePoints, (n, p) => { if (n > p) pulsePpNow() })
+watch(() => game.pendingPrestigePoints, (n, p) => { if (n > p) pulsePendingNow() })
 </script>
 
 <style lang="scss">
@@ -97,6 +107,12 @@ watch(() => game.prestigePoints, (n, p) => { if (n > p) pulsePpNow() })
       overflow: hidden;
       text-overflow: ellipsis;
       max-width: 100%;
+    }
+
+    .pending-pp {
+      font-size: .8em;
+      opacity: .7;
+      margin-left: 4px;
     }
   }
 }

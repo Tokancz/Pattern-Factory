@@ -32,6 +32,7 @@ interface SavePayload {
   money: number
   dc: number
   prestigePoints: number
+  pendingPrestigePoints: number
   level: number
   exp: number
   unlockedSlots: number
@@ -47,7 +48,8 @@ export async function getSave(req: AuthRequest, res: Response): Promise<void> {
   try {
     const saveResult = await query<{
       id: number; money: number; dc: number
-      prestige_points: number; level: number; exp: number
+      prestige_points: number; pending_prestige_points: number
+      level: number; exp: number
       unlocked_slots: number; last_played: number; save_version: number
     }>(
       "SELECT * FROM game_saves WHERE user_id = $1",
@@ -73,6 +75,7 @@ export async function getSave(req: AuthRequest, res: Response): Promise<void> {
       money:          save.money,
       dc:             save.dc,
       prestigePoints: save.prestige_points,
+      pendingPrestigePoints: save.pending_prestige_points ?? 0,
       level:          save.level,
       exp:            save.exp,
       unlockedSlots:  save.unlocked_slots,
@@ -100,15 +103,17 @@ export async function upsertSave(req: AuthRequest, res: Response): Promise<void>
          money           = $1,
          dc              = $2,
          prestige_points = $3,
-         level           = $4,
-         exp             = $5,
-         unlocked_slots  = $6,
-         last_played     = $7,
+         pending_prestige_points = $4,
+         level           = $5,
+         exp             = $6,
+         unlocked_slots  = $7,
+         last_played     = $8,
          save_version    = save_version + 1
-       WHERE user_id = $8 AND save_version = $9
+       WHERE user_id = $9 AND save_version = $10
        RETURNING id, save_version`,
       [
         payload.money, payload.dc, payload.prestigePoints,
+        payload.pendingPrestigePoints ?? 0,
         payload.level, payload.exp, payload.unlockedSlots,
         payload.lastPlayed, req.userId, clientVersion
       ]
@@ -140,11 +145,12 @@ export async function upsertSave(req: AuthRequest, res: Response): Promise<void>
       // No save at all — create the first one
       const insertResult = await query<{ id: number; save_version: number }>(
         `INSERT INTO game_saves
-           (user_id, money, dc, prestige_points, level, exp, unlocked_slots, last_played, save_version)
-         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,1)
+           (user_id, money, dc, prestige_points, pending_prestige_points, level, exp, unlocked_slots, last_played, save_version)
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,1)
          RETURNING id, save_version`,
         [
           req.userId, payload.money, payload.dc, payload.prestigePoints,
+          payload.pendingPrestigePoints ?? 0,
           payload.level, payload.exp, payload.unlockedSlots, payload.lastPlayed
         ]
       )

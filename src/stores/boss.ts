@@ -141,7 +141,7 @@ export const useBossStore = defineStore("boss", {
       switch (pattern.type) {
         case "money":    game.money = 0; break
         case "dc":       game.dc = 0; break
-        case "prestige": game.prestigePoints = 0; break
+        case "prestige": game.pendingPrestigePoints = 0; break
         case "exp":      game.exp = 0; break
       }
 

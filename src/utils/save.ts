@@ -47,6 +47,7 @@ function buildSavePayload(): SavePayload {
     money:          game.money,
     dc:             game.dc,
     prestigePoints: game.prestigePoints,
+    pendingPrestigePoints: game.pendingPrestigePoints,
     level:          game.level,
     exp:            game.exp,
     unlockedSlots:  game.unlockedSlots,
@@ -123,6 +124,7 @@ export async function loadGame(): Promise<number | null> {
       money: data.money,
       dc: data.dc,
       prestigePoints: data.prestigePoints,
+      pendingPrestigePoints: data.pendingPrestigePoints ?? 0,
       level: data.level,
       exp: data.exp,
       unlockedSlots: data.unlockedSlots

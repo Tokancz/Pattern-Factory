@@ -2,10 +2,17 @@
   <Panel title="Prestige">
     <div class="prestige">
       <div class="text-container">
-        <p>Reset your run at <strong>1,000,000 IGM</strong> to earn Prestige Points.</p>
-        <p>PP survives resets and unlocks permanent upgrades.</p>
+        <p>Reset your run to convert pending PP into spendable PP.</p>
+        <p>Crosses generate <strong>Pending PP</strong> during a run — it becomes real PP only when you prestige.</p>
+        <p>Prestiging at <strong>1,000,000 IGM</strong> grants bonus PP from your money.</p>
+        <p id="pending-pp">
+          Pending PP: <strong>{{ formatNumber(Math.floor(game.pendingPrestigePoints)) }}</strong>
+        </p>
+        <p id="money-gain">
+          Bonus from money: <strong>{{ game.getMoneyPrestigeGain() }}</strong> PP
+        </p>
         <p id="gain">
-          Current PP Gain: <strong>{{ game.getPrestigeGain() }}</strong> PP
+          Total on prestige: <strong>{{ game.getPrestigeGain() }}</strong> PP
         </p>
         <p id="current-pp">
           You have: <strong>{{ formatNumber(game.prestigePoints) }}</strong> PP
@@ -19,13 +26,13 @@
           :disabled="!game.canPrestige"
           class="prestige-button"
           :class="{ ready: game.canPrestige }"
-          :aria-label="game.canPrestige ? 'Prestige — reset your run and earn ' + game.getPrestigeGain() + ' PP' : 'Prestige locked — need 1,000,000 IGM'"
+          :aria-label="game.canPrestige ? 'Prestige — reset your run and earn ' + game.getPrestigeGain() + ' PP' : 'Prestige locked — need 1,000,000 IGM or pending PP'"
         >
           <img src="/img/icons/connectdevelop.svg" alt="" aria-hidden="true">
           <p aria-hidden="true">PRESTIGE</p>
         </button>
         <p v-if="!game.canPrestige" class="requirement">
-          Need {{ formatNumber(1_000_000) }} IGM
+          Need {{ formatNumber(1_000_000) }} IGM or pending PP
         </p>
       </div>
     </div>

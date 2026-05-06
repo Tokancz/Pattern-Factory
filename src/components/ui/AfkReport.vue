@@ -25,7 +25,7 @@
             <span>+{{ formatNumber(report.exp) }}</span>
           </li>
           <li v-if="report.prestigePoints > 0">
-            <abbr title="Prestige Points">PP</abbr>
+            <abbr title="Pending Prestige Points (convert by prestiging)">Pending PP</abbr>
             <span>+{{ formatNumber(report.prestigePoints) }}</span>
           </li>
           <li v-if="!hasAnyGain" class="empty">

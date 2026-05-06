@@ -29,6 +29,7 @@ CREATE TABLE game_saves (
   money          DOUBLE PRECISION DEFAULT 0,
   dc             DOUBLE PRECISION DEFAULT 0,
   prestige_points DOUBLE PRECISION DEFAULT 0,
+  pending_prestige_points DOUBLE PRECISION DEFAULT 0,
   level          INTEGER DEFAULT 1,
   exp            DOUBLE PRECISION DEFAULT 0,
   unlocked_slots INTEGER DEFAULT 1,

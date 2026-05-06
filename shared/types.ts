@@ -48,6 +48,7 @@ export interface SavePayload {
   money: number
   dc: number
   prestigePoints: number
+  pendingPrestigePoints: number
   level: number
   exp: number
   unlockedSlots: number

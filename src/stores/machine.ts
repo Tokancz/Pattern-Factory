@@ -79,7 +79,14 @@ export const useMachineStore = defineStore("machines", {
     },
 
     reset() {
-      this.levels = {}
+      this.levels = {
+        slotUnlock: 0,
+        slotBoost: 0,
+        targetedBoost: 0,
+        outputBoost: 0,
+        expMachine: 0,
+        synergyBoost: 0
+      }
     }
   }
 })

@@ -14,6 +14,7 @@ export const useGameStore = defineStore("game", {
     money: 0,
     dc: 0,
     prestigePoints: 0,
+    pendingPrestigePoints: 0,
 
     activePattern: "square" as string,
 
@@ -25,7 +26,7 @@ export const useGameStore = defineStore("game", {
   getters: {
     expToNextLevel: (state) => Math.floor(100 * Math.pow(1.2, state.level)),
 
-    canPrestige: (state) => state.money >= 1_000_000
+    canPrestige: (state) => state.money >= 1_000_000 || state.pendingPrestigePoints > 0
   },
 
   actions: {
@@ -50,6 +51,11 @@ export const useGameStore = defineStore("game", {
       this.prestigePoints += amount
     },
 
+    addPendingPrestigePoints(amount: number) {
+      if (isNaN(amount) || amount <= 0) return
+      this.pendingPrestigePoints += amount
+    },
+
     checkLevelUp() {
       let safety = 0
       let leveled = false
@@ -66,10 +72,14 @@ export const useGameStore = defineStore("game", {
       this.activePattern = patternId
     },
 
-    getPrestigeGain() {
+    getMoneyPrestigeGain() {
       // sqrt scaling: 1M = 3PP, 4M = 6PP, 9M = 9PP, 25M = 15PP
       if (this.money < 1_000_000) return 0
       return Math.floor(Math.sqrt(this.money / 100_000))
+    },
+
+    getPrestigeGain() {
+      return this.getMoneyPrestigeGain() + Math.floor(this.pendingPrestigePoints)
     },
 
     prestige() {
@@ -77,6 +87,7 @@ export const useGameStore = defineStore("game", {
       if (gained <= 0) return
 
       this.prestigePoints += gained
+      this.pendingPrestigePoints = 0
 
       const patterns = usePatternStore()
       const slots = useSlotStore()

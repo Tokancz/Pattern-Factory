@@ -131,7 +131,7 @@ async function initGame() {
     dc: gameStore.dc,
     exp: gameStore.exp,
     level: gameStore.level,
-    pp: gameStore.prestigePoints
+    pp: gameStore.pendingPrestigePoints
   }
 
   slotStore.tick(delta)
@@ -154,7 +154,7 @@ async function initGame() {
   afkReport.money         = Math.max(0, gameStore.money - before.money)
   afkReport.dc            = Math.max(0, gameStore.dc - before.dc)
   afkReport.exp           = Math.max(0, expGainedTotal)
-  afkReport.prestigePoints = Math.max(0, gameStore.prestigePoints - before.pp)
+  afkReport.prestigePoints = Math.max(0, gameStore.pendingPrestigePoints - before.pp)
 
   if (afkReport.money + afkReport.dc + afkReport.exp + afkReport.prestigePoints > 0) {
     afkOpen.value = true
