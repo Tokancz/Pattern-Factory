@@ -17,8 +17,7 @@
             </template>
             <template v-else>
               <p class="machine-cost">
-                Cost: {{ formatNumber(getCost(machine.id)) }}
-                {{ getCurrencyLabel((machine as any).currency) }}
+                Cost: {{ formatNumber(getCost(machine.id)) }} IGM
               </p>
               <p v-if="machines.getLevel(machine.id) > 0" class="machine-level">
                 Lvl: {{ machines.getLevel(machine.id) }}
@@ -83,12 +82,6 @@ const paginatedMachines = computed(() => {
 const totalPages = computed(() =>
   Math.ceil(machineList.value.length / perPage)
 )
-
-function getCurrencyLabel(currency: string) {
-  if (currency === "money") return "IGM"
-  if (currency === "prestige") return "PP"
-  return ""
-}
 
 function nextPage() {
   if (page.value < totalPages.value - 1) page.value++
