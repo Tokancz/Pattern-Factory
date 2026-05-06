@@ -11,6 +11,12 @@ import { useGameStore } from "./game"
 import { playSound, startBossLoop, stopBossLoop } from "@/utils/sound"
 
 type BossResult = "victory" | "defeat" | null
+type BossPhase = "idle" | "incoming" | "active"
+
+// Total duration of the pre-fight countdown in seconds. The countdown
+// labels ("3", "2", "1", "FIGHT") are derived from `preludeLeft` in the
+// component — see BossFight.vue::countdownLabel.
+const PRELUDE_SECONDS = 3.5
 
 let tickHandle: ReturnType<typeof setInterval> | null = null
 
@@ -22,6 +28,8 @@ function randomSpawnDelay(): number {
 export const useBossStore = defineStore("boss", {
   state: () => ({
     activeBossId: null as BossId | null,
+    phase: "idle" as BossPhase,
+    preludeLeft: 0,
     clicks: 0,
     timeLeft: 0,
     lastResult: null as BossResult,
@@ -35,7 +43,7 @@ export const useBossStore = defineStore("boss", {
     activeTuning: (state) =>
       state.activeBossId ? BOSSES[state.activeBossId] : null,
 
-    isActive: (state) => state.activeBossId !== null,
+    isActive: (state) => state.phase !== "idle",
 
     clicksRequired(): number {
       return this.activeTuning?.clicksRequired ?? 0
@@ -60,7 +68,10 @@ export const useBossStore = defineStore("boss", {
       // AFK-safe: only tick while the tab is visible
       if (typeof document !== "undefined" && document.visibilityState !== "visible") return
 
-      if (this.activeBossId) {
+      if (this.phase === "incoming") {
+        this.preludeLeft -= deltaMs / 1000
+        if (this.preludeLeft <= 0) this.engage()
+      } else if (this.phase === "active") {
         this.timeLeft -= deltaMs / 1000
         if (this.timeLeft <= 0) this.fail()
       } else {
@@ -82,17 +93,30 @@ export const useBossStore = defineStore("boss", {
 
       const id = available[Math.floor(Math.random() * available.length)]!
       this.activeBossId = id
+      this.phase = "incoming"
+      this.preludeLeft = PRELUDE_SECONDS
       this.clicks = 0
-      this.timeLeft = BOSSES[id].timeLimit
+      this.timeLeft = 0
       this.lastResult = null
-      playSound("magic")
+      playSound("countdown")
       startBossLoop()
     },
 
-    registerClick() {
+    engage() {
       if (!this.activeBossId) return
+      this.phase = "active"
+      this.preludeLeft = 0
+      this.timeLeft = BOSSES[this.activeBossId].timeLimit
+      playSound("fight")
+    },
+
+    registerClick() {
+      if (this.phase !== "active" || !this.activeBossId) return
       this.clicks++
-      playSound("hit")
+      // Random pitch so each hit sounds slightly different (±a couple
+      // semitones via playbackRate).
+      const rate = 0.85 + Math.random() * 0.35
+      playSound("hit", { rate })
       if (this.clicks >= BOSSES[this.activeBossId].clicksRequired) {
         this.victory()
       }
@@ -100,6 +124,8 @@ export const useBossStore = defineStore("boss", {
 
     victory() {
       this.activeBossId = null
+      this.phase = "idle"
+      this.preludeLeft = 0
       this.lastResult = "victory"
       this.nextSpawnDelayMs = randomSpawnDelay()
       stopBossLoop()
@@ -120,6 +146,8 @@ export const useBossStore = defineStore("boss", {
       }
 
       this.activeBossId = null
+      this.phase = "idle"
+      this.preludeLeft = 0
       this.lastResult = "defeat"
       this.nextSpawnDelayMs = randomSpawnDelay()
       stopBossLoop()

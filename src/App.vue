@@ -22,7 +22,11 @@
     <main>
       <Simulation />
       <div id="shop">
-        <router-view />
+        <router-view v-slot="{ Component }">
+          <Transition name="route-fade" mode="out-in">
+            <component :is="Component" />
+          </Transition>
+        </router-view>
       </div>
       <Stats />
       <footer>

@@ -1,6 +1,6 @@
 import { ref, watch } from "vue"
 
-export type SoundName = "click" | "error" | "magic" | "pop" | "buy" | "tabClick" | "hit" | "victory" | "defeat"
+export type SoundName = "click" | "error" | "magic" | "pop" | "buy" | "tabClick" | "hit" | "victory" | "defeat" | "countdown" | "fight"
 export type LoopTrack = 1 | 2 | 3 | 4 | 5
 
 const BASE = import.meta.env.BASE_URL
@@ -18,9 +18,11 @@ const sounds: Record<SoundName, HTMLAudioElement> = {
   pop:      makeAudio("pop.wav",      0.5),
   buy:      makeAudio("buy.wav",      0.55),
   tabClick: makeAudio("tabClick.wav", 0.4),
-  hit:      makeAudio("hit.wav",      0.6),
-  victory:  makeAudio("victory.mp3",  0.7),
-  defeat:   makeAudio("defeat.mp3",   0.7),
+  hit:       makeAudio("hit.wav",       0.6),
+  victory:   makeAudio("victory.mp3",   0.7),
+  defeat:    makeAudio("defeat.mp3",    0.7),
+  countdown: makeAudio("countdown.wav", 0.7),
+  fight:     makeAudio("fight.wav",     0.7),
 }
 
 // Background loop tracks — selectable via setLoopTrack()
@@ -62,22 +64,33 @@ watch(muted, v => {
     loop.pause()
     boost.pause()
     activeBossLoop?.pause()
+  } else if (activeBossLoop) {
+    // Boss loop owns audio while it's active — keep BG and boost silent.
+    activeBossLoop.play().catch(() => {})
   } else {
-    if (activeBossLoop) activeBossLoop.play().catch(() => {})
-    else loop.play().catch(() => {})
+    loop.play().catch(() => {})
     if (boostWanted) boost.play().catch(() => {})
   }
 })
 
-export function playSound(name: SoundName): void {
+export interface PlaySoundOptions {
+  // Multiplier on playback rate. Doubles as pitch since we don't
+  // preserve pitch — passing 1.1 plays back ~a whole step higher.
+  rate?: number
+}
+
+export function playSound(name: SoundName, opts?: PlaySoundOptions): void {
   if (muted.value) return
   // Kick off the background loop on the first audible event.
   // Browsers block autoplay until a user gesture — this piggy-backs on one.
-  if (loop.paused) loop.play().catch(() => {})
+  // Skip while a boss loop owns the audio, otherwise hits/countdown sounds
+  // would restart the BG loop on top of the boss music.
+  if (loop.paused && !activeBossLoop) loop.play().catch(() => {})
 
   const template = sounds[name]
   const clone = template.cloneNode() as HTMLAudioElement
   clone.volume = template.volume
+  if (opts?.rate && opts.rate > 0) clone.playbackRate = opts.rate
   clone.play().catch(() => {})
 }
 
@@ -88,7 +101,9 @@ export function startBossLoop(): void {
     activeBossLoop.currentTime = 0
   }
   activeBossLoop = pick
+  // Silence BG + boost while the boss loop owns the audio.
   loop.pause()
+  boost.pause()
   if (!muted.value) pick.play().catch(() => {})
 }
 
@@ -98,14 +113,18 @@ export function stopBossLoop(): void {
     activeBossLoop.currentTime = 0
     activeBossLoop = null
   }
-  if (!muted.value) loop.play().catch(() => {})
+  if (!muted.value) {
+    loop.play().catch(() => {})
+    if (boostWanted) boost.play().catch(() => {})
+  }
 }
 
 export function setBoostActive(active: boolean): void {
   boostWanted = active
-  if (active && !muted.value) {
+  // Boss loop suppresses boost — start it back up via stopBossLoop().
+  if (active && !muted.value && !activeBossLoop) {
     boost.play().catch(() => {})
-  } else {
+  } else if (!active) {
     boost.pause()
     boost.currentTime = 0
   }

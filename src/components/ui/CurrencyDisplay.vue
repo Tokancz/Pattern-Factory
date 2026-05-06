@@ -4,19 +4,28 @@
       LVL.{{ game.level }}
       <span class="level-bar" aria-hidden="true">{{ levelBar }}</span>
     </p>
-    <p><abbr title="In-Game Money">IGM</abbr> {{ formatNumber(game.money) }}</p>
-    <p><abbr title="Dark Coins">DC</abbr> {{ formatNumber(game.dc) }}</p>
-    <p><abbr title="Prestige Points">PP</abbr> {{ formatNumber(game.prestigePoints) }}</p>
+    <p>
+      <abbr title="In-Game Money">IGM</abbr>
+      <span :class="{ 'currency-pulse': pulseMoney }">{{ formatNumber(game.money) }}</span>
+    </p>
+    <p>
+      <abbr title="Dark Coins">DC</abbr>
+      <span :class="{ 'currency-pulse': pulseDc }">{{ formatNumber(game.dc) }}</span>
+    </p>
+    <p>
+      <abbr title="Prestige Points">PP</abbr>
+      <span :class="{ 'currency-pulse': pulsePp }">{{ formatNumber(game.prestigePoints) }}</span>
+    </p>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed } from "vue"
+import { computed, ref, watch } from "vue"
 import { useGameStore } from "@/stores/game"
 import { formatNumber } from "@/utils/format"
 import { generateBar } from "@/utils/ascii"
 
-const props = defineProps<{
+defineProps<{
   showLevel?: boolean
 }>()
 
@@ -25,6 +34,32 @@ const game = useGameStore()
 const levelBar = computed(() =>
   generateBar(game.exp, game.expToNextLevel, 8)
 )
+
+const pulseMoney = ref(false)
+const pulseDc    = ref(false)
+const pulsePp    = ref(false)
+
+// Pulse the value briefly when it increases. Re-trigger by toggling the
+// class off-on across two animation frames so the keyframe restarts.
+function makePulser(flag: { value: boolean }) {
+  let timer: ReturnType<typeof setTimeout> | null = null
+  return () => {
+    flag.value = false
+    if (timer) clearTimeout(timer)
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      flag.value = true
+      timer = setTimeout(() => { flag.value = false }, 600)
+    }))
+  }
+}
+
+const pulseMoneyNow = makePulser(pulseMoney)
+const pulseDcNow    = makePulser(pulseDc)
+const pulsePpNow    = makePulser(pulsePp)
+
+watch(() => game.money,          (n, p) => { if (n > p) pulseMoneyNow() })
+watch(() => game.dc,             (n, p) => { if (n > p) pulseDcNow() })
+watch(() => game.prestigePoints, (n, p) => { if (n > p) pulsePpNow() })
 </script>
 
 <style lang="scss">

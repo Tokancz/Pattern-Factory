@@ -67,12 +67,52 @@ body {
     background-color: var(--white);
     border: 2px solid var(--black);
     border-radius: 4px;
-    transition: .3s ease-in-out;
+    transition:
+        background-color .25s ease,
+        color .25s ease,
+        transform .15s ease,
+        box-shadow .15s ease;
     user-select: none;
 
     &:hover {
         background-color: var(--black);
         color: var(--white);
         cursor: pointer;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 0 var(--primary);
     }
+
+    &:active {
+        transform: translateY(0);
+        box-shadow: 0 0 0 var(--primary);
+    }
+}
+
+/* ─── Creamy global transitions ─── */
+
+/* Route view crossfade */
+.route-fade-enter-active,
+.route-fade-leave-active {
+    transition:
+        opacity .22s ease,
+        transform .22s ease;
+}
+.route-fade-enter-from {
+    opacity: 0;
+    transform: translateY(8px);
+}
+.route-fade-leave-to {
+    opacity: 0;
+    transform: translateY(-8px);
+}
+
+/* Currency pulse — used when a currency value increases */
+@keyframes currencyPulse {
+    0%   { transform: scale(1);    color: var(--black); }
+    35%  { transform: scale(1.18); color: var(--primary); text-shadow: 0 0 8px rgba(192, 254, 4, 0.6); }
+    100% { transform: scale(1);    color: var(--black); }
+}
+.currency-pulse {
+    animation: currencyPulse .55s ease-out;
+    display: inline-block;
 }
