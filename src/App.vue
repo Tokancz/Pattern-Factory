@@ -34,6 +34,8 @@
 
     <BossFight />
 
+    <AfkReport :open="!afkOpen" :report="afkReport" @close="afkOpen = !false" />
+
     <!-- Mobile burger menu overlay -->
     <Transition name="menu-fade">
       <div
@@ -58,10 +60,11 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, computed, ref, watch } from "vue"
+import { onMounted, computed, ref, reactive, watch } from "vue"
 import { useWindowSize } from "@vueuse/core"
 import { useSlotStore } from "@/stores/slot"
 import { useUpgradeStore } from "@/stores/upgrade"
+import { useGameStore } from "@/stores/game"
 import { useUserStore } from "@/stores/user"
 import { loadGame, startAutoSave } from "@/utils/save"
 import { startGameLoop } from "@/composables/gameLoop"
@@ -74,12 +77,24 @@ import Stats from "./components/game/Stats.vue"
 import Login from "./components/ui/Login.vue"
 import Navbar from "./components/game/Navbar.vue"
 import BossFight from "@/components/ui/BossFight.vue"
+import AfkReport, { type AfkReportData } from "@/components/ui/AfkReport.vue"
 import { useBossStore } from "@/stores/boss"
 
 const slotStore = useSlotStore()
 const upgradeStore = useUpgradeStore()
+const gameStore = useGameStore()
 const user = useUserStore()
 const bossStore = useBossStore()
+
+const afkOpen = ref(false)
+const afkReport = reactive<AfkReportData>({
+  awaySeconds: 0,
+  cappedSeconds: 0,
+  money: 0,
+  dc: 0,
+  exp: 0,
+  prestigePoints: 0
+})
 
 const { width } = useWindowSize()
 const mobileLayout = computed(() => width.value < 1024)
@@ -94,18 +109,71 @@ watch(
 async function initGame() {
   const lastPlayed = await loadGame()
 
-  if (lastPlayed) {
-    const now = Date.now()
-    const rawDelta = (now - lastPlayed) / 1000
-    const cap = upgradeStore.getOfflineCap
-    const delta = Math.min(rawDelta, cap)
-    slotStore.tick(delta)
+  if (!lastPlayed) return
+
+  const now = Date.now()
+  const rawDelta = (now - lastPlayed) / 1000
+  if (rawDelta < 60) return // skip the popup for trivial gaps
+
+  const cap = upgradeStore.getOfflineCap
+  const delta = Math.min(rawDelta, cap)
+  const cappedSeconds = Math.max(0, rawDelta - cap)
+
+  // Snapshot currencies, simulate the slots forward, then diff to figure
+  // out what was earned while AFK so we can scale it by the offlineGain
+  // multiplier and present a report to the user.
+  const before = {
+    money: gameStore.money,
+    dc: gameStore.dc,
+    exp: gameStore.exp,
+    level: gameStore.level,
+    pp: gameStore.prestigePoints
   }
+
+  slotStore.tick(delta)
+
+  const mult = upgradeStore.getOfflineGainMultiplier
+  const bonus = mult - 1
+  if (bonus > 0) {
+    const moneyGained = gameStore.money - before.money
+    const dcGained    = gameStore.dc - before.dc
+    if (moneyGained > 0) gameStore.addMoney(moneyGained * bonus)
+    if (dcGained > 0)    gameStore.addDC(dcGained * bonus)
+  }
+
+  // Recompute final deltas after the bonus was applied. EXP is tricky
+  // because tick() can level up — convert level diff back into total exp.
+  const expGainedTotal = totalExpDelta(before.level, before.exp, gameStore.level, gameStore.exp)
+
+  afkReport.awaySeconds   = rawDelta
+  afkReport.cappedSeconds = cappedSeconds
+  afkReport.money         = Math.max(0, gameStore.money - before.money)
+  afkReport.dc            = Math.max(0, gameStore.dc - before.dc)
+  afkReport.exp           = Math.max(0, expGainedTotal)
+  afkReport.prestigePoints = Math.max(0, gameStore.prestigePoints - before.pp)
+
+  if (afkReport.money + afkReport.dc + afkReport.exp + afkReport.prestigePoints > 0) {
+    afkOpen.value = true
+  }
+}
+
+// Sum the exp the player accumulated even if they leveled up one or more
+// times during the offline tick. We can't ask the store for "total exp"
+// because each level resets the running counter.
+function totalExpDelta(beforeLevel: number, beforeExp: number, afterLevel: number, afterExp: number): number {
+  if (afterLevel === beforeLevel) return afterExp - beforeExp
+  let sum = -beforeExp
+  for (let lvl = beforeLevel; lvl < afterLevel; lvl++) {
+    sum += Math.floor(100 * Math.pow(1.2, lvl))
+  }
+  sum += afterExp
+  return sum
 }
 
 // Called when user logs in via the Login form
 async function onLoggedIn() {
   await initGame()
+  startAutoSave()
 }
 
 onMounted(async () => {
@@ -115,9 +183,11 @@ onMounted(async () => {
   if (user.loggedIn) {
     // Pull fresh save from DB — this is the source of truth
     await initGame()
+    // Only start the autosave loop AFTER the load is done. Otherwise the
+    // 5s interval can fire mid-load and PUT the default empty state.
+    startAutoSave()
   }
 
-  startAutoSave()
   startGameLoop()
   bossStore.start()
 })

@@ -70,7 +70,8 @@ export const useSlotStore = defineStore("slots", {
       const patterns = usePatternStore()
 
       if (!delta || isNaN(delta) || !isFinite(delta)) return
-      const safeDelta = Math.min(delta, 3600)
+      // 24h ceiling — caller is responsible for the offline-cap upgrade.
+      const safeDelta = Math.min(delta, 86400)
 
       this.slots.forEach(slot => {
         if (!slot.unlocked || !slot.patternId) return

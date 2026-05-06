@@ -58,6 +58,10 @@ export const useUpgradeStore = defineStore("upgrades", {
       return 3600 + lvl * 1800
     },
 
+    getOfflineGainMultiplier: (state) => {
+      return 1 + (state.levels.offlineGain ?? 0) * 0.10
+    },
+
     getClickPower: (state) => {
       const lvl = Math.min(state.levels.clickingPower ?? 0, 10)
       const base = 4 + lvl * 9 
