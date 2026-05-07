@@ -8,16 +8,16 @@
       @click.self="dismiss"
     >
       <div class="afk-panel">
-        <h2>WELCOME BACK</h2>
-        <p class="afk-time">You were AFK for <span>{{ awayLabel }}</span></p>
+        <h2>WELCOME BACK, ARCHITECT</h2>
+        <p class="afk-time">The engine ran without you for <span>{{ awayLabel }}</span></p>
 
         <ul class="afk-rewards">
           <li v-if="report.money > 0">
-            <abbr title="In-Game Money">IGM</abbr>
+            <abbr title="Iterative Generation Mass">IGM</abbr>
             <span>+{{ formatNumber(report.money) }}</span>
           </li>
           <li v-if="report.dc > 0">
-            <abbr title="Dark Coins">DC</abbr>
+            <abbr title="Drift Coins">DC</abbr>
             <span>+{{ formatNumber(report.dc) }}</span>
           </li>
           <li v-if="report.exp > 0">
@@ -25,11 +25,11 @@
             <span>+{{ formatNumber(report.exp) }}</span>
           </li>
           <li v-if="report.prestigePoints > 0">
-            <abbr title="Pending Prestige Points (convert by prestiging)">Pending PP</abbr>
+            <abbr title="Pending Persistence Points — banks when you re-render">Pending PP</abbr>
             <span>+{{ formatNumber(report.prestigePoints) }}</span>
           </li>
           <li v-if="!hasAnyGain" class="empty">
-            No production while you were away.
+            The engine was idle while you were away.
           </li>
         </ul>
 

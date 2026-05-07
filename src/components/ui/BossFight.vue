@@ -26,13 +26,13 @@
         >
           {{ countdownLabel }}
         </div>
-        <div class="bt-count-sub">{{ bossName.toUpperCase() }} BOSS APPROACHING</div>
+        <div class="bt-count-sub">{{ bossName.toUpperCase() }} ANOMALY APPROACHING</div>
       </div>
 
-      <!-- Active boss stage -->
+      <!-- Active anomaly stage -->
       <div v-else class="bt-boss-stage">
         <div class="bt-boss-head">
-          <div class="bt-boss-tag">⚠ BOSS ENCOUNTER</div>
+          <div class="bt-boss-tag">⚠ ANOMALY DETECTED</div>
           <div class="bt-boss-meta-mini">
             LVL.{{ game.level }} · TIMER {{ boss.timeLeft.toFixed(1) }}s
           </div>
@@ -43,7 +43,7 @@
             type="button"
             class="bt-boss-art-wrap"
             @click.stop="onHit"
-            :aria-label="`Hit ${bossName} boss`"
+            :aria-label="`Resolve ${bossName} anomaly`"
           >
             <img
               class="bt-boss-art"
@@ -58,7 +58,7 @@
         <div class="bt-boss-foot">
           <div class="bt-boss-title-row">
             <div class="bt-boss-title">
-              <span class="accent">{{ bossName.toUpperCase() }}</span> BOSS
+              <span class="accent">{{ bossName.toUpperCase() }}</span> ANOMALY
             </div>
           </div>
           <div class="bt-hp-row">

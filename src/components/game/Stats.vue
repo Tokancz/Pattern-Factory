@@ -16,8 +16,8 @@
       </dl>
 
       <dl class="column">
-        <div><dt>Synergies</dt><dd>{{ synergy.activeSynergies.length }} active</dd></div>
-        <div><dt>Prestige Gain</dt><dd>{{ game.canPrestige ? formatNumber(game.getPrestigeGain()) + " PP" : "—" }}</dd></div>
+        <div><dt>Resonances</dt><dd>{{ synergy.activeSynergies.length }} active</dd></div>
+        <div><dt>Re-render Gain</dt><dd>{{ game.canPrestige ? formatNumber(game.getPrestigeGain()) + " PP" : "—" }}</dd></div>
         <div><dt>Offline Cap</dt><dd>{{ formatOfflineCap(upgrades.getOfflineCap) }}</dd></div>
       </dl>
 

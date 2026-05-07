@@ -5,21 +5,21 @@
       <span class="level-bar" aria-hidden="true">{{ levelBar }}</span>
     </p>
     <p>
-      <abbr title="In-Game Money">IGM</abbr>
+      <abbr title="Iterative Generation Mass">IGM</abbr>
       <span :class="{ 'currency-pulse': pulseMoney }">{{ formatNumber(game.money) }}</span>
     </p>
     <p>
-      <abbr title="Dark Coins">DC</abbr>
+      <abbr title="Drift Coins — residue from anomalies">DC</abbr>
       <span :class="{ 'currency-pulse': pulseDc }">{{ formatNumber(game.dc) }}</span>
     </p>
     <p>
-      <abbr title="Prestige Points">PP</abbr>
+      <abbr title="Persistence Points">PP</abbr>
       <span :class="{ 'currency-pulse': pulsePp }">
         {{ formatNumber(game.prestigePoints) }}<span
           v-if="game.pendingPrestigePoints >= 1"
           class="pending-pp"
           :class="{ 'currency-pulse': pulsePending }"
-          title="Pending PP — convert by prestiging"
+          title="Pending PP — banks when you re-render"
         > (+{{ formatNumber(Math.floor(game.pendingPrestigePoints)) }})</span>
       </span>
     </p>

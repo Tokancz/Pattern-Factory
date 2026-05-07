@@ -61,15 +61,15 @@ tooltips.
 |---------------------|------------------------------------------|------------------------------------------|
 | Boss / Boss Fight   | **Anomaly** / **Anomaly Detected**       | Already named "Anomalies" in lore.       |
 | Prestige (action)   | **Re-render**                            | Sub-tab keeps "Prestige" as gameplay term, lore subtitle "Re-render". |
-| Prestige (top tab)  | **Recursion** *(or Cycles / Layers)*     | Top tab houses both Prestige + Ascension sub-tabs. |
+| Prestige (top tab)  | **Recursion**                            | Top tab houses both Prestige + Ascension sub-tabs. |
 | Ascension           | **Recursion** *(action verb: "Recurse")* | Sub-tab name: **Ascension**.             |
 | Patterns            | (keep)                                   | Already lore-fitting.                    |
 | Upgrades            | **Protocols**                            | Operational instruction sets.            |
 | Synergies           | **Resonances**                           | Pattern resonances reinforcing each other. |
-| Machines            | **Modules** *(or Subsystems)*            | Engine modules.                          |
-| Inventory           | **Archive** *(or Catalog)*               | Catalogued patterns.                     |
-| Ranking             | **Registry** *(or Architects' Registry)* | Where Architects are recorded.           |
-| Factory Name (reg.) | **Engine Designation**                   | Registration field on Login screen.      |
+| Machines            | **Modules**                              | Engine modules.                          |
+| Inventory           | **Archive**                              | Catalogued patterns.                     |
+| Ranking             | **Registry**                             | Where Architects are recorded.           |
+| Factory Name (reg.) | **Engine Name**                          | Registration field on Login screen.      |
 | IGM (full meaning)  | "Iterative Generation Mass"              | Keep abbreviation IGM.                   |
 | DC (full meaning)   | "Drift Coins" *(residue from anomalies)* | Keep abbreviation DC.                    |
 | PP (full meaning)   | "Persistence Points"                     | Keep abbreviation PP.                    |
@@ -169,8 +169,9 @@ The expansion is not purely additive — it changes a few existing rules:
 
 ### 3.1 Prestige now wipes DC + DC upgrades
 
-**Currently**, prestiging keeps DC and DC upgrades. With the expansion,
-prestige wipes both. This makes:
+**Decision: confirmed.** Prestiging will wipe DC and DC upgrades.
+
+This makes:
 - The **Boot Sequence** Glyph upgrade meaningful (free DC head-start each
   prestige).
 - The **Pattern Memory** Tier 4 Glyph upgrade meaningful (its whole effect
@@ -182,9 +183,9 @@ prestige wipes both. This makes:
 `dc`, all DC upgrade levels, and the DC upgrade tree. Ascending wipes the
 same things plus PP, levels, and Glyph-pattern flags (see § 4).
 
-This is a balance change to existing players' experience and should ship
-in the same release as Glyphs so the trade-off (DC-wipe + Glyph permanence)
-lands together.
+**No compensation for existing players** — current playerbase is small
+enough that the friction of a one-time nerf is acceptable; the change can
+ship cleanly with the rest of the expansion.
 
 ### 3.2 Synergy expansion for 5 slots
 
@@ -341,12 +342,12 @@ once-a-lifetime gimmick.
 
 This is where the 5th pattern enters.
 
-| Upgrade               | Cost | Effect                                                   |
-|-----------------------|------|----------------------------------------------------------|
-| **Glyph Pattern**     | 8 Γ  | Unlocks the 5th pattern type (Glyph). Producing it generates pending Glyphs at a slow base rate. |
-| **Cross Resolution**  | 7 Γ  | Echo of the Cross cooldown −5s (10s → 5s). Stackable up to 2× for −5s more (5s → 1s)? Tunable. |
-| **Resonance**         | 7 Γ  | Synergies activate at **−1** required pattern count.     |
-| **Glyph Genesis**     | 10 Γ | 5th pattern Glyph generation rate ×2.                    |
+| Upgrade               | Cost           | Effect                                                   |
+|-----------------------|----------------|----------------------------------------------------------|
+| **Glyph Pattern**     | 8 Γ            | Unlocks the 5th pattern type (Glyph). Producing it generates pending Glyphs at a slow base rate. |
+| **Cross Resolution**  | 7 Γ / 8 Γ / 10 Γ | Reduces Echo of the Cross cooldown. **Stackable, 3 levels**: 10s → 7s → 4s → 1s. Final 1s cooldown is the floor. |
+| **Resonance**         | 7 Γ            | Synergies activate at **−1** required pattern count.     |
+| **Glyph Genesis**     | 10 Γ           | 5th pattern Glyph generation rate ×2.                    |
 
 > *Architect's Sight* removed — pending PP is already displayed in
 > CurrencyDisplay, so the upgrade was redundant. The slot it freed in
@@ -575,30 +576,23 @@ frame for now.
 
 ## 8. Open design questions
 
-These are the calls remaining before any implementation:
+Most of the original questions are now resolved (see "confirmed" list
+below). Two remain:
 
-1. **Recursion top-tab name** — "Recursion", "Cycles", "Layers" or just
-   keep "Prestige"? I lean toward **Recursion**, but pick what reads best
-   for you.
-2. **Renaming map (§ 2.1)** — accept the map as proposed or veto specific
-   renames? Some are bigger commitments than others (e.g. renaming the
-   whole nav vs. just renaming Boss → Anomaly).
-3. **Architect title list** — five tiers right (Initiate / Architect /
-   Pattern Walker / Recursionist / Engine Voice / Substrate)? Add more,
-   fewer, or rename?
-4. **Cross Resolution stacking** — is one upgrade level (10s → 5s)
-   enough, or do you want a stackable upgrade so the cooldown can drop
-   to 1s eventually?
-5. **Intro modal — text** — placeholder paragraphs in § 2.2 are mine;
-   you may want to write your own voice for them.
-6. **Tab vs. nested-tab UX** — does the Recursion → Prestige/Ascension
-   nested-tab feel right, or would a separate top-level Ascension nav
-   item be cleaner?
-7. **DC wipe rollout** — the prestige-now-wipes-DC change in § 3.1 is a
-   nerf to existing players. Want a one-time "compensation Glyph" on
-   first deploy for existing accounts above some prestige threshold?
+1. **Architect title list** — five tiers proposed (Initiate / Architect /
+   Pattern Walker / Recursionist / Engine Voice / Substrate, plus the
+   Anchor endgame title). Add more, fewer, or rename? This is purely
+   cosmetic so it can be tuned at any time.
+2. **Intro modal — text** — placeholder paragraphs in § 2.2 are mine;
+   you'll likely want to write your own voice for them before ship.
 
-Notes confirmed (no longer questions):
+**Resolved (no longer open)**:
+- Recursion is the top-tab name.
+- Full renaming map (§ 2.1) accepted as proposed.
+- Cross Resolution stacks 3 levels: 10s → 7s → 4s → 1s.
+- No compensation Glyph for the prestige DC-wipe change.
+- Prestige DC wipe ships.
+- Recursion → Prestige/Ascension nested sub-tabs.
 - Glyph generation rate: 30 min base, tunable.
 - Endgame trigger: 1000 Glyph Patterns, tunable.
 - Glyph visual: Γ placeholder, glitching SVG later.

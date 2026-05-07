@@ -49,12 +49,12 @@
       >
         <nav class="mobile-menu" @click="mobileMenuOpened = false">
           <router-link to="/patterns">PATTERNS</router-link>
-          <router-link to="/upgrades">UPGRADES</router-link>
-          <router-link to="/synergies">SYNERGIES</router-link>
-          <router-link to="/machines">MACHINES</router-link>
-          <router-link to="/inventory">INVENTORY</router-link>
-          <router-link to="/prestige">PRESTIGE</router-link>
-          <router-link to="/leaderboard">RANKING</router-link>
+          <router-link to="/upgrades">PROTOCOLS</router-link>
+          <router-link to="/synergies">RESONANCES</router-link>
+          <router-link to="/machines">MODULES</router-link>
+          <router-link to="/inventory">ARCHIVE</router-link>
+          <router-link to="/prestige">RECURSION</router-link>
+          <router-link to="/leaderboard">REGISTRY</router-link>
 
           <img src="/img/Stripes.png" alt="Stripes Background" aria-hidden="true" draggable="false">
         </nav>

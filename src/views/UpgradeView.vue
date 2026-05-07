@@ -100,9 +100,9 @@ const pageType = computed(() => {
 })
 
 const pageTitle = computed(() => {
-  if (pageType.value === 'normal') return 'Upgrades'
-  if (pageType.value === 'dc') return 'DC Upgrades'
-  return '⬡ Prestige Upgrades'
+  if (pageType.value === 'normal') return 'Protocols'
+  if (pageType.value === 'dc') return 'DC Protocols'
+  return '⬡ Persistence Protocols'
 })
 
 const paginatedItems = computed(() => {

@@ -1,5 +1,5 @@
 <template>
-  <Panel title="Ranking">
+  <Panel title="Registry">
     <div class="leaderboard">
 
       <div class="submit-row">
@@ -12,27 +12,27 @@
                 {{ submitMessage }}
             </p>
             <button class="button submit-btn" @click="submitScore" :disabled="submitting">
-                {{ submitting ? "Submitting..." : "Submit My Score" }}
+                {{ submitting ? "Submitting..." : "Submit Run" }}
             </button>
         </div>
       </div>
 
       <!-- Loading -->
-      <div v-if="loading" class="loading">Loading leaderboard...</div>
+      <div v-if="loading" class="loading">Loading the Registry...</div>
 
       <!-- Error -->
       <div v-else-if="loadError" class="load-error">
-        Could not load leaderboard. Check your connection.
+        Could not load the Registry. Check your connection.
       </div>
 
       <!-- Table -->
       <div v-else class="table-wrapper">
-        <table class="lb-table" aria-label="Leaderboard">
+        <table class="lb-table" aria-label="Architects' Registry">
           <thead>
             <tr>
               <th scope="col" class="rank">#</th>
-              <th scope="col" class="name">Factory</th>
-              <th scope="col" class="player">Player</th>
+              <th scope="col" class="name">Engine</th>
+              <th scope="col" class="player">Architect</th>
               <th scope="col" class="prestige">PP</th>
               <th scope="col" class="money">IGM</th>
               <th scope="col" class="level">Level</th>
@@ -52,7 +52,7 @@
               <td class="level">Lvl {{ entry.level }}</td>
             </tr>
             <tr v-if="entries.length === 0">
-              <td colspan="6" class="empty">No entries yet. Be the first to submit!</td>
+              <td colspan="6" class="empty">No Architects on record yet. Be the first to submit!</td>
             </tr>
           </tbody>
         </table>

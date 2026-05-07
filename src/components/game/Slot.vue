@@ -79,9 +79,9 @@ const bar = computed(() =>
 )
 
 const slotLabel = computed(() => {
-  if (!props.slot.unlocked) return "Locked slot"
-  if (!props.slot.patternId) return "Empty slot — click to assign a pattern"
-  return `${props.slot.patternId} slot — click to produce`
+  if (!props.slot.unlocked) return "Locked thread"
+  if (!props.slot.patternId) return "Empty thread — click to assign a pattern"
+  return `${props.slot.patternId} thread — click to render`
 })
 
 function handleKeyActivate(event: KeyboardEvent) {
@@ -107,7 +107,7 @@ function handleClick(event: MouseEvent) {
 
   if (event.shiftKey) {
     if (machines.getLevel("targetedBoost") < 1) {
-      spawnFloatingText(event, "Machine required")
+      spawnFloatingText(event, "Module required")
       playSound("error")
       return
     }

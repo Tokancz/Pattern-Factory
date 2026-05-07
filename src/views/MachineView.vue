@@ -1,5 +1,5 @@
 <template>
-  <Panel title="Machines">
+  <Panel title="Modules">
     <div class="wrapper">
       <button class="button arrow" type="button" aria-label="Previous page" @click="prevPage" :class="{ disabled: page === 0 }">
         <i class="fa-solid fa-chevron-left" aria-hidden="true"></i>

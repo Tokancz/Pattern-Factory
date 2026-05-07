@@ -1,5 +1,5 @@
 <template>
-  <Panel title="Inventory">
+  <Panel title="Archive">
     <ul class="pattern-grid">
       <li v-for="(p, id) in PATTERNS" :key="id" class="pattern">
         <img :src="p.visuals.icon" :alt="id" class="pattern-image">

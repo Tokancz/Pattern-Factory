@@ -1,7 +1,7 @@
 <template>
-  <Panel title="Synergies">
+  <Panel title="Resonances">
     <section class="wrapper">
-      <aside class="filter-bar" role="tablist" aria-label="Synergy filter">
+      <aside class="filter-bar" role="tablist" aria-label="Resonance filter">
         <button
           v-for="f in filters"
           :key="f.id"
@@ -72,7 +72,7 @@
           </li>
         </ul>
 
-        <p v-else class="empty">No synergies match this filter.</p>
+        <p v-else class="empty">No resonances match this filter.</p>
 
         <button
           class="button arrow"

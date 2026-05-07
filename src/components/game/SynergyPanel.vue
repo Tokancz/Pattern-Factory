@@ -8,7 +8,7 @@
       aria-controls="synergy-panel-body"
       @click="isOpen = !isOpen"
     >
-      SYNERGIES
+      RESONANCES
       <span v-if="synergy.activeSynergies.length" class="badge" aria-label=", {{ synergy.activeSynergies.length }} active">
         {{ synergy.activeSynergies.length }}
       </span>
@@ -53,7 +53,7 @@
       </template>
 
       <p v-if="!synergy.activeSynergies.length && !synergy.pendingSynergies.length" class="empty">
-        Place multiple patterns in slots to discover synergies.
+        Place multiple patterns across threads to discover resonances.
       </p>
 
     </div>

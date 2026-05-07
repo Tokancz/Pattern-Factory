@@ -1,6 +1,6 @@
 <template>
   <div class="login">
-    <h2>Welcome to Pattern Factory</h2>
+    <h2>Welcome to the Reality Engine</h2>
 
     <div class="tabs" role="tablist">
       <button type="button" role="tab" :aria-selected="mode === 'login'"    @click="mode = 'login'"    :class="{ active: mode === 'login' }">Login</button>
@@ -28,7 +28,7 @@
       <label for="reg-password">Password
         <input id="reg-password" v-model="password" type="password" autocomplete="new-password" required />
       </label>
-      <label for="reg-factory">Factory Name
+      <label for="reg-factory">Engine Name
         <input id="reg-factory" v-model="factoryName" type="text" maxlength="15" required />
       </label>
       <p v-if="error" role="alert" class="error">{{ error }}</p>

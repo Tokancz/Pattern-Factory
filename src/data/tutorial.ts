@@ -2,46 +2,46 @@ const BASE = import.meta.env.BASE_URL
 
 export const TUTORIAL_STEPS = [
   {
-    title: "Welcome to Pattern Factory!",
-    description: "Here you’ll manage slots, assign patterns, and automate production.",
+    title: "Welcome, Architect.",
+    description: "You run the Reality Engine. Manage threads, assign patterns, and keep the substrate stable.",
   },
   {
-    title: "Selecting Slots",
-    description: "By hovering on slot and scrolling you can choose from different pattern types. SHIFT + CLICK on slot to activate overclock.",
+    title: "Selecting Threads",
+    description: "Hover a thread and scroll to choose between pattern types. SHIFT + CLICK on a thread to overclock it.",
     image: `${BASE}img/tutorial/Tutorial 1.png`,
   },
   {
     title: "Pattern Types",
-    description: "Patterns give different resources: money, EXP, DC or prestige.",
+    description: "Patterns generate substrate resources: IGM (Iterative Generation Mass), EXP, DC (Drift Coins), and PP (Persistence Points).",
     image: `${BASE}img/tutorial/Tutorial 2.png`,
   },
   {
-    title: "Upgrades",
-    description: "Upgrades increase click power, speed, offline gains, and more.",
+    title: "Protocols",
+    description: "Protocols increase click power, render speed, offline cap, and other engine parameters.",
     image: `${BASE}img/tutorial/Tutorial 3.png`,
   },
   {
-    title: "Machines",
-    description: "Machines provide special effects. Example: Slot unlock, global speed, targeted boost.",
+    title: "Modules",
+    description: "Modules provide passive engine effects — thread unlocks, global speed, targeted overclock, and more.",
     image: `${BASE}img/tutorial/Tutorial 4.png`,
   },
   {
-    title: "Synergies",
-    description: "Some pattern combinations unlock synergy wich will boost specific patterns.",
+    title: "Resonances",
+    description: "Some pattern combinations resonate — activating bonuses for specific patterns while the resonance holds.",
     image: `${BASE}img/tutorial/Tutorial 5.png`,
   },
   {
-    title: "Bosses",
-    description: "In random intervals, a boss will appear. Defeat it by clicking to secure your money, EXP, DC or prestige.",
+    title: "Anomalies",
+    description: "Glitches in the engine occasionally manifest as Anomalies. Click to fight them off — fail and one of your currencies is drained.",
     image: `${BASE}img/tutorial/Tutorial 6.png`,
   },
   {
-    title: "Global Ranking",
-    description: "Compare your progress with others by submiting yout score.",
+    title: "The Registry",
+    description: "Submit your run to the Registry to compare your stability with other Architects.",
     image: `${BASE}img/tutorial/Tutorial 7.png`,
   },
   {
-    title: "Enjoy!",
-    description: "Experiment with slot selection, upgrades, and machines to maximize production."
+    title: "Begin.",
+    description: "Experiment with thread composition, protocols, and modules to keep the substrate humming."
   }
 ]
