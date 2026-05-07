@@ -93,30 +93,32 @@ const hasAnyGain = computed(() =>
 
 <style scoped lang="scss">
 .afk-overlay {
+  @include flexColumn(0, center, center);
   position: fixed;
   inset: 0;
   z-index: 600;
   background-color: rgba(0, 0, 0, 0.55);
   backdrop-filter: blur(2px);
   -webkit-backdrop-filter: blur(2px);
-  @include flexColumn(0, center, center);
 }
 
 .afk-panel {
   @include flexColumn(20px, center, stretch);
-  padding: 40px 48px;
   width: min(520px, 92vw);
-
+  padding: 40px 48px;
   background-color: var(--black);
   color: var(--white);
-
   text-align: center;
+
+  @include bp("sm") { padding: 24px 20px; gap: 14px; }
 
   h2 {
     font-family: "ivy-presto";
     font-size: 3em;
     color: var(--primary);
     letter-spacing: 2px;
+
+    @include bp("sm") { font-size: 2.2em; }
   }
 
   .afk-time {
@@ -129,9 +131,7 @@ const hasAnyGain = computed(() =>
   }
 
   .afk-rewards {
-    list-style: none;
-    padding: 0;
-    margin: 0;
+    @include list-reset;
     @include flexColumn(0, start, stretch);
     border-top: 2px solid var(--primary);
     border-bottom: 2px solid var(--primary);
@@ -140,6 +140,8 @@ const hasAnyGain = computed(() =>
       @include flexRow(0, space-between, center);
       padding: 12px 16px;
       font-size: 1.25em;
+
+      @include bp("sm") { padding: 8px 12px; font-size: 1em; }
 
       abbr {
         text-decoration: none;

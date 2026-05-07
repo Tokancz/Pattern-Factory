@@ -91,14 +91,13 @@ async function handleRegister() {
 
 <style scoped lang="scss">
 .login {
+  @include flexColumn(30px, center);
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
   width: 100%;
   height: 100dvh;
-
-  @include flexColumn(30px, center);
 
   background-image: url("/img/LoginBG.png");
   background-size: cover;
@@ -110,13 +109,13 @@ async function handleRegister() {
     font-size: 4em;
     width: 600px;
 
-    @media (width <= 768px) {
-      width: 90%;
-    }
+    @include bp("md") { width: 90%; font-size: 3em; }
+    @include bp("sm") { font-size: 2.4em; }
   }
 
   .tabs {
     @include flexRow(0, center);
+
     button {
       padding: 10px 30px;
       font-size: 1.2em;
@@ -134,19 +133,17 @@ async function handleRegister() {
   }
 
   label {
-    width: 100%;
     @include flexColumn(4px, start, stretch);
+    width: 100%;
     font-size: 0.9em;
     color: var(--white);
   }
 
   .form {
-    width: 400px;
     @include flexColumn(10px, center);
+    width: 400px;
 
-    @media (width <= 768px) {
-      width: 80%;
-    }
+    @include bp("md") { width: 80%; }
   }
 
   input {
@@ -156,10 +153,10 @@ async function handleRegister() {
   }
 
   button {
+    width: 100%;
     padding: 1rem;
     font-size: 1rem;
     cursor: pointer;
-    width: 100%;
 
     &:disabled {
       opacity: 0.6;

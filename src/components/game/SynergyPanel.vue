@@ -106,10 +106,8 @@ function getDisplayBonuses(syn: SynergyDef): Record<string, string> {
   background: var(--black);
 
   .toggle {
-    width: 100%;
-
     @include flexRow(8px, end);
-
+    width: 100%;
     padding: 10px 20px;
     font-size: 1.25em;
     letter-spacing: 0.05em;
@@ -130,6 +128,7 @@ function getDisplayBonuses(syn: SynergyDef): Record<string, string> {
     }
 
     .badge {
+      @include flexRow(0, center, center);
       background: var(--primary);
       color: var(--black);
       border-radius: 50%;
@@ -137,25 +136,19 @@ function getDisplayBonuses(syn: SynergyDef): Record<string, string> {
       height: 20px;
       font-family: Arial, Helvetica, sans-serif;
       font-size: 0.85em;
-      display: flex;
-      align-items: center;
-      justify-content: center;
       font-weight: bold;
     }
   }
 
   .panel-body {
     display: none;
-
     padding: 12px;
     max-width: 280px;
     max-height: calc(100% - 40px);
     overflow-y: auto;
   }
 
-  &.open .panel-body {
-    @include flexColumn(8px, start, stretch);
-  }
+  &.open .panel-body { @include flexColumn(8px, start, stretch); }
 
   .section-label {
     font-size: 1em;
@@ -168,10 +161,7 @@ function getDisplayBonuses(syn: SynergyDef): Record<string, string> {
     padding: 8px;
     border: 1px solid transparent;
 
-    &.active {
-      border-color: var(--primary);
-    }
-
+    &.active  { border-color: var(--primary); }
     &.pending {
       opacity: 0.45;
       border-color: var(--white);
@@ -179,9 +169,7 @@ function getDisplayBonuses(syn: SynergyDef): Record<string, string> {
     }
   }
 
-  .synergy-header {
-    @include flexRow(10px, space-between, center);
-  }
+  .synergy-header { @include flexRow(10px, space-between, center); }
 
   .synergy-name {
     font-size: 1em;
@@ -190,16 +178,9 @@ function getDisplayBonuses(syn: SynergyDef): Record<string, string> {
   }
 
   .type-badge {
-    font-size: 0.8em;
-    letter-spacing: 0.1em;
-    padding: 2px 6px;
-    border: 1px solid;
-
-    &.pair     { border-color: var(--tertiary1); color: var(--tertiary1); }
-    &.triple   { border-color: var(--tertiary2); color: var(--tertiary2); }
-    &.dual     { border-color: var(--tertiary2); color: var(--tertiary2); }
-    &.dominant { border-color: var(--tertiary3); color: var(--tertiary3); }
-    &.full     { border-color: var(--tertiary3); color: var(--tertiary3); }
+    @include type-badge(0.8em);
+    border-width: 1px;
+    @include synergy-type-colors;
   }
 
   .synergy-desc {
@@ -208,23 +189,7 @@ function getDisplayBonuses(syn: SynergyDef): Record<string, string> {
     margin-bottom: 4px;
   }
 
-  .bonus-list {
-    list-style: none;
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-
-    li {
-      font-size: 0.72em;
-      color: var(--primary);
-
-      &::before {
-        content: "▸ ";
-        opacity: 0.5;
-      }
-    }
-  }
+  .bonus-list { @include bonus-list(var(--primary)); }
 
   .missing-label {
     font-size: 0.7em;

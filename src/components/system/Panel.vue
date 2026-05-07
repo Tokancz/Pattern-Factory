@@ -16,14 +16,12 @@ defineProps<{ title: string }>()
 
 <style scoped lang="scss">
 .panel {
+  @include flexColumn(20px, start);
   position: relative;
   width: 100%;
-  @include flexColumn(20px, start);
   padding: 20px 40px;
 
-  @media (width < 1024px) {
-    padding: 10px 16px;
-  }
+  @include bp-below("lg") { padding: 10px 16px; }
 
   hr {
     position: absolute;
@@ -32,9 +30,8 @@ defineProps<{ title: string }>()
   }
 
   .panelHeader {
-    width: 100%;
     @include flexRow(0, space-between);
-
+    width: 100%;
     color: var(--white);
     font-family: "ivy-presto";
     line-height: 1;
@@ -43,15 +40,14 @@ defineProps<{ title: string }>()
       font-size: 3em;
       text-decoration: underline;
 
-      @media (width <= 480px) {
-        font-size: 2.5em;
-      }
+      @include bp("sm") { font-size: 2.5em; }
     }
   }
+
   .content {
+    @include flexColumn();
     width: 100%;
     height: 100%;
-    @include flexColumn();
   }
 }
 </style>

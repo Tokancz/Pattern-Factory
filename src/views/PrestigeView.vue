@@ -55,9 +55,18 @@ const prestige = game.prestige
   font-size: 1.3em;
   padding: 20px 0;
 
+  @include bp("md") {
+    flex-direction: column;
+    gap: 24px;
+    font-size: 1.1em;
+    padding: 16px 8px;
+  }
+
   .text-container {
     @include flexColumn(8px, center, start);
     max-width: 60%;
+
+    @include bp("md") { max-width: 100%; }
 
     p#gain {
       font-size: .85em;
@@ -79,8 +88,8 @@ const prestige = game.prestige
     @include flexColumn(12px, center, center);
 
     .prestige-button {
-      width: 200px;
       @include flexColumn(10px, center, center);
+      width: 200px;
       padding: 10px 20px;
       border-radius: 5px;
       font-weight: bold;
@@ -102,9 +111,7 @@ const prestige = game.prestige
       }
     }
 
-    > p.requirement {
-      font-size: .7em;
-    }
+    > p.requirement { font-size: .7em; }
   }
 }
 </style>

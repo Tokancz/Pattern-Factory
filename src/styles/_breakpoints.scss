@@ -1,0 +1,26 @@
+@use "sass:map";
+
+// Single source of truth for responsive breakpoints.
+// Keep the names short (xs, sm, md, lg, xl) — they read well at the call site.
+$breakpoints: (
+  "xs": 425px,
+  "sm": 480px,
+  "md": 768px,
+  "lg": 1024px,
+  "xl": 1200px,
+);
+
+// Inclusive: `width <= breakpoint`. Use this for the vast majority of cases.
+@mixin bp($name) {
+  $bp: map.get($breakpoints, $name);
+  @if $bp == null { @error "Unknown breakpoint: #{$name}"; }
+  @media (width <= #{$bp}) { @content; }
+}
+
+// Exclusive: `width < breakpoint`. Use when the breakpoint itself should keep
+// the desktop layout (e.g. the main 1024px desktop/mobile pivot).
+@mixin bp-below($name) {
+  $bp: map.get($breakpoints, $name);
+  @if $bp == null { @error "Unknown breakpoint: #{$name}"; }
+  @media (width < #{$bp}) { @content; }
+}

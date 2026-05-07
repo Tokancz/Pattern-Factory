@@ -1,0 +1,98 @@
+@use "./breakpoints" as *;
+
+// ─── Layout primitives ────────────────────────────────────────────────────
+@mixin flexRow($gap: 0px, $justify: center, $align: center) {
+  display: flex;
+  justify-content: $justify;
+  align-items: $align;
+  gap: $gap;
+}
+
+@mixin flexColumn($gap: 0px, $justify: center, $align: center) {
+  display: flex;
+  flex-direction: column;
+  justify-content: $justify;
+  align-items: $align;
+  gap: $gap;
+}
+
+// Reset native list styling. Apply on the <ul> *and* its <li>s if needed.
+@mixin list-reset {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+// Visually hide while remaining accessible (screen readers).
+@mixin sr-only {
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip: rect(0,0,0,0);
+  white-space: nowrap;
+  border: 0;
+}
+
+// ─── Themed surfaces ──────────────────────────────────────────────────────
+// White card surface used by upgrade/machine/pattern/synergy tiles.
+@mixin card-surface {
+  color: var(--black);
+  background-color: var(--white);
+}
+
+// Transparent input with the primary green border (admin/login style).
+@mixin input-bare {
+  background: transparent;
+  border: 1px solid var(--primary);
+  color: var(--white);
+}
+
+// Thin scrollbar that matches the primary palette.
+@mixin scrollbar($size: 4px, $thumb: var(--primary)) {
+  &::-webkit-scrollbar       { width: $size; height: $size; }
+  &::-webkit-scrollbar-track { background: transparent; }
+  &::-webkit-scrollbar-thumb { background: $thumb; border-radius: calc($size / 2); }
+}
+
+// ─── Typography helpers ───────────────────────────────────────────────────
+// Tiny uppercase section heading (admin "Game Values", etc.).
+@mixin section-label {
+  font-size: 0.7em;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  opacity: 0.5;
+  border-bottom: 1px solid var(--primary);
+  padding-bottom: 4px;
+  margin: 0;
+}
+
+// Outlined badge used for synergy types — subclass with a colour to override.
+@mixin type-badge($size: 0.7em) {
+  font-size: $size;
+  font-weight: bold;
+  letter-spacing: 0.1em;
+  padding: 2px 6px;
+  border: 2px solid;
+}
+
+// Coloured variants for the synergy type-badge (shared by SynergyView + SynergyPanel).
+@mixin synergy-type-colors {
+  &.pair     { border-color: var(--tertiary1); color: var(--tertiary1); }
+  &.triple,
+  &.dual     { border-color: var(--tertiary2); color: var(--tertiary2); }
+  &.dominant,
+  &.full     { border-color: var(--tertiary3); color: var(--tertiary3); }
+}
+
+// Bullet-prefixed bonus list (synergy panels).
+@mixin bonus-list($color: var(--secondary), $size: 0.72em) {
+  @include list-reset;
+  @include flexColumn(2px, start, stretch);
+
+  li {
+    font-size: $size;
+    color: $color;
+    &::before { content: "▸ "; opacity: 0.5; }
+  }
+}

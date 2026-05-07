@@ -211,11 +211,8 @@ div#app {
     "header currency"
     "main aside";
 
-  @media (width <= 1200px) {
-    font-size: .8em;
-  }
-
-  @media (width < 1024px) {
+  @include bp("xl") { font-size: .8em; }
+  @include bp-below("lg") {
     max-height: none;
     grid-template-columns: 1fr;
     grid-template-rows: auto auto auto 1fr;
@@ -226,10 +223,7 @@ div#app {
       "aside";
     font-size: .75em;
   }
-
-  @media (width <= 480px) {
-    font-size: .65em;
-  }
+  @include bp("sm") { font-size: .65em; }
 
   > header {
     height: 100px;
@@ -240,10 +234,7 @@ div#app {
     font-weight: bold;
     color: var(--primary);
 
-    @media (width < 1024px) {
-      padding: 0 16px;
-      height: 64px;
-    }
+    @include bp-below("lg") { padding: 0 16px; height: 64px; }
 
     div {
       @include flexColumn(0, center, start);
@@ -253,17 +244,13 @@ div#app {
         font-size: 3em;
         text-decoration: underline;
 
-        @media (width < 1024px) {
-          font-size: 2.5em;
-        }
+        @include bp-below("lg") { font-size: 2.5em; }
       }
       p {
         font-size: 1.25em;
         text-decoration: underline;
 
-        @media (width < 1024px) {
-          font-size: 1.5em;
-        }
+        @include bp-below("lg") { font-size: 1.5em; }
       }
     }
 
@@ -272,9 +259,7 @@ div#app {
       user-select: none;
       cursor: pointer;
 
-      @media (width < 1024px) {
-        width: 36px;
-      }
+      @include bp-below("lg") { width: 36px; }
     }
   }
 
@@ -289,9 +274,7 @@ div#app {
       "stats"
       "footer";
 
-    @media (width < 1024px) {
-      grid-template-rows: repeat(4, auto);
-    }
+    @include bp-below("lg") { grid-template-rows: repeat(4, auto); }
 
     #shop {
       grid-area: shop;
@@ -303,9 +286,7 @@ div#app {
       @include flexRow(30px, center, center);
       padding: 5px 0;
 
-      > p {
-        font-size: 1.25em;
-      }
+      > p { font-size: 1.25em; }
     }
   }
 }
@@ -341,30 +322,24 @@ div#app {
       background-color: var(--primary);
       color: var(--black);
     }
+
+    @include bp("sm") { font-size: 3em; padding: 14px 18px; }
   }
-  img {
-    height: 100%;
-  }
+  img { height: 100%; }
 }
 
 /* Slide-in transition */
 .menu-fade-enter-active {
   transition: opacity 0.2s ease;
-  .mobile-menu {
-    transition: transform 0.25s ease;
-  }
+  .mobile-menu { transition: transform 0.25s ease; }
 }
 .menu-fade-leave-active {
   transition: opacity 0.2s ease 0.05s;
-  .mobile-menu {
-    transition: transform 0.2s ease;
-  }
+  .mobile-menu { transition: transform 0.2s ease; }
 }
 .menu-fade-enter-from,
 .menu-fade-leave-to {
   opacity: 0;
-  .mobile-menu {
-    transform: translateX(100%);
-  }
+  .mobile-menu { transform: translateX(100%); }
 }
 </style>

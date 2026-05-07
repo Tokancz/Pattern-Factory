@@ -318,9 +318,8 @@ $boss-red-dark: #A8230E;
   gap: 18px;
   animation: bossStageIn 0.35s ease-out;
 
-  @media (width < 1024px) {
-    padding: 56px 24px;
-  }
+  @include bp-below("lg") { padding: 56px 24px; }
+  @include bp("sm")       { padding: 48px 14px; gap: 12px; }
 }
 @keyframes bossStageIn {
   from { opacity: 0; transform: translateY(8px); }
@@ -362,6 +361,7 @@ $boss-red-dark: #A8230E;
   position: relative;
   width: 380px;
   height: 300px;
+  max-width: 100%;
   display: grid;
   place-items: center;
   background: none;
@@ -372,10 +372,8 @@ $boss-red-dark: #A8230E;
   animation: bossFloat 2.4s ease-in-out infinite;
   transition: transform 0.06s ease;
 
-  @media (width < 1024px) {
-    width: 260px;
-    height: 220px;
-  }
+  @include bp-below("lg") { width: 260px; height: 220px; }
+  @include bp("sm")       { width: 200px; height: 180px; }
 
   &::before {
     content: "";
@@ -447,10 +445,8 @@ $boss-red-dark: #A8230E;
 
   .accent { color: $boss-red; }
 
-  @media (width < 1024px) {
-    font-size: 44px;
-    text-shadow: 3px 3px 0 var(--black);
-  }
+  @include bp-below("lg") { font-size: 44px; text-shadow: 3px 3px 0 var(--black); }
+  @include bp("sm")       { font-size: 32px; text-shadow: 2px 2px 0 var(--black); }
 }
 
 .bt-hp-row {
@@ -505,6 +501,8 @@ $boss-red-dark: #A8230E;
   font-variant-numeric: tabular-nums;
   min-width: 110px;
   text-align: right;
+
+  @include bp("sm") { font-size: 16px; min-width: 80px; }
 }
 
 .bt-actions {
@@ -633,10 +631,15 @@ $boss-red-dark: #A8230E;
   letter-spacing: -0.04em;
   text-shadow: 8px 8px 0 var(--black);
 
-  @media (width < 1024px) {
+  @include bp-below("lg") {
     font-size: 220px;
     -webkit-text-stroke-width: 4px;
     text-shadow: 5px 5px 0 var(--black);
+  }
+  @include bp("sm") {
+    font-size: 140px;
+    -webkit-text-stroke-width: 3px;
+    text-shadow: 3px 3px 0 var(--black);
   }
 
   &.go {
@@ -649,9 +652,8 @@ $boss-red-dark: #A8230E;
     text-stroke: 0;
     text-shadow: 6px 6px 0 var(--black);
 
-    @media (width < 1024px) {
-      font-size: 140px;
-    }
+    @include bp-below("lg") { font-size: 140px; }
+    @include bp("sm")       { font-size: 90px; text-shadow: 3px 3px 0 var(--black); }
   }
 }
 

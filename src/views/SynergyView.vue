@@ -193,6 +193,11 @@ function getDisplayBonuses(syn: SynergyDef): Record<string, string> {
   @include flexRow(20px, start, stretch);
   width: 100%;
   height: 100%;
+
+  @include bp("md") {
+    flex-direction: column;
+    gap: 10px;
+  }
 }
 
 .filter-bar {
@@ -201,9 +206,14 @@ function getDisplayBonuses(syn: SynergyDef): Record<string, string> {
   height: 100%;
   flex-shrink: 0;
 
-  @media (width <= 480px) {
-    gap: 6px;
+  @include bp("md") {
+    flex-direction: row;
+    width: 100%;
+    height: auto;
+    gap: 8px;
+    overflow-x: auto;
   }
+  @include bp("sm") { gap: 6px; }
 }
 
 .filter-btn {
@@ -216,7 +226,7 @@ function getDisplayBonuses(syn: SynergyDef): Record<string, string> {
   cursor: pointer;
   transition: background 0.2s, color 0.2s;
 
-  &:hover {
+  &:hover, &.active {
     background: var(--primary);
     color: var(--black);
 
@@ -226,20 +236,8 @@ function getDisplayBonuses(syn: SynergyDef): Record<string, string> {
     }
   }
 
-  &.active {
-    background: var(--primary);
-    color: var(--black);
-
-    .filter-count {
-      background: var(--black);
-      color: var(--primary);
-    }
-  }
-
-  @media (width <= 480px) {
-    padding: 6px 10px;
-    font-size: 0.85em;
-  }
+  @include bp("md") { flex: 1; white-space: nowrap; }
+  @include bp("sm") { padding: 6px 10px; font-size: 0.85em; }
 }
 
 .filter-count {
@@ -263,45 +261,28 @@ function getDisplayBonuses(syn: SynergyDef): Record<string, string> {
 }
 
 .synergy-grid {
+  @include list-reset;
   flex: 1;
-  list-style: none;
-  padding: 0;
-  margin: 0;
 
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 10px;
 
-  @media (width <= 768px) {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 8px;
-  }
-  @media (width <= 480px) {
-    gap: 6px;
-  }
+  @include bp("md") { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  @include bp("sm") { gap: 6px; }
 }
 
 .synergy-card {
   @include flexColumn(6px, start, stretch);
+  @include card-surface;
   width: 100%;
-
   padding: 14px 12px;
-  background-color: var(--white);
-  color: var(--black);
   min-height: 220px;
 
-  &.almost {
-    opacity: 0.9;
-  }
+  &.almost { opacity: 0.9; }
+  &.locked { opacity: 0.55; }
 
-  &.locked {
-    opacity: 0.55;
-  }
-
-  @media (width <= 480px) {
-    padding: 10px 8px;
-    min-height: 180px;
-  }
+  @include bp("sm") { padding: 10px 8px; min-height: 180px; }
 }
 
 .synergy-header {
@@ -315,39 +296,24 @@ function getDisplayBonuses(syn: SynergyDef): Record<string, string> {
   font-weight: bold;
   color: var(--black);
 
-  @media (width <= 480px) {
-    font-size: 0.95em;
-  }
+  @include bp("sm") { font-size: 0.95em; }
 }
 
 .type-badge {
-  font-size: 0.7em;
-  font-weight: bold;
-  letter-spacing: 0.1em;
-  padding: 2px 6px;
-  border: 2px solid;
-
-  &.pair     { border-color: var(--tertiary1); color: var(--tertiary1); }
-  &.triple   { border-color: var(--tertiary2); color: var(--tertiary2); }
-  &.dual     { border-color: var(--tertiary2); color: var(--tertiary2); }
-  &.dominant { border-color: var(--tertiary3); color: var(--tertiary3); }
-  &.full     { border-color: var(--tertiary3); color: var(--tertiary3); }
+  @include type-badge;
+  @include synergy-type-colors;
 }
 
 .synergy-desc {
   font-size: 0.8em;
   opacity: 0.75;
 
-  @media (width <= 480px) {
-    font-size: 0.7em;
-  }
+  @include bp("sm") { font-size: 0.7em; }
 }
 
 .required-list {
   @include flexRow(0, start, center);
-  list-style: none;
-  padding: 0;
-  margin: 0;
+  @include list-reset;
   flex-wrap: wrap;
 }
 
@@ -357,9 +323,7 @@ function getDisplayBonuses(syn: SynergyDef): Record<string, string> {
   padding: 2px 6px;
 }
 
-.required-count {
-  font-weight: bold;
-}
+.required-count { font-weight: bold; }
 
 .min-level {
   font-size: 0.7em;
@@ -367,22 +331,7 @@ function getDisplayBonuses(syn: SynergyDef): Record<string, string> {
   opacity: 0.7;
 }
 
-.bonus-list {
-  @include flexColumn(2px, start, stretch);
-  list-style: none;
-  padding: 0;
-  margin: 0;
-
-  li {
-    font-size: 0.72em;
-    color: var(--secondary);
-
-    &::before {
-      content: "▸ ";
-      opacity: 0.5;
-    }
-  }
-}
+.bonus-list { @include bonus-list; }
 
 .status-label {
   margin-top: auto;

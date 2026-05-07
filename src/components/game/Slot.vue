@@ -158,18 +158,14 @@ function spawnFloatingText(event: MouseEvent, value: string) {
 
 <style scoped lang="scss">
 .slot {
+  position: relative;
   width: 120px;
   height: 120px;
-  position: relative;
   flex-shrink: 0;
-
   cursor: pointer;
   user-select: none;
 
-  @media (width <= 425px) {
-    width: 100px;
-    height: 100px;
-  }
+  @include bp("xs") { width: 100px; height: 100px; }
 
   > img {
     position: absolute;
@@ -178,10 +174,10 @@ function spawnFloatingText(event: MouseEvent, value: string) {
   }
 
   .slotPattern {
+    @include flexColumn(5px, center, center);
+    position: absolute;
     width: 100%;
     height: 100%;
-    position: absolute;
-    @include flexColumn(5px, center, center);
     z-index: 10;
 
     > img {
@@ -192,10 +188,7 @@ function spawnFloatingText(event: MouseEvent, value: string) {
 
     p {
       font-size: 1em;
-
-      @media (width <= 768px) {
-        font-size: .8em;
-      }
+      @include bp("md") { font-size: .8em; }
     }
 
     .progressBar {
@@ -203,21 +196,16 @@ function spawnFloatingText(event: MouseEvent, value: string) {
       bottom: -50px;
       left: 50%;
       width: 100px;
-
       transform: translateX(-50%);
       text-align: center;
 
-      @media (width <= 768px) {
-        font-size: .9em;
-        width: 80px;
-        bottom: -40px;
-      }
+      @include bp("md") { font-size: .9em; width: 80px; bottom: -40px; }
     }
   }
 
   .empty {
-    width: 60%;
     position: absolute;
+    width: 60%;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);

@@ -74,10 +74,8 @@ function openTutorial() {
     gap: 20px;
     z-index: 1;
 
-    @media (width < 1024px) {
-      padding: 80px 0;
-    }
-    @media (width <= 768px) {
+    @include bp-below("lg") { padding: 80px 0; }
+    @include bp("md") {
       grid-template-columns: repeat(2, 1fr);
       grid-template-rows: repeat(2, 1fr);
       gap: 50px 20px;
@@ -86,42 +84,35 @@ function openTutorial() {
   }
 
   #simulation-bg {
+    @include flexColumn(0, space-between);
     position: absolute;
     width: 100%;
     height: 100%;
-
-    @include flexColumn(0, space-between);
-
     padding: 10px;
     pointer-events: none;
     opacity: 0.8;
     z-index: 0;
 
     div {
-      width: 100%;
       @include flexRow(0, space-between);
+      width: 100%;
 
       img {
         width: 60px;
         user-select: none;
 
-        @media (width < 1024px) {
-          width: 50px;
-        }
-
-        @media (width <= 480px) {
-          width: 40px;
-        }
+        @include bp-below("lg") { width: 50px; }
+        @include bp("sm")       { width: 40px; }
       }
     }
   }
 
   .nav {
+    @include flexColumn(0px, start, end);
     position: absolute;
     top: 0;
     right: 0;
     height: 100%;
-    @include flexColumn(0px, start, end);
     z-index: 10;
 
     button {
@@ -133,7 +124,6 @@ function openTutorial() {
       border: none;
       padding: 10px 20px;
       cursor: pointer;
-
       text-align: end;
 
       &:hover {

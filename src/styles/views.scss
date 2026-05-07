@@ -1,5 +1,22 @@
+// Shared layout for the paginated grid views (Upgrades, Machines, Synergies)
+// and the static Pattern / Inventory grids.
 @use "@/styles/main.scss" as *;
 
+// ─── Pattern of a clickable card tile (upgrade, machine, pattern) ─────────
+%card-tile {
+  width: 100%;
+  height: 300px;
+  min-height: 0;
+
+  @include flexColumn(10px, start, center);
+  @include card-surface;
+  padding: 20px 10px;
+
+  @include bp("md") { height: 100%; padding: 14px 8px; gap: 6px; }
+  @include bp("sm") { padding: 10px 6px; gap: 4px; }
+}
+
+// ─── .wrapper — paginate buttons + grid (Upgrades, Machines, Synergies) ──
 .wrapper {
   width: 100%;
   height: 100%;
@@ -7,71 +24,31 @@
 
   @include flexRow(20px);
 
-  @media (width <= 1024px) {
-    gap: 10px;
-  }
-
-  @media (width <= 480px) {
-    gap: 6px;
-  }
+  @include bp("lg") { gap: 10px; }
+  @include bp("sm") { gap: 6px; }
 
   .grid {
     height: 100%;
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     grid-gap: 20px;
-
     padding: 20px 0;
 
-    @media (width <= 1024px) {
-      gap: 10px;
-    }
+    @include bp("lg") { gap: 10px; }
+    @include bp("md") { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+    @include bp("sm") { gap: 6px; }
 
-    /* 2-col layout from 768px down */
-    @media (width <= 768px) {
-      grid-template-columns: repeat(2, 1fr);
-      gap: 8px;
-    }
-
-    @media (width <= 480px) {
-      gap: 6px;
-    }
-
-    &, & li { list-style: none; padding: 0; margin: 0; }
+    &, & li { @include list-reset; }
 
     .upgrade, .machine {
-      width: 100%;
-      height: 300px;
-      min-height: 0;
-
-      @include flexColumn(10px, start, center);
-      padding: 20px 10px;
-
-      color: var(--black);
-      background-color: var(--white);
-
-      @media (width <= 768px) {
-        height: 100%;
-        padding: 14px 8px;
-        gap: 6px;
-      }
-
-      @media (width <= 480px) {
-        padding: 10px 6px;
-        gap: 4px;
-      }
+      @extend %card-tile;
 
       .upgrade-image, .machine-image {
         width: 64px;
         user-select: none;
 
-        @media (width <= 768px) {
-          width: 44px;
-        }
-
-        @media (width <= 480px) {
-          width: 36px;
-        }
+        @include bp("md") { width: 44px; }
+        @include bp("sm") { width: 36px; }
       }
 
       .text-container {
@@ -82,26 +59,19 @@
           text-align: center;
           font-size: .8em;
 
-          @media (width <= 480px) {
-            font-size: .7em;
-          }
+          @include bp("sm") { font-size: .7em; }
 
-          &.upgrade-cost, &.machine-cost {
-            color: var(--secondary);
-          }
+          &.upgrade-cost,
+          &.machine-cost { color: var(--secondary); }
         }
-        
-        h3.upgrade-name, h3.machine-name {
+
+        h3.upgrade-name,
+        h3.machine-name {
           font-size: 1.3em;
           text-align: center;
 
-          @media (width <= 768px) {
-            font-size: 1.1em;
-          }
-
-          @media (width <= 480px) {
-            font-size: 1em;
-          }
+          @include bp("md") { font-size: 1.1em; }
+          @include bp("sm") { font-size: 1em; }
         }
       }
     }
@@ -110,9 +80,7 @@
       border: 1px solid var(--secondary);
       box-shadow: 0 0 5px var(--secondary);
 
-      .upgrade-name {
-        color: var(--secondary);
-      }
+      .upgrade-name { color: var(--secondary); }
     }
   }
 
@@ -120,10 +88,7 @@
     padding: 10px 5px;
     flex-shrink: 0;
 
-    @media (width <= 480px) {
-      padding: 6px 4px;
-      font-size: .8em;
-    }
+    @include bp("sm") { padding: 6px 4px; font-size: .8em; }
 
     &.disabled {
       opacity: 0.3;
@@ -132,8 +97,7 @@
   }
 }
 
-.pattern-grid, .pattern-grid li { list-style: none; padding: 0; margin: 0; }
-
+// ─── .pattern-grid — used by Pattern + Inventory views ────────────────────
 .pattern-grid {
   width: 90%;
   height: 100%;
@@ -141,56 +105,38 @@
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   grid-gap: 20px;
-
   padding-top: 20px;
 
-  @media (width <= 768px) {
+  @include bp("md") {
     grid-template-columns: repeat(2, 1fr);
-    height: 100%;
-    width: 400px;
+    width: 100%;
+    max-width: 400px;
     grid-gap: 10px;
     padding: 15px 0;
   }
-  @media (width <= 480px) {
-    width: 100%;
-    grid-gap: 8px;
-    padding: 12px 0;
-  }
+  @include bp("sm") { grid-gap: 8px; padding: 12px 0; }
+
+  &, & li { @include list-reset; }
 
   .pattern {
-    width: 100%;
+    @extend %card-tile;
     height: 300px;
+    padding: 20px;
 
-    @include flexColumn(10px, start, center);
-    padding: 20px 20px;
-
-    color: var(--black);
-    background-color: var(--white);
-
-    @media (width <= 768px) {
-      height: 100%;
-      padding: 12px 10px;
-      gap: 6px;
-    }
-
-    @media (width <= 480px) {
-      padding: 8px 6px;
-      gap: 4px;
-    }
+    @include bp("md") { padding: 12px 10px; }
+    @include bp("sm") { padding: 8px 6px; }
 
     .pattern-image {
       width: 80px;
 
-      @media (width <= 768px) {
-        width: 54px;
-      }
-
-      @media (width <= 480px) {
-        width: 40px;
-      }
+      @include bp("md") { width: 54px; }
+      @include bp("sm") { width: 40px; }
     }
 
-    .text-container {
+    // Two near-identical containers — merged here. The inventory variant
+    // just uses a wider gap and a slightly larger font on tablet.
+    .text-container,
+    .text-container-inventory {
       height: 100%;
       @include flexColumn(5px, center, center);
 
@@ -198,13 +144,9 @@
         text-align: center;
         font-size: .9em;
 
-        @media (width <= 480px) {
-          font-size: .75em;
-        }
+        @include bp("sm") { font-size: .75em; }
 
-        &.pattern-value {
-          color: var(--secondary);
-        }
+        &.pattern-value { color: var(--secondary); }
 
         &.requirements {
           @include flexColumn();
@@ -214,10 +156,7 @@
 
         &.pattern-name {
           font-size: 1.5em;
-
-          @media (width <= 768px) {
-            font-size: 1.2em;
-          }
+          @include bp("md") { font-size: 1.2em; }
         }
       }
 
@@ -227,46 +166,17 @@
         margin: 0;
         text-align: center;
 
-        @media (width <= 768px) {
-          font-size: 1.2em;
-        }
+        @include bp("md") { font-size: 1.2em; }
       }
     }
 
     .text-container-inventory {
-      height: 100%;
-      @include flexColumn(10px, center, center);
-
-      @media (width <= 768px) {
-        gap: 6px;
-      }
+      gap: 10px;
+      @include bp("md") { gap: 6px; }
 
       p {
-        text-align: center;
-        font-size: .9em;
-
-        @media (width <= 768px) {
-          font-size: .75em;
-        }
-
-        &.pattern-value {
-          color: var(--secondary);
-        }
-
-        &.requirements {
-          @include flexColumn();
-          font-size: 0.8em;
-          color: var(--secondary);
-        }
-
-        &.pattern-name {
-          font-size: 1.5em;
-
-          @media (width <= 768px) {
-            font-size: 1.2em;
-          }
-        }
+        @include bp("md") { font-size: .75em; }
       }
     }
   }
-} 
+}

@@ -191,15 +191,7 @@ async function toggleAdmin(e: Event) {
 </script>
 
 <style scoped lang="scss">
-.sr-only {
-  position: absolute;
-  width: 1px; height: 1px;
-  padding: 0; margin: -1px;
-  overflow: hidden;
-  clip: rect(0,0,0,0);
-  white-space: nowrap;
-  border: 0;
-}
+.sr-only { @include sr-only; }
 
 .admin {
   width: 100%;
@@ -208,41 +200,53 @@ async function toggleAdmin(e: Event) {
   grid-template-columns: 220px 1fr;
   gap: 20px;
   overflow: hidden;
+
+  // Stack the user list above the detail panel on narrow screens — at 220px
+  // fixed sidebar width the detail column would otherwise be unusable.
+  @include bp("md") {
+    grid-template-columns: 1fr;
+    grid-template-rows: minmax(120px, 30%) 1fr;
+    gap: 12px;
+  }
 }
 
 .user-list {
   @include flexColumn(4px, start, stretch);
+  @include scrollbar;
   overflow-y: auto;
   border-right: 2px solid var(--primary);
   padding-right: 12px;
 
+  @include bp("md") {
+    border-right: none;
+    border-bottom: 2px solid var(--primary);
+    padding-right: 0;
+    padding-bottom: 8px;
+  }
+
   .search {
+    @include input-bare;
     margin-bottom: 8px;
     padding: 6px 8px;
-    background: transparent;
-    border: 1px solid var(--primary);
-    color: var(--white);
     font-size: 0.85em;
     width: 100%;
   }
 
   ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
+    @include list-reset;
     @include flexColumn(4px, start, stretch);
   }
 
   li { display: contents; }
 
   .user-row {
+    @include flexRow(8px, space-between, center);
     width: 100%;
     padding: 6px 10px;
     cursor: pointer;
     background: transparent;
     color: var(--white);
     border: 1px solid transparent;
-    @include flexRow(8px, space-between, center);
     transition: border-color 0.15s;
 
     &:hover, &:focus-visible { border-color: var(--primary); outline: none; }
@@ -261,10 +265,13 @@ async function toggleAdmin(e: Event) {
 
 .detail {
   @include flexColumn(14px, start, stretch);
+  @include scrollbar;
   overflow-y: auto;
 
   .detail-header {
     @include flexRow(0, space-between, start);
+    flex-wrap: wrap;
+    gap: 12px;
   }
 
   .detail-name {
@@ -291,19 +298,9 @@ async function toggleAdmin(e: Event) {
     input { cursor: pointer; accent-color: var(--primary); }
   }
 
-  .game-values {
-    @include flexColumn(14px, start, stretch);
-  }
+  .game-values { @include flexColumn(14px, start, stretch); }
 
-  .section-label {
-    font-size: 0.7em;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    opacity: 0.5;
-    border-bottom: 1px solid var(--primary);
-    padding-bottom: 4px;
-    margin: 0;
-  }
+  .section-label { @include section-label; }
 
   .fields {
     display: grid;
@@ -315,10 +312,8 @@ async function toggleAdmin(e: Event) {
       font-size: 0.8em;
 
       input {
+        @include input-bare;
         padding: 8px 14px;
-        background: transparent;
-        border: 1px solid var(--primary);
-        color: var(--white);
         font-size: 1.25em;
         width: 100%;
       }
@@ -338,8 +333,8 @@ async function toggleAdmin(e: Event) {
     border: none;
     transition: opacity 0.2s;
 
-    &:disabled          { opacity: 0.5; cursor: not-allowed; }
-    &:focus-visible     { outline: 2px solid var(--white); outline-offset: 2px; }
+    &:disabled      { opacity: 0.5; cursor: not-allowed; }
+    &:focus-visible { outline: 2px solid var(--white); outline-offset: 2px; }
   }
 }
 

@@ -74,28 +74,25 @@ watch(() => game.pendingPrestigePoints, (n, p) => { if (n > p) pulsePendingNow()
 
 <style lang="scss">
 .currency {
-  grid-area: currency;
-
   @include flexRow(0, space-between);
-
+  grid-area: currency;
   background-color: var(--primary);
   color: var(--black);
 
   p {
     @include flexColumn(2px, center, center);
+    flex: 1;
     height: 100%;
     padding: 5px 8px;
-    flex: 1;
     border-right: 2px solid var(--black);
     text-align: center;
     font-size: .9em;
 
-    &:last-child {
-      border-right: none;
-    }
+    @include bp("xs") { padding: 4px 5px; font-size: .8em; }
+
+    &:last-child { border-right: none; }
 
     &.level-display {
-      @include flexColumn(2px, center, center);
       font-weight: bold;
       flex: 1.4;
     }

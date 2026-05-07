@@ -90,32 +90,45 @@ watch(step, () => nextTick(updateHighlight))
 
 <style scoped lang="scss">
 .tutorial-overlay {
+  @include flexRow();
   position: fixed;
   top: 0; left: 0;
   width: 100vw; height: 100vh;
   background-color: rgba(0,0,0,0.7);
-  @include flexRow();
   z-index: 1000;
 
   .tutorial-box {
-    width: min(600px, 90vw);
     @include flexColumn(20px, center);
+    width: min(600px, 90vw);
     padding: 2rem;
     background: var(--secondary);
     color: var(--white);
     text-align: center;
     box-shadow: 0 0 20px #000;
 
+    @include bp("sm") { padding: 1.25rem; gap: 14px; }
+
     h2 { font-size: 1.8em; font-weight: bold; }
-    p { font-size: 1.2em; }
+    p  { font-size: 1.2em; }
 
     .tutorial-actions {
       @include flexRow(50px, center);
       margin-top: 1rem;
+      flex-wrap: wrap;
+
+      @include bp("sm") { gap: 16px; }
+
       button { border: none; }
     }
 
-    .tutorial-image { margin-top: 1rem; img { width: 300px; user-select: none; } }
+    .tutorial-image {
+      margin-top: 1rem;
+      img {
+        width: 300px;
+        max-width: 100%;
+        user-select: none;
+      }
+    }
   }
 
   .tutorial-highlight {

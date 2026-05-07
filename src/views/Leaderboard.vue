@@ -149,22 +149,16 @@ onMounted(() => {
   .submit-row {
     @include flexRow(20px, space-between, center);
     flex-shrink: 0;
+    flex-wrap: wrap;
 
-    .submit-container {
-      @include flexRow(20px, start, center);
-    }
-
-    .submit-btn {
-      white-space: nowrap;
-    }
+    .submit-container { @include flexRow(20px, start, center); }
+    .submit-btn       { white-space: nowrap; }
 
     .submit-msg {
       font-size: 0.9em;
       color: var(--primary);
 
-      &.error {
-        color: var(--error);
-      }
+      &.error { color: var(--error); }
     }
   }
 
@@ -174,9 +168,7 @@ onMounted(() => {
     color: var(--primary);
     flex-shrink: 0;
 
-    strong {
-      font-size: 1.2em;
-    }
+    strong { font-size: 1.2em; }
   }
 
   .loading, .load-error, .empty {
@@ -186,25 +178,12 @@ onMounted(() => {
     font-size: 1.1em;
   }
 
-  .load-error {
-    color: var(--error);
-    opacity: 1;
-  }
+  .load-error { color: var(--error); opacity: 1; }
 
   .table-wrapper {
+    @include scrollbar(4px);
     flex: 1;
-    overflow-y: auto;
-
-    &::-webkit-scrollbar {
-      width: 4px;
-    }
-    &::-webkit-scrollbar-track {
-      background: transparent;
-    }
-    &::-webkit-scrollbar-thumb {
-      background: var(--primary);
-      border-radius: 2px;
-    }
+    overflow: auto;
   }
 
   .lb-table {
@@ -212,9 +191,13 @@ onMounted(() => {
     border-collapse: collapse;
     font-size: 0.9em;
 
-    @media (width <= 768px) {
+    @include bp("md") {
       font-size: 0.8em;
       .level { display: none; }
+    }
+    @include bp("sm") {
+      font-size: 0.75em;
+      .player { display: none; }
     }
 
     thead tr {
@@ -240,9 +223,7 @@ onMounted(() => {
         color: var(--primary);
       }
 
-      td {
-        padding: 8px 12px;
-      }
+      td { padding: 8px 12px; }
     }
 
     .rank {
@@ -254,13 +235,6 @@ onMounted(() => {
     .money, .prestige, .level {
       text-align: right;
       font-family: monospace;
-    }
-
-    .empty {
-      text-align: center;
-      opacity: 0.6;
-      padding: 20px;
-      font-size: 1.1em;
     }
   }
 }

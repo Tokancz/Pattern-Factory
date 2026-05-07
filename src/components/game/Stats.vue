@@ -52,7 +52,7 @@ section#stat-grid {
   background-color: var(--primary);
   color: var(--black);
 
-  @media (width < 425px) {
+  @include bp-below("xs") {
     font-size: .8em;
     grid-template-columns: 1fr;
   }
@@ -65,27 +65,27 @@ section#stat-grid {
     padding: 10px;
     border-right: 4px solid var(--black);
 
-    @media (width < 425px) {
+    @include bp-below("xs") {
       border-right: none;
       border-bottom: 4px solid var(--black);
-      padding-bottom: 0px;
+      padding-bottom: 0;
     }
   }
 
   .columns {
-    width: 100%;
     @include flexRow(20px, space-between, end);
+    width: 100%;
     padding: 10px 30px;
+    flex-wrap: wrap;
+
+    @include bp("sm") { padding: 10px 14px; gap: 8px 12px; }
 
     .column {
       @include flexColumn(5px, start, start);
       font-weight: bold;
       font-size: 1em;
       margin: 0;
-
-      @media (width < 768px) {
-        font-size: 1em;
-      }
+      min-width: 0;
 
       div { @include flexRow(6px, start, baseline); }
       dt::after { content: ":"; }
