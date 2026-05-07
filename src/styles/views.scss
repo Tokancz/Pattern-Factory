@@ -146,6 +146,19 @@
 
         &.pattern-value { color: var(--secondary); }
 
+        &.pattern-flavour {
+          font-size: .8em;
+          font-style: italic;
+          opacity: 0.75;
+          @include bp("sm") { font-size: .7em; }
+        }
+
+        &.pattern-role {
+          font-size: .75em;
+          opacity: 0.6;
+          @include bp("sm") { font-size: .65em; }
+        }
+
         &.requirements {
           @include flexColumn();
           font-size: 0.8em;

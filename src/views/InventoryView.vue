@@ -5,12 +5,13 @@
         <img :src="p.visuals.icon" :alt="id" class="pattern-image">
         <div class="text-container-inventory">
           <h3 class="pattern-name">{{ id }}</h3>
+          <p v-if="p.flavour" class="pattern-flavour">{{ p.flavour }}</p>
           <p>Lvl: {{ patterns.getPattern(id)?.level }}</p>
           <p>
             EXP: {{ formatNumber( Math.floor(patterns.getPattern(id)?.exp ?? 0) ) }} / {{ formatNumber( Math.floor(expToNext(patterns.getPattern(id)!.level)) ) }}
           </p>
           <p class="pattern-value">
-            Value: {{ formatNumber(getValue(id)) }} 
+            Value: {{ formatNumber(getValue(id)) }}
             <span v-if="p.type === 'money'">IGM</span>
             <span v-else-if="p.type === 'exp'">EXP</span>
             <span v-else-if="p.type === 'dc'">DC</span>

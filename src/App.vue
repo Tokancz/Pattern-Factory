@@ -5,7 +5,10 @@
     <header>
       <div>
         <h1>{{ user.user?.factoryName }}</h1>
-        <p>{{ user.user?.username }}</p>
+        <p>
+          <span class="architect-title">{{ architectTitle(0) }}</span>
+          {{ user.user?.username }}
+        </p>
       </div>
       <ProgressBar v-if="!mobileLayout" :type="'level'" :length="15"/>
       <img
@@ -39,6 +42,12 @@
     <BossFight />
 
     <AfkReport :open="afkOpen" :report="afkReport" @close="afkOpen = false" />
+
+    <IntroOverlay
+      :open="introOpen"
+      @close="closeIntro"
+      @open-tutorial="openTutorial"
+    />
 
     <!-- Mobile burger menu overlay -->
     <Transition name="menu-fade">
@@ -82,6 +91,9 @@ import Login from "./components/ui/Login.vue"
 import Navbar from "./components/game/Navbar.vue"
 import BossFight from "@/components/ui/BossFight.vue"
 import AfkReport, { type AfkReportData } from "@/components/ui/AfkReport.vue"
+import IntroOverlay, { hasSeenIntro, markIntroSeen } from "@/components/ui/IntroOverlay.vue"
+import { openTutorial } from "@/composables/tutorial"
+import { architectTitle } from "@/utils/architect"
 import { useBossStore } from "@/stores/boss"
 
 const slotStore = useSlotStore()
@@ -99,6 +111,17 @@ const afkReport = reactive<AfkReportData>({
   exp: 0,
   prestigePoints: 0
 })
+
+const introOpen = ref(false)
+
+function maybeShowIntro() {
+  if (!hasSeenIntro(user.user?.id)) introOpen.value = true
+}
+
+function closeIntro() {
+  markIntroSeen(user.user?.id)
+  introOpen.value = false
+}
 
 const { width } = useWindowSize()
 const mobileLayout = computed(() => width.value < 1024)
@@ -178,6 +201,7 @@ function totalExpDelta(beforeLevel: number, beforeExp: number, afterLevel: numbe
 async function onLoggedIn() {
   await initGame()
   startAutoSave()
+  maybeShowIntro()
 }
 
 onMounted(async () => {
@@ -190,6 +214,7 @@ onMounted(async () => {
     // Only start the autosave loop AFTER the load is done. Otherwise the
     // 5s interval can fire mid-load and PUT the default empty state.
     startAutoSave()
+    maybeShowIntro()
   }
 
   startGameLoop()
@@ -251,6 +276,19 @@ div#app {
         text-decoration: underline;
 
         @include bp-below("lg") { font-size: 1.5em; }
+
+        .architect-title {
+          display: inline-block;
+          margin-right: 6px;
+          padding: 1px 6px;
+          font-size: .7em;
+          letter-spacing: 0.1em;
+          color: var(--black);
+          background: var(--primary);
+          text-decoration: none;
+          vertical-align: middle;
+          text-transform: uppercase;
+        }
       }
     }
 

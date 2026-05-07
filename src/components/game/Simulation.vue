@@ -39,22 +39,17 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue"
 import { useSlotStore } from "@/stores/slot"
 import Slot from "./Slot.vue"
 import TutorialOverlay from "@/components/ui/TutorialOverlay.vue"
 import { TUTORIAL_STEPS } from "@/data/tutorial"
 import { useMuted, toggleMute, useLoopTrack, cycleLoopTrack } from "@/utils/sound"
+import { tutorialVisible, openTutorial } from "@/composables/tutorial"
 
 const slots = useSlotStore()
-const tutorialVisible = ref(false)
 const tutorialSteps = TUTORIAL_STEPS
 const muted = useMuted()
 const loopTrack = useLoopTrack()
-
-function openTutorial() {
-  tutorialVisible.value = true
-}
 </script>
 
 <style scoped lang="scss">

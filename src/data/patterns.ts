@@ -5,6 +5,8 @@ export const PATTERNS = {
     baseValue: 1,
     baseProgress: 100,
     type: "money",
+    flavour: "Order. Structure. The default render.",
+    roleHint: "Generates IGM. Click-friendly.",
     visuals: {
       icon: BASE + "img/patterns/Square.svg",
       slot: BASE + "img/slots/SquareSlot.svg"
@@ -15,6 +17,8 @@ export const PATTERNS = {
     baseValue: 2,
     baseProgress: 200,
     type: "exp",
+    flavour: "Energy in motion.",
+    roleHint: "Generates EXP — fuels the Architect.",
     visuals: {
       icon: `${BASE}img/patterns/Triangle.svg`,
       slot: `${BASE}img/slots/TriangleSlot.svg`
@@ -27,6 +31,8 @@ export const PATTERNS = {
     baseValue: 1,
     type: "dc",
     baseProgress: 250,
+    flavour: "Continuity. Time loops back.",
+    roleHint: "Generates DC at a slow base rate.",
     visuals: {
       icon: `${BASE}img/patterns/Circle.svg`,
       slot: `${BASE}img/slots/CircleSlot.svg`
@@ -40,6 +46,8 @@ export const PATTERNS = {
     baseValue: 1,
     type: "prestige",
     baseProgress: 4000,
+    flavour: "A paradox. It resolves on its own.",
+    roleHint: "Cannot be clicked. Auto-only — generates Pending PP.",
     visuals: {
       icon: `${BASE}img/patterns/Cross.svg`,
       slot: `${BASE}img/slots/CrossSlot.svg`

@@ -5,9 +5,12 @@
         <img :src="p.visuals.icon" :alt="id" class="pattern-image">
         <div class="text-container">
           <h3 class="pattern-name">{{ id }}</h3>
-          
+
+          <p v-if="p.flavour" class="pattern-flavour">{{ p.flavour }}</p>
+          <p v-if="p.roleHint" class="pattern-role">{{ p.roleHint }}</p>
+
           <p>
-            Base value: {{ formatNumber(p.baseValue) }} 
+            Base value: {{ formatNumber(p.baseValue) }}
             <span v-if="p.type === 'money'">IGM</span>
             <span v-else-if="p.type === 'exp'">EXP</span>
             <span v-else-if="p.type === 'dc'">DC</span>
@@ -15,7 +18,7 @@
           </p>
 
           <p v-if="p.requirements && !patterns.unlockedPatterns.includes(id)" class="requirements">
-            Unlock requires: 
+            Unlock requires:
             <span v-if="'money' in p.requirements">{{ formatNumber(p.requirements.money) }} IGM </span>
             <span v-if="'dc' in p.requirements">{{ formatNumber(p.requirements.dc) }} DC </span>
             <span v-if="'level' in p.requirements">Level {{ p.requirements.level }} </span>
