@@ -1,5 +1,6 @@
 import { defineStore } from "pinia"
 import { useGameStore } from "./game"
+import { useGlyphStore } from "./glyph"
 import { UPGRADES, DC_UPGRADES, PRESTIGE_UPGRADES } from "@/data/upgrades"
 import { saveGame } from "@/utils/save"
 import { playSound } from "@/utils/sound"
@@ -55,7 +56,13 @@ export const useUpgradeStore = defineStore("upgrades", {
 
     getOfflineCap: (state) => {
       const lvl = state.levels.offlineCap ?? 0
-      return 3600 + lvl * 1800
+      let cap = 3600 + lvl * 1800
+
+      // Time Dilation Glyph upgrade multiplies the cap by 1.5×.
+      const glyph = useGlyphStore()
+      if (glyph.hasUpgrade("timeDilation")) cap = Math.floor(cap * 1.5)
+
+      return cap
     },
 
     getOfflineGainMultiplier: (state) => {
@@ -150,7 +157,10 @@ export const useUpgradeStore = defineStore("upgrades", {
     },
 
     reset() {
-      // Only reset regular upgrades — DC and prestige levels survive
+      // Wipe regular and DC upgrade levels on prestige. Prestige levels
+      // survive (they're paid for in PP, which only ascension resets).
+      // The Tier 4 Glyph upgrade "Pattern Memory" will later let DC
+      // upgrades persist through prestige; for now, always wipe.
       this.levels = {
         clickingPower: 0,
         sellMultiplier: 0,
@@ -158,6 +168,25 @@ export const useUpgradeStore = defineStore("upgrades", {
         expGain: 0,
         offlineCap: 0,
         offlineGain: 0
+      }
+      this.dcLevels = {
+        squareSpeed: 0,
+        squareOutput: 0,
+        triangleSpeed: 0,
+        triangleOutput: 0,
+        crossSpeed: 0,
+        crossOutput: 0
+      }
+    },
+
+    resetAll() {
+      // Full wipe used by ascension. Clears every upgrade tier including
+      // PP-tier upgrades, which `reset()` deliberately keeps.
+      this.reset()
+      this.prestigeLevels = {
+        prestigeOutput: 0,
+        prestigeSpeed: 0,
+        prestigeClick: 0
       }
     }
   }

@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <!-- Placeholder Γ slot icon. Replace with the final glitching shape later. -->
+  <rect x="6" y="6" width="52" height="52" stroke="#C0FE04" stroke-width="2" fill="none"/>
+  <text x="50%" y="62%"
+        text-anchor="middle"
+        font-family="ivy-presto, serif"
+        font-size="42"
+        font-weight="900"
+        fill="#C0FE04">Γ</text>
+</svg>

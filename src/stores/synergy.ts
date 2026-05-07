@@ -4,6 +4,7 @@ import { SYNERGIES, ALL_PATTERNS, type PatternId, type SynergyDef } from "@/data
 import { useSlotStore }    from "./slot"
 import { usePatternStore } from "./pattern"
 import { useMachineStore } from "./machine"
+import { useGlyphStore }   from "./glyph"
 
 export const useSynergyStore = defineStore("synergy", () => {
 
@@ -36,17 +37,27 @@ export const useSynergyStore = defineStore("synergy", () => {
     return 1 + machines.getLevel("synergyBoost") * 0.15
   })
 
-  // Exact-match: synergy fires only when slot counts match requiredCounts for every pattern.
-  // Patterns absent from requiredCounts must have count 0 in slots.
+  // Resonance Glyph upgrade allows synergies to fire when the slot
+  // composition is one pattern short of the exact requirement. Without
+  // it, synergies stay strict (current behaviour).
   const activeSynergies = computed((): SynergyDef[] => {
     const counts = slotCounts.value
     const levels = patternLevels.value
+    const glyph = useGlyphStore()
+    const allowedDeficit = glyph.hasUpgrade("resonance") ? 1 : 0
 
     return SYNERGIES.filter(syn => {
+      let totalDeficit = 0
       for (const p of ALL_PATTERNS) {
         const need = syn.requiredCounts[p] ?? 0
-        if (counts[p] !== need) return false
+        const have = counts[p]
+        // Over-stuffed compositions still break the synergy — Resonance
+        // only forgives a missing pattern, not extras of the wrong one.
+        if (have > need) return false
+        totalDeficit += need - have
       }
+      if (totalDeficit > allowedDeficit) return false
+
       if (syn.minAvgLevel !== undefined) {
         const present = ALL_PATTERNS.filter(p => (syn.requiredCounts[p] ?? 0) > 0)
         const avg = present.reduce((s, p) => s + (levels[p] ?? 1), 0) / present.length

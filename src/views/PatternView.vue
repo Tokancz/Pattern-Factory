@@ -19,8 +19,8 @@
 
           <p v-if="p.requirements && !patterns.unlockedPatterns.includes(id)" class="requirements">
             Unlock requires:
-            <span v-if="'money' in p.requirements">{{ formatNumber(p.requirements.money) }} IGM </span>
-            <span v-if="'dc' in p.requirements">{{ formatNumber(p.requirements.dc) }} DC </span>
+            <span v-if="'money' in p.requirements">{{ formatNumber(patterns.getPatternUnlockCost(id, 'money')) }} IGM </span>
+            <span v-if="'dc' in p.requirements">{{ formatNumber(patterns.getPatternUnlockCost(id, 'dc')) }} DC </span>
             <span v-if="'level' in p.requirements">Level {{ p.requirements.level }} </span>
           </p>
         </div>

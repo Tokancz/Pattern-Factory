@@ -8,7 +8,23 @@ import {
 import type { BossId } from "@/data/bosses"
 import { usePatternStore } from "./pattern"
 import { useGameStore } from "./game"
+import { useGlyphStore } from "./glyph"
 import { playSound, startBossLoop, stopBossLoop } from "@/utils/sound"
+
+// Returns the currency the player holds the smallest positive amount of.
+// EXP is excluded — it's always small by definition (bounded per level)
+// so including it would make exp anomalies almost always shielded.
+function rarestCurrency(game: ReturnType<typeof useGameStore>): string | null {
+  const candidates = [
+    { type: "money",    amt: game.money },
+    { type: "dc",       amt: game.dc },
+    { type: "prestige", amt: game.pendingPrestigePoints }
+  ].filter(c => c.amt > 0)
+
+  if (candidates.length === 0) return null
+  candidates.sort((a, b) => a.amt - b.amt)
+  return candidates[0]!.type
+}
 
 type BossResult = "victory" | "defeat" | null
 type BossPhase = "idle" | "incoming" | "active"
@@ -46,7 +62,11 @@ export const useBossStore = defineStore("boss", {
     isActive: (state) => state.phase !== "idle",
 
     clicksRequired(): number {
-      return this.activeTuning?.clicksRequired ?? 0
+      const base = this.activeTuning?.clicksRequired ?? 0
+      // Anomaly Resistance Glyph upgrade reduces required clicks by 25%.
+      const glyph = useGlyphStore()
+      if (glyph.hasUpgrade("anomalyResistance")) return Math.ceil(base * 0.75)
+      return base
     },
 
     timeLimit(): number {
@@ -117,7 +137,8 @@ export const useBossStore = defineStore("boss", {
       // semitones via playbackRate).
       const rate = 0.85 + Math.random() * 0.35
       playSound("hit", { rate })
-      if (this.clicks >= BOSSES[this.activeBossId].clicksRequired) {
+      // Use the getter — Anomaly Resistance shaves the threshold.
+      if (this.clicks >= this.clicksRequired) {
         this.victory()
       }
     },
@@ -138,11 +159,21 @@ export const useBossStore = defineStore("boss", {
       if (!pattern) return
 
       const game = useGameStore()
-      switch (pattern.type) {
-        case "money":    game.money = 0; break
-        case "dc":       game.dc = 0; break
-        case "prestige": game.pendingPrestigePoints = 0; break
-        case "exp":      game.exp = 0; break
+      const glyph = useGlyphStore()
+
+      // Anomaly Shielding: refuse to drain the rarest currency the player
+      // holds. The anomaly still counts as a defeat for animation purposes
+      // but no penalty is applied.
+      const shielded = glyph.hasUpgrade("anomalyShielding") &&
+                       rarestCurrency(game) === pattern.type
+
+      if (!shielded) {
+        switch (pattern.type) {
+          case "money":    game.money = 0; break
+          case "dc":       game.dc = 0; break
+          case "prestige": game.pendingPrestigePoints = 0; break
+          case "exp":      game.exp = 0; break
+        }
       }
 
       this.activeBossId = null

@@ -2,8 +2,12 @@ import { defineStore } from "pinia"
 import { PATTERNS } from "@/data/patterns"
 import { useUpgradeStore } from "./upgrade"
 import { useGameStore } from "./game"
+import { useGlyphStore } from "./glyph"
 import { saveGame } from "@/utils/save"
 import { playSound } from "@/utils/sound"
+
+// Patterns whose unlock cost gets discounted by the Foundation Glyph upgrade.
+const FOUNDATION_DISCOUNTED = new Set(["triangle", "circle", "cross"])
 
 export const usePatternStore = defineStore("patterns", {
   state: () => ({
@@ -21,6 +25,24 @@ export const usePatternStore = defineStore("patterns", {
     getPattern: (state) => (id: string) => state.patterns[id],
 
     expToNext: () => (lvl: number) => Math.floor(10 * Math.pow(1.5, lvl)),
+
+    // Effective unlock requirement for a pattern, after Glyph upgrades like
+    // Foundation are applied. Returns 0 for resources the pattern doesn't
+    // require, the discounted amount for triangle/circle/cross when
+    // Foundation is owned, and the raw amount otherwise.
+    getPatternUnlockCost: () => (id: string, resource: "money" | "dc"): number => {
+      const p = PATTERNS[id as keyof typeof PATTERNS]
+      if (!p?.requirements) return 0
+      const req = p.requirements as Record<string, number>
+      const base = req[resource] ?? 0
+      if (base === 0) return 0
+
+      const glyph = useGlyphStore()
+      if (glyph.hasUpgrade("foundation") && FOUNDATION_DISCOUNTED.has(id)) {
+        return Math.floor(base * 0.5)
+      }
+      return base
+    },
 
     // getPatternValue includes ALL multipliers so Inventory shows the real
     // value a slot will produce — including prestige bonus, sell multiplier,
@@ -89,13 +111,15 @@ export const usePatternStore = defineStore("patterns", {
       }
 
       const req = p.requirements
+      const moneyCost = this.getPatternUnlockCost(id, "money")
+      const dcCost    = this.getPatternUnlockCost(id, "dc")
 
-      if (req && "money" in req && game.money < req.money) { playSound("error"); return false }
-      if (req && "dc" in req && game.dc < req.dc) { playSound("error"); return false }
-      if (req && "level" in req && game.level < req.level) { playSound("error"); return false }
+      if (moneyCost > 0 && game.money < moneyCost)                   { playSound("error"); return false }
+      if (dcCost > 0    && game.dc    < dcCost)                      { playSound("error"); return false }
+      if ("level" in req && req.level !== undefined && game.level < req.level) { playSound("error"); return false }
 
-      if ("money" in req && req.money !== undefined) game.money -= req.money
-      if ("dc" in req && req.dc !== undefined) game.dc -= req.dc
+      if (moneyCost > 0) game.money -= moneyCost
+      if (dcCost > 0)    game.dc    -= dcCost
 
       this.unlockPattern(id)
       playSound("buy")

@@ -6,7 +6,7 @@
       <div>
         <h1>{{ user.user?.factoryName }}</h1>
         <p>
-          <span class="architect-title">{{ architectTitle(0) }}</span>
+          <span class="architect-title">{{ architectTitle(glyphStore.ascensionCount, glyphStore.isStabilized) }}</span>
           {{ user.user?.username }}
         </p>
       </div>
@@ -79,6 +79,7 @@ import { useSlotStore } from "@/stores/slot"
 import { useUpgradeStore } from "@/stores/upgrade"
 import { useGameStore } from "@/stores/game"
 import { useUserStore } from "@/stores/user"
+import { useGlyphStore } from "@/stores/glyph"
 import { loadGame, startAutoSave } from "@/utils/save"
 import { startGameLoop } from "@/composables/gameLoop"
 import { setBoostActive } from "@/utils/sound"
@@ -100,6 +101,7 @@ const slotStore = useSlotStore()
 const upgradeStore = useUpgradeStore()
 const gameStore = useGameStore()
 const user = useUserStore()
+const glyphStore = useGlyphStore()
 const bossStore = useBossStore()
 
 const afkOpen = ref(false)
@@ -200,6 +202,7 @@ function totalExpDelta(beforeLevel: number, beforeExp: number, afterLevel: numbe
 // Called when user logs in via the Login form
 async function onLoggedIn() {
   await initGame()
+  glyphStore.load(user.user?.id)
   startAutoSave()
   maybeShowIntro()
 }
@@ -211,6 +214,9 @@ onMounted(async () => {
   if (user.loggedIn) {
     // Pull fresh save from DB — this is the source of truth
     await initGame()
+    // Glyph state lives in localStorage for now (per-user keyed). Backend
+    // migration ships with the ascension flow in a later step.
+    glyphStore.load(user.user?.id)
     // Only start the autosave loop AFTER the load is done. Otherwise the
     // 5s interval can fire mid-load and PUT the default empty state.
     startAutoSave()

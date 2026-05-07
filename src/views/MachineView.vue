@@ -58,11 +58,10 @@ const buy = machines.buy
 const page = ref(0)
 const perPage = 4
 
-const MAX_SLOTS = 4
-
 function isMachineMaxed(id: string): boolean {
   if (id === "slotUnlock") {
-    return slots.slots.filter(s => s.unlocked).length >= MAX_SLOTS
+    // slots.maxSlots is 5 when Slot V is owned, 4 otherwise.
+    return slots.slots.filter(s => s.unlocked).length >= slots.maxSlots
   }
   return false
 }

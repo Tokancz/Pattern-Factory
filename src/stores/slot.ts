@@ -2,6 +2,7 @@ import { defineStore } from "pinia"
 import { useGameStore } from "./game"
 import { usePatternStore } from "./pattern"
 import { useUpgradeStore } from "./upgrade"
+import { useGlyphStore } from "./glyph"
 import { PATTERNS } from "@/data/patterns"
 import { saveGame } from "@/utils/save"
 import { useMachineStore } from "./machine"
@@ -17,11 +18,15 @@ interface Slot {
   outputMultiplier: number
 }
 
+// Slot 4 is the 5th thread, gated behind the Slot V Glyph upgrade. It's
+// always present in the underlying state (so saves can carry its data
+// across runs) but hidden from the UI until Slot V is owned.
 const DEFAULT_SLOTS: Slot[] = [
   { id: 0, patternId: "square", progress: 0, unlocked: true, speedMultiplier: 1, outputMultiplier: 1 },
   { id: 1, patternId: null, progress: 0, unlocked: false, speedMultiplier: 1, outputMultiplier: 1 },
   { id: 2, patternId: null, progress: 0, unlocked: false, speedMultiplier: 1, outputMultiplier: 1 },
-  { id: 3, patternId: null, progress: 0, unlocked: false, speedMultiplier: 1, outputMultiplier: 1 }
+  { id: 3, patternId: null, progress: 0, unlocked: false, speedMultiplier: 1, outputMultiplier: 1 },
+  { id: 4, patternId: null, progress: 0, unlocked: false, speedMultiplier: 1, outputMultiplier: 1 }
 ]
 
 export const useSlotStore = defineStore("slots", {
@@ -32,7 +37,21 @@ export const useSlotStore = defineStore("slots", {
   }),
 
   getters: {
-    getDefaultSlots: () => [...DEFAULT_SLOTS]
+    getDefaultSlots: () => [...DEFAULT_SLOTS],
+
+    // What the UI should iterate. Hides slot 4 entirely until Slot V is
+    // owned — no greyed-out placeholder, no silhouette. The player should
+    // not know it exists before purchase.
+    visibleSlots: (state): Slot[] => {
+      const glyph = useGlyphStore()
+      return glyph.hasUpgrade("slotV") ? state.slots : state.slots.slice(0, 4)
+    },
+
+    // Hard ceiling on unlockable threads, used by the slotUnlock module.
+    maxSlots: (): number => {
+      const glyph = useGlyphStore()
+      return glyph.hasUpgrade("slotV") ? 5 : 4
+    }
   },
 
   actions: {
@@ -95,8 +114,13 @@ export const useSlotStore = defineStore("slots", {
     clickSlot(slotId: number) {
       const slot = this.slots.find(s => s.id === slotId)
       if (!slot || !slot.patternId) return
-      // Cross is auto-only — clicking does nothing
-      if (slot.patternId === "cross") return
+      // Cross is auto-only by default — Echo of the Cross unlocks manual
+      // clicks (with a cooldown enforced in Slot.vue, since this store
+      // doesn't model timing per-thread).
+      if (slot.patternId === "cross") {
+        const glyph = useGlyphStore()
+        if (!glyph.hasUpgrade("echoOfTheCross")) return
+      }
 
       const upgrades = useUpgradeStore()
       slot.progress += upgrades.getClickPower
@@ -154,7 +178,11 @@ export const useSlotStore = defineStore("slots", {
     },
 
     unlockSlot() {
-      const slot = this.slots.find(s => !s.unlocked)
+      // Only consider slots within the player's current cap (4 by default,
+      // 5 when Slot V is owned). Without this, the slotUnlock module would
+      // happily pop slot 4 for players who don't own Slot V yet.
+      const cap = this.maxSlots
+      const slot = this.slots.find(s => !s.unlocked && s.id < cap)
       if (!slot) return
       slot.unlocked = true
       saveGame()
@@ -178,6 +206,13 @@ export const useSlotStore = defineStore("slots", {
     reset() {
       this.slots = this.getDefaultSlots.map(s => ({ ...s }))
       this.selectedSlotId = null
+
+      // Slot V grants a +1 starting unlocked thread post-prestige so the
+      // 5th thread doesn't feel like dead UI on a fresh run.
+      const glyph = useGlyphStore()
+      if (glyph.hasUpgrade("slotV") && this.slots[1]) {
+        this.slots[1].unlocked = true
+      }
     }
   }
 })

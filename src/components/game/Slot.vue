@@ -41,8 +41,28 @@ import { useSlotStore } from "@/stores/slot"
 import { usePatternStore } from "@/stores/pattern"
 import { useUpgradeStore } from "@/stores/upgrade"
 import { useMachineStore } from "@/stores/machine"
+import { useGlyphStore } from "@/stores/glyph"
 import { formatNumber } from "@/utils/format"
 import { playSound } from "@/utils/sound"
+
+// Per-thread Cross click cooldown (Echo of the Cross). Module-level so
+// the cooldown persists if the slot remounts. Maps slot id → next-allowed
+// timestamp (ms). Keyed by id — a thread that swaps to a non-cross
+// pattern still keeps its remaining cooldown if it swaps back.
+const crossCooldowns = new Map<number, number>()
+
+// Cooldown shrinks with the Cross Resolution Glyph upgrade (Tier 3,
+// Step 8). Levels: 0 = 10s, 1 = 7s, 2 = 4s, 3 = 1s.
+function crossCooldownMs(): number {
+  const glyph = useGlyphStore()
+  const lvl = glyph.upgradeLevel("crossResolution")
+  switch (lvl) {
+    case 1:  return 7_000
+    case 2:  return 4_000
+    case 3:  return 1_000
+    default: return 10_000
+  }
+}
 
 type FloatingText = {
   id: number
@@ -121,7 +141,22 @@ function handleClick(event: MouseEvent) {
     return
   }
 
-  if (props.slot.patternId === "cross") return
+  // Cross handling: blocked by default, unlocked by Echo of the Cross
+  // with a per-thread cooldown.
+  if (props.slot.patternId === "cross") {
+    const glyph = useGlyphStore()
+    if (!glyph.hasUpgrade("echoOfTheCross")) return
+
+    const now = Date.now()
+    const next = crossCooldowns.get(props.slot.id) ?? 0
+    if (now < next) {
+      const remaining = ((next - now) / 1000).toFixed(1)
+      spawnFloatingText(event, `${remaining}s`)
+      playSound("error")
+      return
+    }
+    crossCooldowns.set(props.slot.id, now + crossCooldownMs())
+  }
 
   slots.clickSlot(props.slot.id)
   playSound("click")

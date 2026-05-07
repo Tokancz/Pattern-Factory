@@ -15,9 +15,9 @@
       </div>
     </div>
 
-    <div class="slot-container">
+    <div class="slot-container" :class="`slots-${slots.visibleSlots.length}`">
       <Slot
-        v-for="slot in slots.slots"
+        v-for="slot in slots.visibleSlots"
         :key="slot.id"
         :slot="slot"
       />
@@ -65,16 +65,56 @@ const loopTrack = useLoopTrack()
 
   .slot-container {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
     gap: 20px;
     z-index: 1;
 
     @include bp-below("lg") { padding: 80px 0; }
-    @include bp("md") {
-      grid-template-columns: repeat(2, 1fr);
-      grid-template-rows: repeat(2, 1fr);
-      gap: 50px 20px;
-      padding: 60px 0;
+
+    // ─── 4-thread layout (default — no Slot V) ─────────────────────────
+    &.slots-4 {
+      grid-template-columns: repeat(4, 1fr);
+
+      @include bp("md") {
+        grid-template-columns: repeat(2, 1fr);
+        grid-template-rows: repeat(2, 1fr);
+        gap: 50px 20px;
+        padding: 60px 0;
+      }
+    }
+
+    // ─── 5-thread layout (Slot V owned) ────────────────────────────────
+    // Desktop: a single row of 5. Tablet: 3 + 2 with the bottom row
+    // centered via a 6-col grid where each tile spans 2 cols. Phone:
+    // 2 + 2 + 1 with the 5th tile centered via grid-column: 1 / -1.
+    &.slots-5 {
+      grid-template-columns: repeat(5, 1fr);
+
+      @include bp("md") {
+        grid-template-columns: repeat(6, 1fr);
+        grid-template-rows: repeat(2, 1fr);
+        gap: 40px 12px;
+        padding: 60px 0;
+
+        > :nth-child(1) { grid-column: 1 / 3; grid-row: 1; }
+        > :nth-child(2) { grid-column: 3 / 5; grid-row: 1; }
+        > :nth-child(3) { grid-column: 5 / 7; grid-row: 1; }
+        > :nth-child(4) { grid-column: 2 / 4; grid-row: 2; }
+        > :nth-child(5) { grid-column: 4 / 6; grid-row: 2; }
+      }
+
+      @include bp("sm") {
+        grid-template-columns: repeat(2, 1fr);
+        grid-template-rows: repeat(3, auto);
+        gap: 30px 12px;
+
+        // Reset desktop/tablet column placement so the 2-col grid auto-flows.
+        > :nth-child(n) { grid-column: auto; grid-row: auto; }
+
+        > :nth-child(5) {
+          grid-column: 1 / -1;
+          justify-self: center;
+        }
+      }
     }
   }
 

@@ -5,7 +5,8 @@ import { MACHINES } from "@/data/machines"
 import { saveGame } from "@/utils/save"
 import { playSound } from "@/utils/sound"
 
-const MAX_SLOTS = 4
+// Slot cap is dynamic now: 5 when the Slot V Glyph upgrade is owned,
+// 4 otherwise. Read it off the slot store rather than hardcoding here.
 
 export const useMachineStore = defineStore("machines", {
   state: () => ({
@@ -41,10 +42,11 @@ export const useMachineStore = defineStore("machines", {
       return Math.pow(machine.value, lvl)
     },
 
-    // Check if slotUnlock is maxed (all 4 slots unlocked)
+    // Check if slotUnlock is maxed (all unlockable threads unlocked).
+    // Cap is 5 when Slot V is owned, 4 otherwise.
     isSlotUnlockMaxed: (_state) => {
       const slots = useSlotStore()
-      return slots.slots.filter(s => s.unlocked).length >= MAX_SLOTS
+      return slots.slots.filter(s => s.unlocked).length >= slots.maxSlots
     }
   },
 
@@ -56,7 +58,7 @@ export const useMachineStore = defineStore("machines", {
       // Prevent buying more slot unlocks if all slots are already unlocked
       if (id === "slotUnlock") {
         const unlockedCount = slots.slots.filter(s => s.unlocked).length
-        if (unlockedCount >= MAX_SLOTS) { playSound("error"); return }
+        if (unlockedCount >= slots.maxSlots) { playSound("error"); return }
       }
 
       const cost = this.getCost(id)
