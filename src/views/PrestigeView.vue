@@ -52,8 +52,8 @@ const prestige = game.prestige
 .prestige {
   grid-column: 1 / span 4;
   @include flexRow(50px, center, center);
-  font-size: 1.5em;
-  padding: 50px 0;
+  font-size: 1.3em;
+  padding: 20px 0;
 
   .text-container {
     @include flexColumn(8px, center, start);
