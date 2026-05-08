@@ -159,8 +159,6 @@ export const useUpgradeStore = defineStore("upgrades", {
     reset() {
       // Wipe regular and DC upgrade levels on prestige. Prestige levels
       // survive (they're paid for in PP, which only ascension resets).
-      // The Tier 4 Glyph upgrade "Pattern Memory" will later let DC
-      // upgrades persist through prestige; for now, always wipe.
       this.levels = {
         clickingPower: 0,
         sellMultiplier: 0,
@@ -169,6 +167,27 @@ export const useUpgradeStore = defineStore("upgrades", {
         offlineCap: 0,
         offlineGain: 0
       }
+
+      // Pattern Memory (Tier 4) preserves DC upgrades through re-render —
+      // only ascension wipes them when this is owned.
+      const glyph = useGlyphStore()
+      if (!glyph.hasUpgrade("patternMemory")) {
+        this.dcLevels = {
+          squareSpeed: 0,
+          squareOutput: 0,
+          triangleSpeed: 0,
+          triangleOutput: 0,
+          crossSpeed: 0,
+          crossOutput: 0
+        }
+      }
+    },
+
+    resetAll() {
+      // Full wipe used by ascension. Clears every upgrade tier including
+      // PP-tier upgrades and DC upgrades — Pattern Memory only protects
+      // DC upgrades from prestige resets, never from ascension.
+      this.reset()
       this.dcLevels = {
         squareSpeed: 0,
         squareOutput: 0,
@@ -177,12 +196,6 @@ export const useUpgradeStore = defineStore("upgrades", {
         crossSpeed: 0,
         crossOutput: 0
       }
-    },
-
-    resetAll() {
-      // Full wipe used by ascension. Clears every upgrade tier including
-      // PP-tier upgrades, which `reset()` deliberately keeps.
-      this.reset()
       this.prestigeLevels = {
         prestigeOutput: 0,
         prestigeSpeed: 0,

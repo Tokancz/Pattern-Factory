@@ -40,26 +40,6 @@ function onContinue() { emit("close") }
 function onTutorial() { emit("open-tutorial"); emit("close") }
 </script>
 
-<script lang="ts">
-// Keys are scoped per user id so a different account on the same browser
-// gets the intro on its first login.
-const STORAGE_PREFIX = "patternfactory:seenIntro:"
-
-export function hasSeenIntro(userId: number | undefined): boolean {
-  if (userId === undefined) return false
-  return localStorage.getItem(STORAGE_PREFIX + userId) === "1"
-}
-
-export function markIntroSeen(userId: number | undefined): void {
-  if (userId === undefined) return
-  localStorage.setItem(STORAGE_PREFIX + userId, "1")
-}
-
-export function resetIntroSeen(userId: number | undefined): void {
-  if (userId === undefined) return
-  localStorage.removeItem(STORAGE_PREFIX + userId)
-}
-</script>
 
 <style scoped lang="scss">
 .intro-overlay {

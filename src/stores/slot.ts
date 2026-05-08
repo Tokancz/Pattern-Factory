@@ -157,6 +157,17 @@ export const useSlotStore = defineStore("slots", {
         const prestigeGain = Math.max(1, Math.floor(Math.log2(value + 2)))
         game.addPendingPrestigePoints(prestigeGain)
       }
+      else if (type === "glyph") {
+        // Each completion banks 1 pending Γ at base. Glyph Genesis (Tier 3)
+        // doubles the rate. baseProgress on the glyph pattern is tuned so
+        // that one completion takes ~30 minutes at base speed; speed
+        // multipliers naturally accelerate it as the player progresses.
+        const glyph = useGlyphStore()
+        const rate = glyph.hasUpgrade("glyphGenesis") ? 2 : 1
+        glyph.addPendingGlyphs(rate)
+        // Lifetime counter — drives the Architect's Choice endgame.
+        glyph.glyphPatternCount += 1
+      }
 
       const expMultiplier = upgrades.getExpMultiplier * machines.getMultiplier("expMachine")
       const expGain = 1 * expMultiplier

@@ -1,8 +1,9 @@
-import { PATTERNS } from "./patterns"
-
 const BASE = import.meta.env.BASE_URL
 
-export type BossId = keyof typeof PATTERNS
+// Bosses are pinned to the original 4 pattern types. The 5th pattern
+// (Glyph) intentionally has no anomaly — its lore role is the player's
+// own signature, not something the engine glitches into.
+export type BossId = "square" | "triangle" | "circle" | "cross"
 
 export interface BossTuning {
   clicksRequired: number
@@ -11,7 +12,7 @@ export interface BossTuning {
 }
 
 export const BOSSES: Record<BossId, BossTuning> = {
-  square:   { clicksRequired: 150,  timeLimit: 60, icon: `${BASE}img/patterns/bossSquare.svg` },
+  square:   { clicksRequired: 150, timeLimit: 60, icon: `${BASE}img/patterns/bossSquare.svg` },
   triangle: { clicksRequired: 200, timeLimit: 60, icon: `${BASE}img/patterns/bossTriangle.svg` },
   circle:   { clicksRequired: 250, timeLimit: 60, icon: `${BASE}img/patterns/bossCircle.svg` },
   cross:    { clicksRequired: 300, timeLimit: 60, icon: `${BASE}img/patterns/bossCross.svg` }

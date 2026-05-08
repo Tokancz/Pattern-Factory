@@ -15,7 +15,10 @@ export const usePatternStore = defineStore("patterns", {
       square: { level: 1, exp: 0 },
       triangle: { level: 1, exp: 0 },
       circle: { level: 1, exp: 0 },
-      cross: { level: 1, exp: 0 }
+      cross: { level: 1, exp: 0 },
+      // 5th pattern (Reality Engine expansion). Stays at level 1 / unowned
+      // until the Glyph Pattern Glyph upgrade flips its visibility.
+      glyph: { level: 1, exp: 0 }
     } as Record<string, { level: number; exp: number }>,
 
     unlockedPatterns: ["square"]
@@ -132,10 +135,18 @@ export const usePatternStore = defineStore("patterns", {
         square: { level: 1, exp: 0 },
         triangle: { level: 1, exp: 0 },
         circle: { level: 1, exp: 0 },
-        cross: { level: 1, exp: 0 }
+        cross: { level: 1, exp: 0 },
+        glyph: { level: 1, exp: 0 }
       }
 
       this.unlockedPatterns = ["square"]
+
+      // Glyph Pattern is a permanent Glyph upgrade — re-unlock the glyph
+      // pattern after a prestige wipe so the player keeps using it.
+      const glyph = useGlyphStore()
+      if (glyph.hasUpgrade("glyphPattern")) {
+        this.unlockedPatterns.push("glyph")
+      }
     }
   }
 })

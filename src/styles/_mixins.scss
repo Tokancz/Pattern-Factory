@@ -77,12 +77,18 @@
 }
 
 // Coloured variants for the synergy type-badge (shared by SynergyView + SynergyPanel).
+// 4-slot synergy types use the original tertiary palette. 5-slot types
+// (Reality Engine expansion) lean on the primary green so they read as
+// the "next layer" of resonance.
 @mixin synergy-type-colors {
-  &.pair     { border-color: var(--tertiary1); color: var(--tertiary1); }
+  &.pair       { border-color: var(--tertiary1); color: var(--tertiary1); }
   &.triple,
-  &.dual     { border-color: var(--tertiary2); color: var(--tertiary2); }
+  &.dual,
+  &.accord     { border-color: var(--tertiary2); color: var(--tertiary2); }
   &.dominant,
-  &.full     { border-color: var(--tertiary3); color: var(--tertiary3); }
+  &.full,
+  &.tyrant     { border-color: var(--tertiary3); color: var(--tertiary3); }
+  &.spectrum   { border-color: var(--primary);   color: var(--primary); }
 }
 
 // Bullet-prefixed bonus list (synergy panels).

@@ -28,6 +28,11 @@ interface PatternProgressPayload {
   unlocked: boolean
 }
 
+interface GlyphUpgradeLevelPayload {
+  upgradeId: string
+  level: number
+}
+
 interface SavePayload {
   money: number
   dc: number
@@ -42,6 +47,16 @@ interface SavePayload {
   upgrades: UpgradeLevelPayload[]
   machines: MachineLevelPayload[]
   patterns: PatternProgressPayload[]
+
+  // Reality Engine expansion (optional on the wire — older clients
+  // without these fields are tolerated; the server defaults them).
+  glyphs?:            number
+  pendingGlyphs?:     number
+  ascensionCount?:    number
+  glyphPatternCount?: number
+  endgameState?:      "stabilized" | null
+  seenIntro?:         boolean
+  glyphUpgrades?:     GlyphUpgradeLevelPayload[]
 }
 
 export async function getSave(req: AuthRequest, res: Response): Promise<void> {
@@ -51,6 +66,10 @@ export async function getSave(req: AuthRequest, res: Response): Promise<void> {
       prestige_points: number; pending_prestige_points: number
       level: number; exp: number
       unlocked_slots: number; last_played: number; save_version: number
+      glyphs: number; pending_glyphs: number
+      ascension_count: number; glyph_pattern_count: number
+      endgame_state: string | null
+      seen_intro: boolean
     }>(
       "SELECT * FROM game_saves WHERE user_id = $1",
       [req.userId]
@@ -61,14 +80,15 @@ export async function getSave(req: AuthRequest, res: Response): Promise<void> {
       return
     }
 
-    const save = saveResult.rows[0]
+    const save = saveResult.rows[0]!
     const saveId = save.id
 
-    const [slots, upgrades, machines, patterns] = await Promise.all([
+    const [slots, upgrades, machines, patterns, glyphUpgrades] = await Promise.all([
       query("SELECT * FROM slot_states WHERE save_id = $1 ORDER BY slot_index", [saveId]),
       query("SELECT * FROM upgrade_levels WHERE save_id = $1", [saveId]),
       query("SELECT * FROM machine_levels WHERE save_id = $1", [saveId]),
-      query("SELECT * FROM pattern_progress WHERE save_id = $1", [saveId])
+      query("SELECT * FROM pattern_progress WHERE save_id = $1", [saveId]),
+      query("SELECT * FROM glyph_upgrade_levels WHERE save_id = $1", [saveId])
     ])
 
     res.json({
@@ -84,7 +104,17 @@ export async function getSave(req: AuthRequest, res: Response): Promise<void> {
       slots:    slots.rows,
       upgrades: upgrades.rows,
       machines: machines.rows,
-      patterns: patterns.rows
+      patterns: patterns.rows,
+
+      // Reality Engine expansion fields. Defaults make legacy rows
+      // (pre-migration data) safe to round-trip back to the client.
+      glyphs:            save.glyphs ?? 0,
+      pendingGlyphs:     save.pending_glyphs ?? 0,
+      ascensionCount:    save.ascension_count ?? 0,
+      glyphPatternCount: save.glyph_pattern_count ?? 0,
+      endgameState:      save.endgame_state ?? null,
+      seenIntro:         save.seen_intro ?? false,
+      glyphUpgrades:     glyphUpgrades.rows
     })
   } catch (err) {
     console.error(err)
@@ -96,26 +126,44 @@ export async function upsertSave(req: AuthRequest, res: Response): Promise<void>
   const payload = req.body as SavePayload
   const clientVersion = payload.saveVersion ?? 0
 
+  // Reality Engine fields — default everything so older clients that
+  // don't send these don't blow away existing server data with NULLs.
+  const glyphs            = payload.glyphs            ?? 0
+  const pendingGlyphs     = payload.pendingGlyphs     ?? 0
+  const ascensionCount    = payload.ascensionCount    ?? 0
+  const glyphPatternCount = payload.glyphPatternCount ?? 0
+  const endgameState      = payload.endgameState      ?? null
+  const seenIntro         = payload.seenIntro         ?? false
+
   try {
     // Try a version-gated update first
     const updateResult = await query<{ id: number; save_version: number }>(
       `UPDATE game_saves SET
-         money           = $1,
-         dc              = $2,
-         prestige_points = $3,
+         money                   = $1,
+         dc                      = $2,
+         prestige_points         = $3,
          pending_prestige_points = $4,
-         level           = $5,
-         exp             = $6,
-         unlocked_slots  = $7,
-         last_played     = $8,
-         save_version    = save_version + 1
-       WHERE user_id = $9 AND save_version = $10
+         level                   = $5,
+         exp                     = $6,
+         unlocked_slots          = $7,
+         last_played             = $8,
+         glyphs                  = $9,
+         pending_glyphs          = $10,
+         ascension_count         = $11,
+         glyph_pattern_count     = $12,
+         endgame_state           = $13,
+         seen_intro              = $14,
+         save_version            = save_version + 1
+       WHERE user_id = $15 AND save_version = $16
        RETURNING id, save_version`,
       [
         payload.money, payload.dc, payload.prestigePoints,
         payload.pendingPrestigePoints ?? 0,
         payload.level, payload.exp, payload.unlockedSlots,
-        payload.lastPlayed, req.userId, clientVersion
+        payload.lastPlayed,
+        glyphs, pendingGlyphs, ascensionCount, glyphPatternCount,
+        endgameState, seenIntro,
+        req.userId, clientVersion
       ]
     )
 
@@ -124,8 +172,8 @@ export async function upsertSave(req: AuthRequest, res: Response): Promise<void>
 
     if (updateResult.rows.length > 0) {
       // Version matched — update succeeded
-      saveId     = updateResult.rows[0].id
-      newVersion = updateResult.rows[0].save_version
+      saveId     = updateResult.rows[0]!.id
+      newVersion = updateResult.rows[0]!.save_version
     } else {
       // No rows updated: either first-ever save, or version conflict
       const existsResult = await query<{ id: number; save_version: number }>(
@@ -137,7 +185,7 @@ export async function upsertSave(req: AuthRequest, res: Response): Promise<void>
         // Row exists but version didn't match → conflict
         res.status(409).json({
           error: "Save conflict",
-          serverVersion: existsResult.rows[0].save_version
+          serverVersion: existsResult.rows[0]!.save_version
         })
         return
       }
@@ -145,17 +193,23 @@ export async function upsertSave(req: AuthRequest, res: Response): Promise<void>
       // No save at all — create the first one
       const insertResult = await query<{ id: number; save_version: number }>(
         `INSERT INTO game_saves
-           (user_id, money, dc, prestige_points, pending_prestige_points, level, exp, unlocked_slots, last_played, save_version)
-         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,1)
+           (user_id, money, dc, prestige_points, pending_prestige_points,
+            level, exp, unlocked_slots, last_played,
+            glyphs, pending_glyphs, ascension_count, glyph_pattern_count,
+            endgame_state, seen_intro,
+            save_version)
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,1)
          RETURNING id, save_version`,
         [
           req.userId, payload.money, payload.dc, payload.prestigePoints,
           payload.pendingPrestigePoints ?? 0,
-          payload.level, payload.exp, payload.unlockedSlots, payload.lastPlayed
+          payload.level, payload.exp, payload.unlockedSlots, payload.lastPlayed,
+          glyphs, pendingGlyphs, ascensionCount, glyphPatternCount,
+          endgameState, seenIntro
         ]
       )
-      saveId     = insertResult.rows[0].id
-      newVersion = insertResult.rows[0].save_version
+      saveId     = insertResult.rows[0]!.id
+      newVersion = insertResult.rows[0]!.save_version
     }
 
     // Upsert slots
@@ -208,6 +262,21 @@ export async function upsertSave(req: AuthRequest, res: Response): Promise<void>
            unlocked = EXCLUDED.unlocked`,
         [saveId, pattern.patternId, pattern.level, pattern.exp, pattern.unlocked]
       )
+    }
+
+    // Upsert glyph upgrades — only when the client actually sent them.
+    // (Older clients without the expansion will just leave server data
+    // alone instead of wiping it.)
+    if (payload.glyphUpgrades) {
+      for (const upgrade of payload.glyphUpgrades) {
+        await query(
+          `INSERT INTO glyph_upgrade_levels (save_id, upgrade_id, level)
+           VALUES ($1,$2,$3)
+           ON CONFLICT (save_id, upgrade_id) DO UPDATE SET
+             level = EXCLUDED.level`,
+          [saveId, upgrade.upgradeId, upgrade.level]
+        )
+      }
     }
 
     res.json({ saveVersion: newVersion })

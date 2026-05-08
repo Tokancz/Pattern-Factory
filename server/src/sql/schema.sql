@@ -34,14 +34,22 @@ CREATE TABLE game_saves (
   exp            DOUBLE PRECISION DEFAULT 0,
   unlocked_slots INTEGER DEFAULT 1,
   last_played    BIGINT DEFAULT EXTRACT(EPOCH FROM NOW()) * 1000,
-  save_version   INTEGER DEFAULT 0
+  save_version   INTEGER DEFAULT 0,
+
+  -- Reality Engine expansion (Phase 1)
+  glyphs              DOUBLE PRECISION DEFAULT 0,
+  pending_glyphs      DOUBLE PRECISION DEFAULT 0,
+  ascension_count     INTEGER          DEFAULT 0,
+  glyph_pattern_count BIGINT           DEFAULT 0,
+  endgame_state       VARCHAR(20),                 -- null | 'stabilized'
+  seen_intro          BOOLEAN          DEFAULT FALSE
 );
 
--- Slot states (4 per save)
+-- Slot states (up to 5 per save — 4 base + Slot V's 5th thread)
 CREATE TABLE slot_states (
   id               SERIAL PRIMARY KEY,
   save_id          INTEGER REFERENCES game_saves(id) ON DELETE CASCADE,
-  slot_index       INTEGER NOT NULL CHECK (slot_index >= 0 AND slot_index <= 3),
+  slot_index       INTEGER NOT NULL CHECK (slot_index >= 0 AND slot_index <= 4),
   pattern_id       VARCHAR(50),
   progress         DOUBLE PRECISION DEFAULT 0,
   unlocked         BOOLEAN DEFAULT FALSE,
@@ -80,6 +88,16 @@ CREATE TABLE pattern_progress (
   UNIQUE(save_id, pattern_id)
 );
 
+-- Glyph upgrade levels (Reality Engine expansion). Survives prestige and
+-- ascension — these are the player's permanent account-level upgrades.
+CREATE TABLE glyph_upgrade_levels (
+  id          SERIAL PRIMARY KEY,
+  save_id     INTEGER REFERENCES game_saves(id) ON DELETE CASCADE,
+  upgrade_id  VARCHAR(100) NOT NULL,
+  level       INTEGER DEFAULT 0,
+  UNIQUE(save_id, upgrade_id)
+);
+
 -- Leaderboard
 CREATE TABLE leaderboard_entries (
   id              SERIAL PRIMARY KEY,
@@ -96,5 +114,6 @@ CREATE TABLE leaderboard_entries (
 -- Indexes for common queries
 CREATE INDEX idx_leaderboard_prestige ON leaderboard_entries(prestige_points DESC);
 CREATE INDEX idx_leaderboard_user     ON leaderboard_entries(user_id);
-CREATE INDEX idx_slot_states_save     ON slot_states(save_id);
-CREATE INDEX idx_upgrade_levels_save  ON upgrade_levels(save_id);
+CREATE INDEX idx_slot_states_save           ON slot_states(save_id);
+CREATE INDEX idx_upgrade_levels_save        ON upgrade_levels(save_id);
+CREATE INDEX idx_glyph_upgrade_levels_save  ON glyph_upgrade_levels(save_id);

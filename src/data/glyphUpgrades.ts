@@ -130,6 +130,41 @@ export const GLYPH_UPGRADES: Record<string, GlyphUpgrade> = {
     cost: 10,
     maxLevel: 1,
     needs: "glyphPattern"
+  },
+
+  // ─── Tier 4 — Recursion ───────────────────────────────────────────────
+  recursiveClick: {
+    id: "recursiveClick",
+    name: "Recursive Click",
+    description: "Clicking a thread also fires a click on each adjacent unlocked thread.",
+    tier: 4,
+    cost: 18,
+    maxLevel: 1
+  },
+  patternMemory: {
+    id: "patternMemory",
+    name: "Pattern Memory",
+    description: "DC upgrades persist through re-render. Only ascension wipes them now.",
+    tier: 4,
+    cost: 15,
+    maxLevel: 1
+  },
+  engineOverride: {
+    id: "engineOverride",
+    name: "Engine Override",
+    description: "Anomalies appear half as often.",
+    tier: 4,
+    cost: 20,
+    maxLevel: 1
+  },
+  finalPattern: {
+    id: "finalPattern",
+    name: "Final Pattern",
+    description: "Unlocks the endgame. Producing 1000 Γ patterns triggers the Architect's Choice.",
+    tier: 4,
+    cost: 25,
+    maxLevel: 1,
+    needs: "glyphGenesis"
   }
 }
 
@@ -137,8 +172,13 @@ export const GLYPH_UPGRADES: Record<string, GlyphUpgrade> = {
 export const GLYPH_UPGRADE_ORDER: string[] = [
   "slotV", "bootSequence", "threshold", "foundation",
   "anomalyResistance", "anomalyShielding", "echoOfTheCross", "timeDilation", "stableLoop",
-  "glyphPattern", "crossResolution", "resonance", "glyphGenesis"
+  "glyphPattern", "crossResolution", "resonance", "glyphGenesis",
+  "recursiveClick", "patternMemory", "engineOverride", "finalPattern"
 ]
+
+// Glyph patterns required to trigger the Architect's Choice endgame.
+// Tunable — see EXPANSION.md § 6.
+export const ENDGAME_GLYPH_PATTERN_THRESHOLD = 1000
 
 export const TIER_NAMES: Record<GlyphUpgradeTier, string> = {
   1: "Foothold",

@@ -49,6 +49,16 @@
       @open-tutorial="openTutorial"
     />
 
+    <ChoiceOverlay
+      :open="choiceOpen"
+      @stabilize="onStabilize"
+    />
+
+    <CreditsOverlay
+      :open="creditsOpen"
+      @close="creditsOpen = false"
+    />
+
     <!-- Mobile burger menu overlay -->
     <Transition name="menu-fade">
       <div
@@ -92,7 +102,9 @@ import Login from "./components/ui/Login.vue"
 import Navbar from "./components/game/Navbar.vue"
 import BossFight from "@/components/ui/BossFight.vue"
 import AfkReport, { type AfkReportData } from "@/components/ui/AfkReport.vue"
-import IntroOverlay, { hasSeenIntro, markIntroSeen } from "@/components/ui/IntroOverlay.vue"
+import IntroOverlay  from "@/components/ui/IntroOverlay.vue"
+import ChoiceOverlay  from "@/components/ui/ChoiceOverlay.vue"
+import CreditsOverlay from "@/components/ui/CreditsOverlay.vue"
 import { openTutorial } from "@/composables/tutorial"
 import { architectTitle } from "@/utils/architect"
 import { useBossStore } from "@/stores/boss"
@@ -114,15 +126,32 @@ const afkReport = reactive<AfkReportData>({
   prestigePoints: 0
 })
 
-const introOpen = ref(false)
+const introOpen   = ref(false)
+const choiceOpen  = ref(false)
+const creditsOpen = ref(false)
 
 function maybeShowIntro() {
-  if (!hasSeenIntro(user.user?.id)) introOpen.value = true
+  if (!glyphStore.seenIntro) introOpen.value = true
 }
 
 function closeIntro() {
-  markIntroSeen(user.user?.id)
+  glyphStore.setSeenIntro(true)
   introOpen.value = false
+}
+
+// The Architect's Choice: surfaces the Stabilize / Compile modal once
+// the player produces ENDGAME_GLYPH_PATTERN_THRESHOLD Γ patterns AND
+// owns Final Pattern. Once they pick Stabilize, the choice modal closes
+// and the credits roll. Already-stabilized accounts never re-trigger.
+watch(
+  () => glyphStore.endgameAvailable,
+  available => { if (available) choiceOpen.value = true }
+)
+
+function onStabilize() {
+  glyphStore.stabilize()
+  choiceOpen.value  = false
+  creditsOpen.value = true
 }
 
 const { width } = useWindowSize()
@@ -202,7 +231,6 @@ function totalExpDelta(beforeLevel: number, beforeExp: number, afterLevel: numbe
 // Called when user logs in via the Login form
 async function onLoggedIn() {
   await initGame()
-  glyphStore.load(user.user?.id)
   startAutoSave()
   maybeShowIntro()
 }
@@ -212,11 +240,9 @@ onMounted(async () => {
   await user.restoreSession()
 
   if (user.loggedIn) {
-    // Pull fresh save from DB — this is the source of truth
+    // Pull fresh save from DB — this is the source of truth, including
+    // Glyph state (loaded into glyphStore by loadGame()).
     await initGame()
-    // Glyph state lives in localStorage for now (per-user keyed). Backend
-    // migration ships with the ascension flow in a later step.
-    glyphStore.load(user.user?.id)
     // Only start the autosave loop AFTER the load is done. Otherwise the
     // 5s interval can fire mid-load and PUT the default empty state.
     startAutoSave()

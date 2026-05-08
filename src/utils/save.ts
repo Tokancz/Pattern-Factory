@@ -3,6 +3,7 @@ import { usePatternStore } from "@/stores/pattern"
 import { useSlotStore }    from "@/stores/slot"
 import { useUpgradeStore } from "@/stores/upgrade"
 import { useMachineStore } from "@/stores/machine"
+import { useGlyphStore }   from "@/stores/glyph"
 import { api, ApiError }   from "@/utils/api"
 import type { SavePayload } from "../../shared/types"
 
@@ -30,6 +31,7 @@ function buildSavePayload(): SavePayload {
   const slots    = useSlotStore()
   const upgrades = useUpgradeStore()
   const machines = useMachineStore()
+  const glyph    = useGlyphStore()
 
   const upgradePayload = [
     ...Object.entries(upgrades.levels).map(([upgradeId, level]) => ({
@@ -70,6 +72,17 @@ function buildSavePayload(): SavePayload {
       level:    data.level,
       exp:      data.exp,
       unlocked: patterns.unlockedPatterns.includes(patternId)
+    })),
+
+    // Reality Engine expansion state
+    glyphs:            glyph.glyphs,
+    pendingGlyphs:     glyph.pendingGlyphs,
+    ascensionCount:    glyph.ascensionCount,
+    glyphPatternCount: glyph.glyphPatternCount,
+    endgameState:      glyph.endgameState,
+    seenIntro:         glyph.seenIntro,
+    glyphUpgrades:     Object.entries(glyph.boughtUpgrades).map(([upgradeId, level]) => ({
+      upgradeId, level
     }))
   }
 }
@@ -118,6 +131,7 @@ export async function loadGame(): Promise<number | null> {
     const slots = useSlotStore()
     const upgrades = useUpgradeStore()
     const machines = useMachineStore()
+    const glyph = useGlyphStore()
 
     // Patch game state
     game.$patch({
@@ -128,6 +142,26 @@ export async function loadGame(): Promise<number | null> {
       level: data.level,
       exp: data.exp,
       unlockedSlots: data.unlockedSlots
+    })
+
+    // Patch glyph state (Reality Engine expansion). Older saves predate
+    // these columns — defaults keep them zeroed/false so legacy accounts
+    // start the expansion fresh on first load.
+    const glyphUpgradeMap: Record<string, number> = {}
+    for (const u of (data.glyphUpgrades ?? []) as any[]) {
+      // Server returns snake_case from the SQL row.
+      const id    = u.upgrade_id ?? u.upgradeId
+      const level = u.level
+      if (id !== undefined) glyphUpgradeMap[id] = level
+    }
+    glyph.$patch({
+      glyphs:            data.glyphs            ?? 0,
+      pendingGlyphs:     data.pendingGlyphs     ?? 0,
+      ascensionCount:    data.ascensionCount    ?? 0,
+      glyphPatternCount: data.glyphPatternCount ?? 0,
+      endgameState:      data.endgameState      ?? null,
+      seenIntro:         data.seenIntro         ?? false,
+      boughtUpgrades:    glyphUpgradeMap
     })
 
     // Patch slots

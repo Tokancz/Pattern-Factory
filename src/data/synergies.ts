@@ -1,13 +1,20 @@
-export type PatternId = "square" | "triangle" | "circle" | "cross"
+export type PatternId = "square" | "triangle" | "circle" | "cross" | "glyph"
 
-export const ALL_PATTERNS: PatternId[] = ["square", "triangle", "circle", "cross"]
+export const ALL_PATTERNS: PatternId[] = ["square", "triangle", "circle", "cross", "glyph"]
 
 export interface SynergyBonus {
   outputMultipliers: Partial<Record<PatternId, number>>
   speedMultipliers:  Partial<Record<PatternId, number>>
 }
 
-export type SynergyType = "pair" | "triple" | "full" | "dual" | "dominant"
+// 4-slot types (existing): pair / triple / dual / dominant / full.
+// 5-slot types (Reality Engine expansion):
+//   - accord    — 3+2, two patterns sharing the engine's load
+//   - tyrant    — 4+1, one pattern dominates the run
+//   - spectrum  — 1+1+1+1+1, the only synergy that uses every pattern type
+export type SynergyType =
+  | "pair" | "triple" | "full" | "dual" | "dominant"
+  | "accord" | "tyrant" | "spectrum"
 
 export interface SynergyDef {
   id:             string
@@ -194,6 +201,103 @@ export const SYNERGIES: SynergyDef[] = [
       return {
         outputMultipliers: { square: out, triangle: out, circle: out, cross: out },
         speedMultipliers:  { square: 1.12, triangle: 1.12, circle: 1.12, cross: 1.12 }
+      }
+    }
+  },
+
+  // ── ACCORD (5 slots, 3+2 — two patterns share the engine's load) ──────────
+
+  {
+    id:          "industrial_accord",
+    name:        "Industrial Accord",
+    description: "Mass production paired with steady learning. 3 squares + 2 triangles.",
+    type:        "accord",
+    requiredCounts: { square: 3, triangle: 2 },
+    getBonus: () => ({
+      outputMultipliers: { square: 1.25, triangle: 1.18 },
+      speedMultipliers:  { square: 1.12, triangle: 1.10 }
+    })
+  },
+
+  {
+    id:          "void_accord",
+    name:        "Void Accord",
+    description: "Three dark threads weighed against two paradoxes — the engine groans.",
+    type:        "accord",
+    requiredCounts: { circle: 3, cross: 2 },
+    getBonus: () => ({
+      outputMultipliers: { circle: 1.22, cross: 1.30 },
+      speedMultipliers:  { circle: 1.10, cross: 1.08 }
+    })
+  },
+
+  {
+    id:          "recursive_accord",
+    name:        "Recursive Accord",
+    description: "Paradox feeds the self. Three crosses + two glyphs accelerate Γ rendering.",
+    type:        "accord",
+    requiredCounts: { cross: 3, glyph: 2 },
+    getBonus: () => ({
+      outputMultipliers: { cross: 1.30, glyph: 1.40 },
+      speedMultipliers:  { glyph: 1.20 }
+    })
+  },
+
+  // ── TYRANT (5 slots, 4+1 — one pattern overruns the engine) ───────────────
+
+  {
+    id:          "tyrant_of_mass",
+    name:        "Tyrant of Mass",
+    description: "Four square lines hammer reality flat, one knowledge thread coordinates.",
+    type:        "tyrant",
+    requiredCounts: { square: 4, triangle: 1 },
+    getBonus: () => ({
+      outputMultipliers: { square: 1.40 },
+      speedMultipliers:  { square: 1.18 }
+    })
+  },
+
+  {
+    id:          "tyrant_of_voids",
+    name:        "Tyrant of Voids",
+    description: "A four-circle dark cascade, anchored by a single paradox.",
+    type:        "tyrant",
+    requiredCounts: { circle: 4, cross: 1 },
+    getBonus: () => ({
+      outputMultipliers: { circle: 1.42 },
+      speedMultipliers:  { circle: 1.20 }
+    })
+  },
+
+  {
+    id:          "tyrant_of_self",
+    name:        "Tyrant of Self",
+    description: "Four glyphs and a single anchor — the engine is mostly you now.",
+    type:        "tyrant",
+    requiredCounts: { glyph: 4, square: 1 },
+    getBonus: () => ({
+      outputMultipliers: { glyph: 1.50, square: 1.10 },
+      speedMultipliers:  { glyph: 1.25 }
+    })
+  },
+
+  // ── SPECTRUM (5 slots, 1+1+1+1+1 — every pattern type, all at once) ───────
+
+  {
+    id:          "full_spectrum",
+    name:        "Full Spectrum",
+    description: "Every primitive aligned. Scales with your weakest pattern level — the engine renders nothing better than its softest note.",
+    type:        "spectrum",
+    requiredCounts: { square: 1, triangle: 1, circle: 1, cross: 1, glyph: 1 },
+    minAvgLevel: 5,
+    getBonus: (levels) => {
+      const minLvl  = Math.min(levels.square, levels.triangle, levels.circle, levels.cross, levels.glyph)
+      const scaling = 1 + minLvl * 0.025
+      const out     = 1.35 * scaling
+      const spd     = 1.18 * scaling
+      return {
+        outputMultipliers: { square: out, triangle: out, circle: out, cross: out, glyph: out },
+        speedMultipliers:  { square: spd, triangle: spd, circle: spd, cross: spd, glyph: spd }
       }
     }
   }

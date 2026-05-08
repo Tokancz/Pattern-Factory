@@ -38,7 +38,13 @@ let tickHandle: ReturnType<typeof setInterval> | null = null
 
 function randomSpawnDelay(): number {
   const span = BOSS_MAX_INTERVAL_MS - BOSS_MIN_INTERVAL_MS
-  return BOSS_MIN_INTERVAL_MS + Math.random() * span
+  let delay = BOSS_MIN_INTERVAL_MS + Math.random() * span
+
+  // Engine Override (Tier 4): anomalies appear half as often.
+  const glyph = useGlyphStore()
+  if (glyph.hasUpgrade("engineOverride")) delay *= 2
+
+  return delay
 }
 
 export const useBossStore = defineStore("boss", {

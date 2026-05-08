@@ -3,17 +3,20 @@
 @use "@/styles/main.scss" as *;
 
 // ─── Pattern of a clickable card tile (upgrade, machine, pattern) ─────────
+// `min-height` (instead of fixed `height`) keeps the visual rhythm but lets
+// cards grow when their content does — important now that pattern cards
+// carry flavour + role lines and locked patterns carry requirements text.
+// CSS grid auto-rows align cards in the same row to the tallest one.
 %card-tile {
   width: 100%;
-  height: 300px;
-  min-height: 0;
+  min-height: 300px;
 
   @include flexColumn(10px, start, center);
   @include card-surface;
   padding: 20px 10px;
 
-  @include bp("md") { height: 100%; padding: 14px 8px; gap: 6px; }
-  @include bp("sm") { padding: 10px 6px; gap: 4px; }
+  @include bp("md") { min-height: 220px; padding: 14px 8px; gap: 6px; }
+  @include bp("sm") { min-height: 180px; padding: 10px 6px; gap: 4px; }
 }
 
 // ─── .wrapper — paginate buttons + grid (Upgrades, Machines, Synergies) ──
@@ -104,21 +107,26 @@
   grid-template-columns: repeat(4, 1fr);
   grid-gap: 20px;
   padding-top: 20px;
+  // Allow vertical scrolling when cards exceed viewport height (e.g. with
+  // the glyph pattern + flavour/role lines on phones).
+  overflow-y: auto;
+  align-content: start;
 
   @include bp("md") {
     grid-template-columns: repeat(2, 1fr);
     width: 100%;
-    max-width: 400px;
     grid-gap: 10px;
-    padding: 15px 0;
+    padding: 15px 12px;
   }
-  @include bp("sm") { grid-gap: 8px; padding: 12px 0; }
+  @include bp("sm") {
+    grid-gap: 8px;
+    padding: 12px 8px;
+  }
 
   &, & li { @include list-reset; }
 
   .pattern {
     @extend %card-tile;
-    height: 300px;
     padding: 20px;
 
     @include bp("md") { padding: 12px 10px; }
@@ -126,21 +134,28 @@
 
     .pattern-image {
       width: 80px;
+      flex-shrink: 0;
 
       @include bp("md") { width: 54px; }
       @include bp("sm") { width: 40px; }
     }
 
     // Two near-identical containers — merged here. The inventory variant
-    // just uses a wider gap and a slightly larger font on tablet.
+    // just uses a wider gap and a slightly larger font on tablet. Both
+    // grow with their content; the parent card has min-height so empty
+    // text-containers don't collapse the card.
     .text-container,
     .text-container-inventory {
-      height: 100%;
       @include flexColumn(5px, center, center);
+      flex: 1;
+      min-width: 0;
+      width: 100%;
 
       p {
         text-align: center;
         font-size: .9em;
+        word-break: break-word;
+        max-width: 100%;
 
         @include bp("sm") { font-size: .75em; }
 
@@ -150,12 +165,14 @@
           font-size: .8em;
           font-style: italic;
           opacity: 0.75;
+          line-height: 1.25;
           @include bp("sm") { font-size: .7em; }
         }
 
         &.pattern-role {
           font-size: .75em;
           opacity: 0.6;
+          line-height: 1.25;
           @include bp("sm") { font-size: .65em; }
         }
 
@@ -176,8 +193,11 @@
         font-weight: bold;
         margin: 0;
         text-align: center;
+        word-break: break-word;
+        max-width: 100%;
 
         @include bp("md") { font-size: 1.2em; }
+        @include bp("sm") { font-size: 1.05em; }
       }
     }
 

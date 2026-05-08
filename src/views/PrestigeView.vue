@@ -108,7 +108,7 @@
         <section v-if="glyph.ascensionCount > 0" class="glyph-tree" aria-label="Glyph upgrade tree">
           <h3 class="tree-title">Glyph Tree</h3>
 
-          <div v-for="tier in [1, 2, 3] as const" :key="tier" class="glyph-tier">
+          <div v-for="tier in [1, 2, 3, 4] as const" :key="tier" class="glyph-tier">
             <h4 class="tier-label" :class="{ locked: !glyph.isTierUnlocked(tier) }">
               Tier {{ tier }} · {{ TIER_NAMES[tier] }}
               <span v-if="!glyph.isTierUnlocked(tier)" class="lock-note">(buy {{ TIER_UNLOCK_REQUIREMENT }} Tier {{ tier - 1 }} to unlock)</span>
@@ -216,9 +216,13 @@ function onAscendClick() {
 
 <style scoped lang="scss">
 .recursion {
+  @include flexColumn(20px, start, stretch);
   width: 100%;
   height: 100%;
-  @include flexColumn(20px, start, stretch);
+  min-width: 0;
+  // Hide horizontal overflow defensively — long upgrade names should
+  // wrap, never trigger a sideways scrollbar on the parent.
+  overflow-x: hidden;
 }
 
 // ─── Sub-tab nav ─────────────────────────────────────────────────────────
@@ -337,14 +341,21 @@ function onAscendClick() {
 
 .ascend-row {
   @include flexRow(50px, center, center);
+  flex-wrap: wrap;
 
   @include bp("md") { flex-direction: column; gap: 24px; }
 
   .text-container {
     @include flexColumn(8px, center, start);
     max-width: 60%;
+    min-width: 0;
 
     @include bp("md") { max-width: 100%; }
+
+    p {
+      word-break: break-word;
+      max-width: 100%;
+    }
 
     p#ascend-gain {
       font-size: .9em;
@@ -362,10 +373,12 @@ function onAscendClick() {
   .ascend-container {
     @include flexColumn(12px, center, center);
     flex-shrink: 0;
+    max-width: 100%;
 
     .ascend-button {
       @include flexColumn(4px, center, center);
       width: 220px;
+      max-width: 100%;
       padding: 18px 20px;
       border: 2px solid var(--primary);
       background: transparent;
@@ -415,6 +428,7 @@ function onAscendClick() {
 // ─── Glyph upgrade tree ─────────────────────────────────────────────────
 .glyph-tree {
   @include flexColumn(18px, start, stretch);
+  width: 100%;
   font-size: 0.85em;
   padding-top: 8px;
   border-top: 1px solid var(--primary);
@@ -424,13 +438,18 @@ function onAscendClick() {
     font-size: 1.5em;
     color: var(--primary);
     letter-spacing: 0.1em;
+
+    @include bp("sm") { font-size: 1.25em; letter-spacing: 0.05em; }
   }
 }
 
 .glyph-tier {
   @include flexColumn(10px, start, stretch);
+  min-width: 0;
 
   .tier-label {
+    @include flexRow(8px, start, baseline);
+    flex-wrap: wrap;
     font-size: 1em;
     letter-spacing: 0.1em;
     color: var(--primary);
@@ -445,7 +464,6 @@ function onAscendClick() {
       letter-spacing: 0;
       opacity: 0.6;
       text-transform: none;
-      margin-left: 8px;
       font-style: italic;
     }
   }
@@ -457,7 +475,10 @@ function onAscendClick() {
   grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
   gap: 10px;
 
-  @include bp("sm") { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 8px; }
+  @include bp("sm") {
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 8px;
+  }
 }
 
 .glyph-card {
@@ -467,6 +488,10 @@ function onAscendClick() {
   background: var(--black);
   color: var(--white);
   transition: opacity 0.2s, border-color 0.2s, box-shadow 0.2s;
+  min-width: 0;
+  overflow: hidden;
+
+  @include bp("sm") { padding: 10px 12px; }
 
   &.locked {
     opacity: 0.35;
@@ -484,11 +509,14 @@ function onAscendClick() {
   }
 
   .upgrade-name {
+    @include flexRow(6px, space-between, center);
+    flex-wrap: wrap;
     font-size: 1em;
     font-weight: bold;
     color: var(--primary);
     letter-spacing: 0.05em;
-    @include flexRow(8px, space-between, center);
+    word-break: break-word;
+    min-width: 0;
 
     .upgrade-level {
       font-size: 0.75em;
@@ -496,12 +524,14 @@ function onAscendClick() {
       opacity: 0.7;
       letter-spacing: 0;
       font-family: monospace;
+      flex-shrink: 0;
     }
   }
 
   .upgrade-desc {
     font-size: 0.85em;
     opacity: 0.85;
+    word-break: break-word;
     flex: 1;
   }
 

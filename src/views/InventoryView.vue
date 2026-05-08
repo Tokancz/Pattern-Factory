@@ -1,7 +1,7 @@
 <template>
   <Panel title="Archive">
     <ul class="pattern-grid">
-      <li v-for="(p, id) in PATTERNS" :key="id" class="pattern">
+      <li v-for="(p, id) in visiblePatterns" :key="id" class="pattern">
         <img :src="p.visuals.icon" :alt="id" class="pattern-image">
         <div class="text-container-inventory">
           <h3 class="pattern-name">{{ id }}</h3>
@@ -16,6 +16,7 @@
             <span v-else-if="p.type === 'exp'">EXP</span>
             <span v-else-if="p.type === 'dc'">DC</span>
             <span v-else-if="p.type === 'prestige'">PP</span>
+            <span v-else-if="p.type === 'glyph'">Γ</span>
           </p>
         </div>
       </li>
@@ -24,16 +25,27 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from "vue"
 import Panel from "../components/system/Panel.vue"
 import { formatNumber } from "@/utils/format"
 import { PATTERNS } from "@/data/patterns"
 import { usePatternStore } from "@/stores/pattern"
+import { useGlyphStore } from "@/stores/glyph"
 
 const patterns = usePatternStore()
+const glyph    = useGlyphStore()
 
 const expToNext = patterns.expToNext
-const getValue = patterns.getPatternValue
+const getValue  = patterns.getPatternValue
 
+// Mirror PatternView: keep the glyph row out of the Archive until the
+// Glyph Pattern Glyph upgrade is owned.
+const visiblePatterns = computed(() => {
+  const showGlyph = glyph.hasUpgrade("glyphPattern")
+  return Object.fromEntries(
+    Object.entries(PATTERNS).filter(([id]) => showGlyph || id !== "glyph")
+  ) as typeof PATTERNS
+})
 </script>
 
 <style scoped lang="scss">

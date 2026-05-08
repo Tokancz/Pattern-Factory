@@ -5,7 +5,6 @@ import { saveGame } from "@/utils/save"
 import { useUpgradeStore } from "./upgrade"
 import { useMachineStore } from "./machine"
 import { useGlyphStore } from "./glyph"
-import { useUserStore } from "./user"
 import { playSound } from "@/utils/sound"
 
 const ASCEND_LEVEL = 100
@@ -144,16 +143,15 @@ export const useGameStore = defineStore("game", {
       if (!this.canAscend) return
 
       const glyph = useGlyphStore()
-      const user  = useUserStore()
 
       // 1 base Glyph for crossing the level-100 threshold + any pending
-      // Glyphs accumulated this run (only non-zero once the 5th pattern
-      // ships in Step 4).
+      // Glyphs accumulated this run.
       const gained = 1 + Math.floor(glyph.pendingGlyphs)
       glyph.glyphs += gained
       glyph.pendingGlyphs = 0
       glyph.ascensionCount += 1
-      glyph.save(user.user?.id)
+      // No explicit Glyph save needed — saveGame() at the bottom of this
+      // action persists everything (including the Glyph state) in one PUT.
 
       // Wipe everything else
       const patterns = usePatternStore()

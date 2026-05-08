@@ -1,20 +1,14 @@
 import { defineStore } from "pinia"
-import { GLYPH_UPGRADES, TIER_UNLOCK_REQUIREMENT } from "@/data/glyphUpgrades"
+import { GLYPH_UPGRADES, TIER_UNLOCK_REQUIREMENT, ENDGAME_GLYPH_PATTERN_THRESHOLD } from "@/data/glyphUpgrades"
 import type { GlyphUpgradeTier } from "@/data/glyphUpgrades"
-import { useUserStore } from "./user"
 import { usePatternStore } from "./pattern"
+import { saveGame } from "@/utils/save"
 import { playSound } from "@/utils/sound"
 
 // Pinia store for the Reality Engine expansion's Ascension layer.
-//
-// Phase 1 step 2: data shape + per-user localStorage persistence only.
-// Mutation actions (gainPendingGlyphs, ascend, buyUpgrade) land in later
-// steps when the rest of the ascension flow exists.
-//
-// Backend migration is intentionally deferred — once the schema gets the
-// glyph_state columns, swap localStorage for the server-backed save.
-
-const STORAGE_PREFIX = "patternfactory:glyphState:"
+// Persisted server-side via the standard save flow (saveGame()/loadGame()
+// in utils/save.ts). State here is reset by clear() and patched by the
+// loader; mutating actions schedule a saveGame() so changes survive.
 
 interface GlyphState {
   glyphs: number              // permanent, banked Glyphs
@@ -23,6 +17,7 @@ interface GlyphState {
   glyphPatternCount: number   // lifetime — drives endgame trigger
   boughtUpgrades: Record<string, number>
   endgameState: null | "stabilized"
+  seenIntro: boolean          // first-login flavour modal flag
 }
 
 const defaultState = (): GlyphState => ({
@@ -31,7 +26,8 @@ const defaultState = (): GlyphState => ({
   ascensionCount: 0,
   glyphPatternCount: 0,
   boughtUpgrades: {},
-  endgameState: null
+  endgameState: null,
+  seenIntro: false
 })
 
 export const useGlyphStore = defineStore("glyph", {
@@ -90,47 +86,48 @@ export const useGlyphStore = defineStore("glyph", {
         }
         return def.cost
       }
+    },
+
+    // Endgame trigger — the Architect's Choice fires once the player has
+    // produced ENDGAME_GLYPH_PATTERN_THRESHOLD Γ patterns lifetime AND
+    // owns Final Pattern. Already-stabilized accounts don't re-trigger.
+    endgameAvailable(): boolean {
+      if (this.endgameState === "stabilized") return false
+      if (!(this as any).hasUpgrade("finalPattern")) return false
+      return this.glyphPatternCount >= ENDGAME_GLYPH_PATTERN_THRESHOLD
+    },
+
+    endgameThreshold(): number {
+      return ENDGAME_GLYPH_PATTERN_THRESHOLD
     }
   },
 
   actions: {
-    load(userId: number | undefined) {
-      if (userId === undefined) return
-      const raw = localStorage.getItem(STORAGE_PREFIX + userId)
-      if (!raw) {
-        this.$patch(defaultState())
-        return
-      }
-      try {
-        const parsed = JSON.parse(raw) as Partial<GlyphState>
-        this.$patch({
-          glyphs:            parsed.glyphs            ?? 0,
-          pendingGlyphs:     parsed.pendingGlyphs     ?? 0,
-          ascensionCount:    parsed.ascensionCount    ?? 0,
-          glyphPatternCount: parsed.glyphPatternCount ?? 0,
-          boughtUpgrades:    parsed.boughtUpgrades    ?? {},
-          endgameState:      parsed.endgameState      ?? null
-        })
-      } catch {
-        this.$patch(defaultState())
-      }
-    },
-
-    save(userId: number | undefined) {
-      if (userId === undefined) return
-      const payload: GlyphState = {
-        glyphs:            this.glyphs,
-        pendingGlyphs:     this.pendingGlyphs,
-        ascensionCount:    this.ascensionCount,
-        glyphPatternCount: this.glyphPatternCount,
-        boughtUpgrades:    { ...this.boughtUpgrades },
-        endgameState:      this.endgameState
-      }
-      localStorage.setItem(STORAGE_PREFIX + userId, JSON.stringify(payload))
-    },
-
+    // Reset to defaults. Used by ascension-style hard resets that don't
+    // touch the server save (the saveGame() call afterwards persists).
     clear() {
       this.$patch(defaultState())
+    },
+
+    addPendingGlyphs(amount: number) {
+      if (isNaN(amount) || amount <= 0) return
+      this.pendingGlyphs += amount
+    },
+
+    setSeenIntro(seen: boolean) {
+      if (this.seenIntro === seen) return
+      this.seenIntro = seen
+      saveGame()
+    },
+
+    // The Architect's Choice — Stabilize. Locks the engine in its
+    // current state. The factory keeps running passively; the Architect
+    // title becomes "Anchor". One-way, no path back without a fresh
+    // account. (Compile is deferred to a future expansion — see § 6.)
+    stabilize() {
+      this.endgameState = "stabilized"
+      saveGame()
+      playSound("victory")
     },
 
     buyUpgrade(id: string): boolean {
@@ -140,10 +137,10 @@ export const useGlyphStore = defineStore("glyph", {
       const owned = this.upgradeLevel(id)
       const cost  = this.nextLevelCost(id)
 
-      if (owned >= def.maxLevel)                                 { playSound("error"); return false }
-      if (!this.isTierUnlocked(def.tier))                        { playSound("error"); return false }
-      if (def.needs && !this.hasUpgrade(def.needs))              { playSound("error"); return false }
-      if (this.glyphs < cost)                                    { playSound("error"); return false }
+      if (owned >= def.maxLevel)                    { playSound("error"); return false }
+      if (!this.isTierUnlocked(def.tier))           { playSound("error"); return false }
+      if (def.needs && !this.hasUpgrade(def.needs)) { playSound("error"); return false }
+      if (this.glyphs < cost)                       { playSound("error"); return false }
 
       this.glyphs -= cost
       this.boughtUpgrades[id] = owned + 1
@@ -156,8 +153,7 @@ export const useGlyphStore = defineStore("glyph", {
         usePatternStore().unlockPattern("glyph")
       }
 
-      const user = useUserStore()
-      this.save(user.user?.id)
+      saveGame()
       return true
     }
   }

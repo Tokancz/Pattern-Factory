@@ -44,6 +44,11 @@ export interface PatternProgressPayload {
   unlocked: boolean
 }
 
+export interface GlyphUpgradeLevelPayload {
+  upgradeId: string
+  level: number
+}
+
 export interface SavePayload {
   money: number
   dc: number
@@ -58,6 +63,17 @@ export interface SavePayload {
   upgrades: UpgradeLevelPayload[]
   machines: MachineLevelPayload[]
   patterns: PatternProgressPayload[]
+
+  // Reality Engine expansion. Optional on the wire so an older client
+  // (without Glyph state) can still PUT a save against the new server
+  // without sending these. Missing fields are treated as defaults.
+  glyphs?:            number
+  pendingGlyphs?:     number
+  ascensionCount?:    number
+  glyphPatternCount?: number
+  endgameState?:      "stabilized" | null
+  seenIntro?:         boolean
+  glyphUpgrades?:     GlyphUpgradeLevelPayload[]
 }
 
 export interface LeaderboardEntry {

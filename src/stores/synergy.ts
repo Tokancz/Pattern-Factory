@@ -11,7 +11,7 @@ export const useSynergyStore = defineStore("synergy", () => {
   // Current slot composition: how many unlocked, filled slots hold each pattern
   const slotCounts = computed((): Record<PatternId, number> => {
     const slots = useSlotStore()
-    const counts: Record<PatternId, number> = { square: 0, triangle: 0, circle: 0, cross: 0 }
+    const counts: Record<PatternId, number> = { square: 0, triangle: 0, circle: 0, cross: 0, glyph: 0 }
     for (const s of slots.slots) {
       if (s.unlocked && s.patternId && s.patternId in counts) {
         counts[s.patternId as PatternId]++
@@ -27,6 +27,7 @@ export const useSynergyStore = defineStore("synergy", () => {
       triangle: p.patterns["triangle"]?.level ?? 1,
       circle:   p.patterns["circle"]?.level   ?? 1,
       cross:    p.patterns["cross"]?.level    ?? 1,
+      glyph:    p.patterns["glyph"]?.level    ?? 1,
     }
   })
 

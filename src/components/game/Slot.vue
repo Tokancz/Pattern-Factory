@@ -161,6 +161,18 @@ function handleClick(event: MouseEvent) {
   slots.clickSlot(props.slot.id)
   playSound("click")
   spawnFloatingText(event, `+${ formatNumber(upgrades.getClickPower) }`)
+
+  // Recursive Click (Tier 4): the click cascades to adjacent unlocked
+  // threads. Adjacency is by slot id ±1 (the visual grid order), so a
+  // click on thread 2 also fires threads 1 and 3 if both are unlocked.
+  // The recursive fires don't recurse — single-bounce only.
+  const glyph = useGlyphStore()
+  if (glyph.hasUpgrade("recursiveClick")) {
+    for (const offset of [-1, 1]) {
+      const adj = slots.slots.find(s => s.id === props.slot.id + offset)
+      if (adj?.unlocked && adj.patternId) slots.clickSlot(adj.id)
+    }
+  }
 }
 
 function handleWheel(event: WheelEvent) {
