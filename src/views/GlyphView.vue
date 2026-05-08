@@ -271,9 +271,9 @@ const selectedTier = ref<1 | 2 | 3 | 4>(1)
     user-select: none;
 
     &:hover:not(:disabled) {
-      background: var(--black);
-      color: var(--white);
-      box-shadow: inset 0 0 0 2px var(--primary);
+      background: var(--white);
+      color: var(--secondary);
+      box-shadow: inset 0 0 0 2px var(--secondary);
     }
 
     &:disabled {

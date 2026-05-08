@@ -53,25 +53,25 @@
           <h3 class="section-label">Game Values</h3>
           <div class="fields">
             <label for="field-money">IGM (Money)
-              <input id="field-money"       v-model.number="form.money"           type="number" min="0" @blur="form.money = Math.round(form.money)" />
+              <input id="field-money"       v-model.number="form.money"           type="number" min="0" step="any" />
             </label>
             <label for="field-dc">DC (Dark Coins)
-              <input id="field-dc"          v-model.number="form.dc"              type="number" min="0" @blur="form.dc = Math.round(form.dc)" />
+              <input id="field-dc"          v-model.number="form.dc"              type="number" min="0" step="any" />
             </label>
             <label for="field-prestige">Prestige Points
-              <input id="field-prestige"    v-model.number="form.prestige_points" type="number" min="0" @blur="form.prestige_points = Math.round(form.prestige_points)" />
+              <input id="field-prestige"    v-model.number="form.prestige_points" type="number" min="0" step="any" />
             </label>
             <label for="field-level">Level
-              <input id="field-level"       v-model.number="form.level"           type="number" min="1" @blur="form.level = Math.round(form.level)" />
+              <input id="field-level"       v-model.number="form.level"           type="number" min="1" step="any" />
             </label>
             <label for="field-exp">EXP
-              <input id="field-exp"         v-model.number="form.exp"             type="number" min="0" @blur="form.exp = Math.round(form.exp)" />
+              <input id="field-exp"         v-model.number="form.exp"             type="number" min="0" step="any" />
             </label>
             <label for="field-glyphs">Glyphs
-              <input id="field-glyphs"      v-model.number="form.glyphs"         type="number" min="0" @blur="form.glyphs = Math.round(form.glyphs ?? 0)" />
+              <input id="field-glyphs"      v-model.number="form.glyphs"         type="number" min="0" step="any" />
             </label>
             <label for="field-pending-glyphs">Pending Glyphs
-              <input id="field-pending-glyphs" v-model.number="form.pending_glyphs" type="number" min="0" @blur="form.pending_glyphs = Math.round(form.pending_glyphs ?? 0)" />
+              <input id="field-pending-glyphs" v-model.number="form.pending_glyphs" type="number" min="0" step="any" />
             </label>
           </div>
 
