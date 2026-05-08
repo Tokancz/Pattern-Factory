@@ -29,7 +29,7 @@
         <div class="text-container">
           <p>Re-render this layer of reality. Pending PP banks into spendable Persistence Points.</p>
           <p>Crosses generate <strong>Pending PP</strong> while the engine runs — it inscribes only when you re-render.</p>
-          <p>Re-rendering at <strong>1,000,000 IGM</strong> grants bonus PP from accumulated mass.</p>
+            <p>Re-rendering at <strong>{{ formatNumber(game.prestigeThreshold) }} IGM</strong> grants bonus PP from accumulated mass.</p>
           <p id="pending-pp">
             Pending PP: <strong>{{ formatNumber(Math.floor(game.pendingPrestigePoints)) }}</strong>
           </p>
@@ -51,13 +51,13 @@
             :disabled="!game.canPrestige"
             class="prestige-button"
             :class="{ ready: game.canPrestige }"
-            :aria-label="game.canPrestige ? 'Re-render — collapse this run and bank ' + game.getPrestigeGain() + ' PP' : 'Re-render locked — need 1,000,000 IGM or pending PP'"
+            :aria-label="game.canPrestige ? 'Re-render — collapse this run and bank ' + game.getPrestigeGain() + ' PP' : 'Re-render locked — need ' + formatNumber(game.prestigeThreshold) + ' IGM or pending PP'"
           >
             <img src="/img/icons/connectdevelop.svg" alt="" aria-hidden="true">
             <p aria-hidden="true">RE-RENDER</p>
           </button>
           <p v-if="!game.canPrestige" class="requirement">
-            Need {{ formatNumber(1_000_000) }} IGM or pending PP
+            Need {{ formatNumber(game.prestigeThreshold) }} IGM or pending PP
           </p>
         </div>
       </div>
@@ -114,20 +114,6 @@ import Panel from "../components/system/Panel.vue"
 import { useGameStore } from "@/stores/game"
 import { useGlyphStore } from "@/stores/glyph"
 import { formatNumber } from "@/utils/format"
-import {
-  GLYPH_UPGRADES,
-  GLYPH_UPGRADE_ORDER,
-  TIER_NAMES,
-  TIER_UNLOCK_REQUIREMENT,
-  type GlyphUpgrade,
-  type GlyphUpgradeTier
-} from "@/data/glyphUpgrades"
-
-function upgradesInTier(tier: GlyphUpgradeTier): GlyphUpgrade[] {
-  return GLYPH_UPGRADE_ORDER
-    .map(id => GLYPH_UPGRADES[id])
-    .filter((u): u is GlyphUpgrade => !!u && u.tier === tier)
-}
 
 const game     = useGameStore()
 const glyph    = useGlyphStore()
@@ -184,15 +170,14 @@ function onAscendClick() {
 .sub-tabs {
   @include flexRow(0, start, stretch);
   width: 100%;
-  border-bottom: 1px solid var(--primary);
+  border-bottom: 1px solid var(--white);
   flex-shrink: 0;
 
   .sub-tab {
     padding: 8px 24px;
     background: transparent;
     color: var(--white);
-    border: 1px solid var(--primary);
-    border-bottom: none;
+    border: none;
     cursor: pointer;
     font-size: 1.1em;
     letter-spacing: 0.05em;
@@ -204,12 +189,12 @@ function onAscendClick() {
     @include bp("sm") { padding: 6px 14px; font-size: 1em; }
 
     &:hover {
-      background: var(--primary);
+      background: var(--white);
       color: var(--black);
     }
 
     &.active {
-      background: var(--primary);
+      background: var(--white);
       color: var(--black);
       font-weight: bold;
     }
@@ -279,7 +264,7 @@ function onAscendClick() {
       }
     }
 
-    > p.requirement { font-size: .7em; }
+    > p.requirement { font-size: .7em; color: var(--secondary); }
   }
 }
 
@@ -296,7 +281,6 @@ function onAscendClick() {
 
 .ascend-row {
   @include flexRow(50px, center, center);
-  flex-wrap: wrap;
 
   @include bp("md") { flex-direction: column; gap: 24px; }
 
@@ -314,7 +298,7 @@ function onAscendClick() {
 
     p#ascend-gain {
       font-size: .9em;
-      color: var(--primary);
+      color: var(--secondary);
       margin-top: 8px;
     }
     p#current-glyphs,
@@ -335,9 +319,10 @@ function onAscendClick() {
       width: 220px;
       max-width: 100%;
       padding: 18px 20px;
-      border: 2px solid var(--primary);
+      border-radius: 5px;
       background: transparent;
-      color: var(--primary);
+      color: var(--black);
+      background-color: var(--white);
       font-weight: bold;
       letter-spacing: 0.1em;
       opacity: 0.4;
@@ -371,7 +356,8 @@ function onAscendClick() {
     }
 
     .requirement {
-      font-size: .75em;
+      font-size: .7em;
+      max-width: 200px;
       color: var(--secondary);
       text-align: center;
 

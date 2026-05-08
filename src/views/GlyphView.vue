@@ -1,16 +1,16 @@
 <template>
-  <Panel title="Glyphs">
+  <Panel :title="`Glyphs - ${TIER_NAMES[selectedTier]}`">
     <div class="glyph-view">
       <!-- Only show content after first ascension -->
       <div v-if="glyph.ascensionCount > 0" class="glyph-content">
         <!-- Header stats -->
         <div class="glyph-header">
           <div class="stat">
-            <p class="label">You have</p>
+            <p class="label">You have: </p>
             <p class="value">{{ formatNumber(glyph.glyphs) }} Γ</p>
           </div>
           <div class="stat">
-            <p class="label">Ascensions</p>
+            <p class="label">Ascensions: </p>
             <p class="value">{{ glyph.ascensionCount }}</p>
           </div>
         </div>
@@ -33,12 +33,9 @@
 
         <!-- Current tier content -->
         <div class="tier-content">
-          <h3 class="tier-title" :class="{ locked: !glyph.isTierUnlocked(selectedTier) }">
-            {{ TIER_NAMES[selectedTier] }}
-            <span v-if="!glyph.isTierUnlocked(selectedTier)" class="lock-note">
-              (buy {{ TIER_UNLOCK_REQUIREMENT }} Tier {{ selectedTier - 1 }} to unlock)
-            </span>
-          </h3>
+          <p v-if="!glyph.isTierUnlocked(selectedTier)" class="lock-note">
+            (buy {{ TIER_UNLOCK_REQUIREMENT }} Tier {{ selectedTier - 1 }} to unlock)
+          </p>
 
           <ul class="upgrade-grid">
             <li
@@ -122,11 +119,12 @@ const selectedTier = ref<1 | 2 | 3 | 4>(1)
   @include flexRow(20px, start, center);
   flex-wrap: wrap;
   font-size: 1.2em;
+  padding-bottom: 10px;
 
   @include bp("md") { font-size: 1em; }
 
   .stat {
-    @include flexColumn(4px, start, stretch);
+    @include flexRow(10px, start);
 
     .label {
       font-size: 0.85em;
@@ -136,8 +134,8 @@ const selectedTier = ref<1 | 2 | 3 | 4>(1)
     }
 
     .value {
-      font-size: 1.8em;
-      color: var(--primary);
+      font-size: 1.3em;
+      color: var(--secondary);
       font-weight: bold;
       font-family: monospace;
     }
@@ -147,7 +145,8 @@ const selectedTier = ref<1 | 2 | 3 | 4>(1)
 .tier-tabs {
   @include flexRow(0, start, stretch);
   width: 100%;
-  border-bottom: 2px solid var(--primary);
+  border-bottom: 2px solid var(--white);
+  margin-bottom: 10px;
   gap: 0;
 
   .tier-tab {
@@ -166,11 +165,11 @@ const selectedTier = ref<1 | 2 | 3 | 4>(1)
 
     @include bp("sm") { padding: 6px 12px; font-size: 0.9em; }
 
-    &:hover:not(.locked) { background: rgba(192, 254, 4, 0.15); }
+    &:hover:not(.locked) { background: rgba(138, 0, 255, 0.15); }
 
     &.active {
-      background: var(--primary);
-      color: var(--black);
+      background: var(--secondary);
+      color: var(--white);
     }
 
     &.locked {
