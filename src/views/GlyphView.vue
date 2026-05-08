@@ -185,26 +185,15 @@ const selectedTier = ref<1 | 2 | 3 | 4>(1)
   min-height: 0;
   overflow-y: auto;
 
-  .tier-title {
-    font-family: "ivy-presto";
-    font-size: 1.4em;
-    color: var(--primary);
-    letter-spacing: 0.1em;
-    margin-bottom: 8px;
-
-    @include bp("md") { font-size: 1.2em; }
-
-    &.locked { color: var(--white); opacity: 0.4; }
-
-    .lock-note {
-      font-size: 0.6em;
-      letter-spacing: 0;
-      opacity: 0.6;
-      text-transform: none;
-      font-style: italic;
-    }
+  .lock-note {
+    font-size: 1em;
+    letter-spacing: 0;
+    opacity: 0.8;
+    text-transform: none;
+    font-style: italic;
   }
 }
+
 
 .upgrade-grid {
   @include list-reset;
@@ -226,9 +215,8 @@ const selectedTier = ref<1 | 2 | 3 | 4>(1)
 .glyph-card {
   @include flexColumn(8px, start, stretch);
   padding: 14px 16px;
-  border: 1px solid var(--primary);
-  background: var(--black);
-  color: var(--white);
+  background: var(--white);
+  color: var(--black);
   transition: opacity 0.2s, border-color 0.2s, box-shadow 0.2s;
   min-width: 0;
   overflow: hidden;
@@ -236,19 +224,11 @@ const selectedTier = ref<1 | 2 | 3 | 4>(1)
   @include bp("md") { padding: 12px 14px; }
   @include bp("sm") { padding: 10px 12px; font-size: 0.9em; }
 
+  &.affordable {
+    box-shadow: 0 0 12px rgba(138, 0, 255, 0.3);
+  }
   &.locked {
     opacity: 0.35;
-    border-color: rgba(192, 254, 4, 0.3);
-  }
-
-  &.owned {
-    border-color: var(--primary);
-    background: rgba(192, 254, 4, 0.08);
-    box-shadow: inset 0 0 0 1px var(--primary);
-  }
-
-  &.affordable {
-    box-shadow: 0 0 12px rgba(192, 254, 4, 0.3);
   }
 
   .upgrade-name {
@@ -256,14 +236,14 @@ const selectedTier = ref<1 | 2 | 3 | 4>(1)
     flex-wrap: wrap;
     font-size: 1em;
     font-weight: bold;
-    color: var(--primary);
+    color: var(--secondary);
     letter-spacing: 0.05em;
     word-break: break-word;
     min-width: 0;
 
     .upgrade-level {
       font-size: 0.75em;
-      color: var(--white);
+      color: var(--black);
       opacity: 0.7;
       letter-spacing: 0;
       font-family: monospace;
@@ -283,7 +263,7 @@ const selectedTier = ref<1 | 2 | 3 | 4>(1)
     padding: 6px 10px;
     font-size: 0.85em;
     font-weight: bold;
-    background: var(--primary);
+    background: var(--secondary);
     color: var(--black);
     border: none;
     cursor: pointer;
@@ -292,7 +272,7 @@ const selectedTier = ref<1 | 2 | 3 | 4>(1)
 
     &:hover:not(:disabled) {
       background: var(--black);
-      color: var(--primary);
+      color: var(--white);
       box-shadow: inset 0 0 0 2px var(--primary);
     }
 
@@ -303,8 +283,8 @@ const selectedTier = ref<1 | 2 | 3 | 4>(1)
 
     &.owned-btn {
       background: transparent;
-      color: var(--primary);
-      border: 2px solid var(--primary);
+      color: var(--secondary);
+      border: 2px solid var(--secondary);
       opacity: 1;
     }
   }
