@@ -7,17 +7,22 @@ export async function getLeaderboard(_req: Request, res: Response): Promise<void
     const result = await query<{
       rank: number; username: string; factory_name: string
       prestige_points: number; money: number; level: number; submitted_at: string
+      ascension_count: number; glyphs: number; endgame_state: string | null
     }>(
       `SELECT
-        RANK() OVER (ORDER BY prestige_points DESC, level DESC, money DESC) as rank,
+        RANK() OVER (ORDER BY le.prestige_points DESC, le.level DESC, le.money DESC) as rank,
         u.username,
         le.factory_name AS "factoryName",
         le.prestige_points AS "prestigePoints",
         le.money,
         le.level,
-        le.submitted_at AS "submittedAt"
+        le.submitted_at AS "submittedAt",
+        gs.ascension_count AS "ascensionCount",
+        gs.glyphs,
+        gs.endgame_state AS "endgameState"
        FROM leaderboard_entries le
        JOIN users u ON u.id = le.user_id
+       LEFT JOIN game_saves gs ON gs.user_id = le.user_id
        ORDER BY le.prestige_points DESC
        LIMIT 100`
     )

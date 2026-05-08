@@ -33,6 +33,8 @@
               <th scope="col" class="rank">#</th>
               <th scope="col" class="name">Engine</th>
               <th scope="col" class="player">Architect</th>
+              <th scope="col" class="title">Title</th>
+              <th scope="col" class="glyphs">Γ</th>
               <th scope="col" class="prestige">PP</th>
               <th scope="col" class="money">IGM</th>
               <th scope="col" class="level">Level</th>
@@ -47,12 +49,14 @@
               <td class="rank">{{ entry.rank }}</td>
               <td class="name">{{ entry.factoryName }}</td>
               <td class="player">{{ entry.username }}</td>
+              <td class="title">{{ architectTitle(entry.ascensionCount, entry.endgameState === 'stabilized') }}</td>
+              <td class="glyphs">{{ formatNumber(entry.glyphs) }}</td>
               <td class="prestige">{{ formatNumber(entry.prestigePoints) }}</td>
               <td class="money">{{ formatNumber(entry.money) }}</td>
               <td class="level">Lvl {{ entry.level }}</td>
             </tr>
             <tr v-if="entries.length === 0">
-              <td colspan="6" class="empty">No Architects on record yet. Be the first to submit!</td>
+              <td colspan="8" class="empty">No Architects on record yet. Be the first to submit!</td>
             </tr>
           </tbody>
         </table>
@@ -66,6 +70,7 @@ import { ref, onMounted } from "vue"
 import Panel from "../components/system/Panel.vue"
 import { useUserStore } from "@/stores/user"
 import { formatNumber } from "@/utils/format"
+import { architectTitle } from "@/utils/architect"
 import { api } from "@/utils/api"
 
 interface LeaderboardEntry {
@@ -75,6 +80,9 @@ interface LeaderboardEntry {
   prestigePoints: number
   level: number
   money: number
+  ascensionCount: number
+  glyphs: number
+  endgameState: string | null
 }
 
 interface MyRankData {
@@ -232,7 +240,7 @@ onMounted(() => {
       width: 2rem;
     }
 
-    .money, .prestige, .level {
+    .money, .prestige, .level, .glyphs {
       text-align: right;
       font-family: monospace;
     }
