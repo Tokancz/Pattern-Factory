@@ -67,6 +67,12 @@
             <label for="field-exp">EXP
               <input id="field-exp"         v-model.number="form.exp"             type="number" min="0" />
             </label>
+            <label for="field-glyphs">Glyphs
+              <input id="field-glyphs"      v-model.number="form.glyphs"         type="number" min="0" step="1" />
+            </label>
+            <label for="field-pending-glyphs">Pending Glyphs
+              <input id="field-pending-glyphs" v-model.number="form.pending_glyphs" type="number" min="0" step="1" />
+            </label>
           </div>
 
           <p v-if="saveError"   role="alert" class="error">{{ saveError }}</p>
@@ -120,6 +126,9 @@ interface SaveForm {
   prestige_points: number
   level: number
   exp: number
+  glyphs?: number
+  pending_glyphs?: number
+  glyph_pattern_count?: number
 }
 
 const users       = ref<AdminUser[]>([])
@@ -150,7 +159,7 @@ async function selectUser(id: number) {
   selected.value = detail
   form.value = detail.save
     ? { ...detail.save }
-    : { money: 0, dc: 0, prestige_points: 0, level: 1, exp: 0 }
+    : { money: 0, dc: 0, prestige_points: 0, level: 1, exp: 0, glyphs: 0, pending_glyphs: 0, glyph_pattern_count: 0 }
 }
 
 async function saveChanges() {
@@ -159,7 +168,21 @@ async function saveChanges() {
   saveError.value   = ""
   saveSuccess.value = false
   try {
-    await api.patch(`/admin/users/${selected.value.id}/save`, form.value)
+    // Ensure numeric fields are natural numbers (integers, with sensible minima)
+    const payload = {
+      ...form.value,
+      money: Math.max(0, Math.round(form.value.money)),
+      dc: Math.max(0, Math.round(form.value.dc)),
+      prestige_points: Math.max(0, Math.round(form.value.prestige_points)),
+      level: Math.max(1, Math.round(form.value.level)),
+      exp: Math.max(0, Math.round(form.value.exp)),
+      glyphs: Math.max(0, Math.round((form.value.glyphs ?? 0))),
+      pending_glyphs: Math.max(0, Math.round((form.value.pending_glyphs ?? 0))),
+      glyph_pattern_count: Math.max(0, Math.round((form.value.glyph_pattern_count ?? 0)))
+    }
+    // Update local form to reflect rounded values
+    form.value = { ...form.value, ...payload }
+    await api.patch(`/admin/users/${selected.value.id}/save`, payload)
     saveSuccess.value = true
     // If we just edited our own save, resync the running game session so
     // the next autosave doesn't collide with the bumped save_version.

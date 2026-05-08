@@ -19,6 +19,9 @@ interface SaveRow {
   level: number
   exp: number
   unlocked_slots: number
+  glyphs: number
+  pending_glyphs: number
+  glyph_pattern_count: number
 }
 
 // GET /admin/users
@@ -50,7 +53,8 @@ export async function getUser(req: AuthRequest, res: Response): Promise<void> {
     }
 
     const saveResult = await query<SaveRow>(
-      `SELECT money, dc, prestige_points, level, exp, unlocked_slots
+      `SELECT money, dc, prestige_points, level, exp, unlocked_slots,
+              glyphs, pending_glyphs, glyph_pattern_count
        FROM game_saves WHERE user_id = $1`,
       [id]
     )
@@ -75,19 +79,32 @@ export async function getUser(req: AuthRequest, res: Response): Promise<void> {
 // PATCH /admin/users/:id/save  — alter game currency/progression values
 export async function patchUserSave(req: AuthRequest, res: Response): Promise<void> {
   const { id } = req.params
-  const { money, dc, prestige_points, level, exp } = req.body
+  const { money, dc, prestige_points, level, exp, glyphs, pending_glyphs, glyph_pattern_count } = req.body
 
   try {
     await query(
       `UPDATE game_saves SET
-         money            = COALESCE($1, money),
-         dc               = COALESCE($2, dc),
-         prestige_points  = COALESCE($3, prestige_points),
-         level            = COALESCE($4, level),
-         exp              = COALESCE($5, exp),
-         save_version     = save_version + 1
-       WHERE user_id = $6`,
-      [money ?? null, dc ?? null, prestige_points ?? null, level ?? null, exp ?? null, id]
+         money               = COALESCE($1, money),
+         dc                  = COALESCE($2, dc),
+         prestige_points     = COALESCE($3, prestige_points),
+         level               = COALESCE($4, level),
+         exp                 = COALESCE($5, exp),
+         glyphs              = COALESCE($6, glyphs),
+         pending_glyphs      = COALESCE($7, pending_glyphs),
+         glyph_pattern_count = COALESCE($8, glyph_pattern_count),
+         save_version        = save_version + 1
+       WHERE user_id = $9`,
+      [
+        money ?? null,
+        dc ?? null,
+        prestige_points ?? null,
+        level ?? null,
+        exp ?? null,
+        glyphs ?? null,
+        pending_glyphs ?? null,
+        glyph_pattern_count ?? null,
+        id
+      ]
     )
     res.json({ message: "Save updated" })
   } catch (err) {

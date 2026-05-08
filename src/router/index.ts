@@ -6,6 +6,7 @@ import UpgradeView from "@/views/UpgradeView.vue"
 import SynergyView from "@/views/SynergyView.vue"
 import MachineView from "@/views/MachineView.vue"
 import InventoryView from "@/views/InventoryView.vue"
+import GlyphView from "@/views/GlyphView.vue"
 import PrestigeView from "@/views/PrestigeView.vue"
 import Leaderboard from "@/views/Leaderboard.vue"
 import AdminView from "@/views/AdminView.vue"
@@ -17,6 +18,7 @@ const routes = [
   { path: "/synergies",  component: SynergyView },
   { path: "/machines",   component: MachineView },
   { path: "/inventory",  component: InventoryView },
+  { path: "/glyphs",     component: GlyphView },
   { path: "/prestige",   component: PrestigeView },
   { path: "/leaderboard", component: Leaderboard },
   {

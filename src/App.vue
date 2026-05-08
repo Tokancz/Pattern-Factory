@@ -72,6 +72,7 @@
           <router-link to="/synergies">RESONANCES</router-link>
           <router-link to="/machines">MODULES</router-link>
           <router-link to="/inventory">ARCHIVE</router-link>
+          <router-link to="/glyphs">GLYPHS</router-link>
           <router-link to="/prestige">RECURSION</router-link>
           <router-link to="/leaderboard">REGISTRY</router-link>
 

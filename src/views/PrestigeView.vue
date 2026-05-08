@@ -103,51 +103,6 @@
             </p>
           </div>
         </div>
-
-        <!-- Glyph upgrade tree — only meaningful after first ascension. -->
-        <section v-if="glyph.ascensionCount > 0" class="glyph-tree" aria-label="Glyph upgrade tree">
-          <h3 class="tree-title">Glyph Tree</h3>
-
-          <div v-for="tier in [1, 2, 3, 4] as const" :key="tier" class="glyph-tier">
-            <h4 class="tier-label" :class="{ locked: !glyph.isTierUnlocked(tier) }">
-              Tier {{ tier }} · {{ TIER_NAMES[tier] }}
-              <span v-if="!glyph.isTierUnlocked(tier)" class="lock-note">(buy {{ TIER_UNLOCK_REQUIREMENT }} Tier {{ tier - 1 }} to unlock)</span>
-            </h4>
-            <ul class="upgrade-grid">
-              <li
-                v-for="upgrade in upgradesInTier(tier)"
-                :key="upgrade.id"
-                class="glyph-card"
-                :class="{
-                  owned:      glyph.upgradeLevel(upgrade.id) >= upgrade.maxLevel,
-                  affordable: glyph.upgradeLevel(upgrade.id) < upgrade.maxLevel && glyph.canBuyUpgrade(upgrade.id),
-                  locked:     !glyph.isTierUnlocked(upgrade.tier)
-                }"
-              >
-                <h5 class="upgrade-name">
-                  {{ upgrade.name }}
-                  <span v-if="upgrade.maxLevel > 1" class="upgrade-level">
-                    {{ glyph.upgradeLevel(upgrade.id) }}/{{ upgrade.maxLevel }}
-                  </span>
-                </h5>
-                <p class="upgrade-desc">{{ upgrade.description }}</p>
-                <button
-                  v-if="glyph.upgradeLevel(upgrade.id) >= upgrade.maxLevel"
-                  type="button"
-                  class="upgrade-btn owned-btn"
-                  disabled
-                >{{ upgrade.maxLevel > 1 ? "MAX" : "OWNED" }}</button>
-                <button
-                  v-else
-                  type="button"
-                  class="upgrade-btn"
-                  :disabled="!glyph.canBuyUpgrade(upgrade.id)"
-                  @click="glyph.buyUpgrade(upgrade.id)"
-                >{{ glyph.nextLevelCost(upgrade.id) }} Γ</button>
-              </li>
-            </ul>
-          </div>
-        </section>
       </div>
     </div>
   </Panel>
@@ -328,7 +283,7 @@ function onAscendClick() {
   }
 }
 
-// ─── Ascension (new) ────────────────────────────────────────────────────
+// ─── Ascension ─────────────────────────────────────────────────────────
 .ascension {
   @include flexColumn(28px, start, stretch);
   flex: 1;
@@ -421,148 +376,6 @@ function onAscendClick() {
       text-align: center;
 
       &.confirm-msg { color: var(--error); font-weight: bold; }
-    }
-  }
-}
-
-// ─── Glyph upgrade tree ─────────────────────────────────────────────────
-.glyph-tree {
-  @include flexColumn(18px, start, stretch);
-  width: 100%;
-  font-size: 0.85em;
-  padding-top: 8px;
-  border-top: 1px solid var(--primary);
-
-  .tree-title {
-    font-family: "ivy-presto";
-    font-size: 1.5em;
-    color: var(--primary);
-    letter-spacing: 0.1em;
-
-    @include bp("sm") { font-size: 1.25em; letter-spacing: 0.05em; }
-  }
-}
-
-.glyph-tier {
-  @include flexColumn(10px, start, stretch);
-  min-width: 0;
-
-  .tier-label {
-    @include flexRow(8px, start, baseline);
-    flex-wrap: wrap;
-    font-size: 1em;
-    letter-spacing: 0.1em;
-    color: var(--primary);
-    text-transform: uppercase;
-    border-bottom: 1px solid rgba(192, 254, 4, 0.4);
-    padding-bottom: 4px;
-
-    &.locked { color: var(--white); opacity: 0.4; }
-
-    .lock-note {
-      font-size: 0.7em;
-      letter-spacing: 0;
-      opacity: 0.6;
-      text-transform: none;
-      font-style: italic;
-    }
-  }
-}
-
-.upgrade-grid {
-  @include list-reset;
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  gap: 10px;
-
-  @include bp("sm") {
-    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-    gap: 8px;
-  }
-}
-
-.glyph-card {
-  @include flexColumn(8px, start, stretch);
-  padding: 12px 14px;
-  border: 1px solid var(--primary);
-  background: var(--black);
-  color: var(--white);
-  transition: opacity 0.2s, border-color 0.2s, box-shadow 0.2s;
-  min-width: 0;
-  overflow: hidden;
-
-  @include bp("sm") { padding: 10px 12px; }
-
-  &.locked {
-    opacity: 0.35;
-    border-color: rgba(192, 254, 4, 0.3);
-  }
-
-  &.owned {
-    border-color: var(--primary);
-    background: rgba(192, 254, 4, 0.08);
-    box-shadow: inset 0 0 0 1px var(--primary);
-  }
-
-  &.affordable {
-    box-shadow: 0 0 12px rgba(192, 254, 4, 0.3);
-  }
-
-  .upgrade-name {
-    @include flexRow(6px, space-between, center);
-    flex-wrap: wrap;
-    font-size: 1em;
-    font-weight: bold;
-    color: var(--primary);
-    letter-spacing: 0.05em;
-    word-break: break-word;
-    min-width: 0;
-
-    .upgrade-level {
-      font-size: 0.75em;
-      color: var(--white);
-      opacity: 0.7;
-      letter-spacing: 0;
-      font-family: monospace;
-      flex-shrink: 0;
-    }
-  }
-
-  .upgrade-desc {
-    font-size: 0.85em;
-    opacity: 0.85;
-    word-break: break-word;
-    flex: 1;
-  }
-
-  .upgrade-btn {
-    margin-top: auto;
-    padding: 6px 10px;
-    font-size: 0.9em;
-    font-weight: bold;
-    background: var(--primary);
-    color: var(--black);
-    border: none;
-    cursor: pointer;
-    transition: 0.2s;
-    user-select: none;
-
-    &:hover:not(:disabled) {
-      background: var(--black);
-      color: var(--primary);
-      box-shadow: inset 0 0 0 2px var(--primary);
-    }
-
-    &:disabled {
-      cursor: not-allowed;
-      opacity: 0.55;
-    }
-
-    &.owned-btn {
-      background: transparent;
-      color: var(--primary);
-      border: 2px solid var(--primary);
-      opacity: 1;
     }
   }
 }
