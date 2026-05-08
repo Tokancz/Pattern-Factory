@@ -1,5 +1,6 @@
 import { Request, Response } from "express"
 import { query } from "../db.js"
+import { log }   from "../utils/logger.js"
 import { AuthRequest } from "../middleware/auth.js"
 
 export async function getLeaderboard(_req: Request, res: Response): Promise<void> {
@@ -10,16 +11,16 @@ export async function getLeaderboard(_req: Request, res: Response): Promise<void
       ascension_count: number; glyphs: number; endgame_state: string | null
     }>(
       `SELECT
-        RANK() OVER (ORDER BY le.prestige_points DESC, le.level DESC, le.money DESC) as rank,
+        RANK() OVER (ORDER BY le.prestige_points DESC, le.level DESC, le.money DESC) AS rank,
         u.username,
-        le.factory_name AS "factoryName",
+        le.factory_name    AS "factoryName",
         le.prestige_points AS "prestigePoints",
         le.money,
         le.level,
-        le.submitted_at AS "submittedAt",
+        le.submitted_at    AS "submittedAt",
         gs.ascension_count AS "ascensionCount",
         gs.glyphs,
-        gs.endgame_state AS "endgameState"
+        gs.endgame_state   AS "endgameState"
        FROM leaderboard_entries le
        JOIN users u ON u.id = le.user_id
        LEFT JOIN game_saves gs ON gs.user_id = le.user_id
@@ -29,7 +30,7 @@ export async function getLeaderboard(_req: Request, res: Response): Promise<void
 
     res.json(result.rows)
   } catch (err) {
-    console.error(err)
+    log.error("leaderboard.get", "fetch failed", { err })
     res.status(500).json({ error: "Failed to fetch leaderboard" })
   }
 }
@@ -43,7 +44,7 @@ export async function getMyRank(req: AuthRequest, res: Response): Promise<void> 
       `SELECT rank, prestige_points, money, level, submitted_at FROM (
          SELECT
            le.*,
-           RANK() OVER (ORDER BY prestige_points DESC, level DESC, money DESC) as rank
+           RANK() OVER (ORDER BY prestige_points DESC, level DESC, money DESC) AS rank
          FROM leaderboard_entries le
        ) ranked
        WHERE user_id = $1
@@ -59,7 +60,7 @@ export async function getMyRank(req: AuthRequest, res: Response): Promise<void> 
 
     res.json(result.rows[0])
   } catch (err) {
-    console.error(err)
+    log.error("leaderboard.me", "fetch failed", { err, userId: req.userId })
     res.status(500).json({ error: "Failed to fetch rank" })
   }
 }
@@ -92,17 +93,20 @@ export async function submitScore(req: AuthRequest, res: Response): Promise<void
       VALUES ($1,$2,$3,$4,$5)
       ON CONFLICT (user_id)
       DO UPDATE SET
-        factory_name = EXCLUDED.factory_name,
+        factory_name    = EXCLUDED.factory_name,
         prestige_points = EXCLUDED.prestige_points,
-        money = EXCLUDED.money,
-        level = EXCLUDED.level,
-        submitted_at = NOW()`,
+        money           = EXCLUDED.money,
+        level           = EXCLUDED.level,
+        submitted_at    = NOW()`,
       [req.userId, factoryName, prestige_points, money, level]
     )
 
+    log.info("leaderboard.submit", "score submitted", {
+      userId: req.userId, prestigePoints: prestige_points, level
+    })
     res.status(201).json({ message: "Score submitted" })
   } catch (err) {
-    console.error(err)
+    log.error("leaderboard.submit", "submit failed", { err, userId: req.userId })
     res.status(500).json({ error: "Failed to submit score" })
   }
 }

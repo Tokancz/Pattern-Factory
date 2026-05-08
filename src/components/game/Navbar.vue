@@ -42,13 +42,13 @@
       }
 
       li {
-        @include flexRow(0, center, center);
+        @include flexRow(0, end, center);
         width: 100%;
         height: 100%;
         border-bottom: 2px solid var(--primary);
         border-top: 2px solid var(--primary);
         text-align: end;
-        padding: 0 20px;
+        padding-right: 10px;
         cursor: pointer;
         user-select: none;
         transition: .3s;
@@ -62,7 +62,6 @@
 
         a {
           display: block;
-          width: 100%;
           color: var(--primary);
           font-family: "ivy-presto";
           font-size: 4em;

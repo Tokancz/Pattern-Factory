@@ -2,6 +2,7 @@ import { defineStore } from "pinia"
 import { GLYPH_UPGRADES, TIER_UNLOCK_REQUIREMENT, ENDGAME_GLYPH_PATTERN_THRESHOLD } from "@/data/glyphUpgrades"
 import type { GlyphUpgradeTier } from "@/data/glyphUpgrades"
 import { usePatternStore } from "./pattern"
+import { useSlotStore } from "./slot"
 import { saveGame } from "@/utils/save"
 import { playSound } from "@/utils/sound"
 
@@ -151,6 +152,15 @@ export const useGlyphStore = defineStore("glyph", {
       // needs to read the upgrade flag, not re-trigger this path.
       if (id === "glyphPattern") {
         usePatternStore().unlockPattern("glyph")
+      }
+
+      // Slot V raises the slot cap from 4 → 5, but the free "+1 starting
+      // thread" perk only fires inside slotStore.reset() at prestige.
+      // Mid-run buyers would otherwise have to grind another Scale-Out
+      // to feel the upgrade — pop the next slot now to match the
+      // post-prestige experience.
+      if (id === "slotV") {
+        useSlotStore().unlockSlot()
       }
 
       saveGame()

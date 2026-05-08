@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from "express"
 import jwt from "jsonwebtoken"
+import { config } from "../config.js"
 
 export interface AuthRequest extends Request {
   userId?: number
@@ -21,10 +22,10 @@ export function verifyToken(
   const token = authHeader.split(" ")[1]
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET ?? "fallback_secret") as {
-      userId: number
+    const decoded = jwt.verify(token, config.jwtSecret) as {
+      userId:   number
       username: string
-      isAdmin: boolean
+      isAdmin:  boolean
     }
     req.userId   = decoded.userId
     req.username = decoded.username

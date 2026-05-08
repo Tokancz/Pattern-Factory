@@ -1,52 +1,53 @@
 import { Request, Response } from "express"
 import { query } from "../db.js"
+import { log }   from "../utils/logger.js"
 import { AuthRequest } from "../middleware/auth.js"
 
 interface SlotStatePayload {
-  slotIndex: number
-  patternId: string | null
-  progress: number
-  unlocked: boolean
-  speedMultiplier: number
+  slotIndex:        number
+  patternId:        string | null
+  progress:         number
+  unlocked:         boolean
+  speedMultiplier:  number
   outputMultiplier: number
 }
 interface UpgradeLevelPayload {
-  upgradeId: string
-  level: number
+  upgradeId:   string
+  level:       number
   upgradeType: "normal" | "dc" | "prestige"
 }
 
 interface MachineLevelPayload {
   machineId: string
-  level: number
+  level:     number
 }
 
 interface PatternProgressPayload {
   patternId: string
-  level: number
-  exp: number
-  unlocked: boolean
+  level:     number
+  exp:       number
+  unlocked:  boolean
 }
 
 interface GlyphUpgradeLevelPayload {
   upgradeId: string
-  level: number
+  level:     number
 }
 
 interface SavePayload {
-  money: number
-  dc: number
-  prestigePoints: number
+  money:                 number
+  dc:                    number
+  prestigePoints:        number
   pendingPrestigePoints: number
-  level: number
-  exp: number
-  unlockedSlots: number
-  lastPlayed: number
-  saveVersion: number
-  slots: SlotStatePayload[]
-  upgrades: UpgradeLevelPayload[]
-  machines: MachineLevelPayload[]
-  patterns: PatternProgressPayload[]
+  level:                 number
+  exp:                   number
+  unlockedSlots:         number
+  lastPlayed:            number
+  saveVersion:           number
+  slots:                 SlotStatePayload[]
+  upgrades:              UpgradeLevelPayload[]
+  machines:              MachineLevelPayload[]
+  patterns:              PatternProgressPayload[]
 
   // Reality Engine expansion (optional on the wire — older clients
   // without these fields are tolerated; the server defaults them).
@@ -57,6 +58,41 @@ interface SavePayload {
   endgameState?:      "stabilized" | null
   seenIntro?:         boolean
   glyphUpgrades?:     GlyphUpgradeLevelPayload[]
+}
+
+// The client is authoritative for its own progression (idle game, no
+// adversarial multiplayer), but we still defend the DB from NaN/Infinity
+// and negatives — these would corrupt arithmetic on the server side and
+// break leaderboard ordering. The check is intentionally cheap.
+function finiteNonNeg(value: unknown): value is number {
+  return typeof value === "number" && Number.isFinite(value) && value >= 0
+}
+
+function validateSavePayload(p: SavePayload): string | null {
+  const numericFields: Array<[string, unknown]> = [
+    ["money",                 p.money],
+    ["dc",                    p.dc],
+    ["prestigePoints",        p.prestigePoints],
+    ["pendingPrestigePoints", p.pendingPrestigePoints],
+    ["level",                 p.level],
+    ["exp",                   p.exp],
+    ["unlockedSlots",         p.unlockedSlots],
+    ["lastPlayed",            p.lastPlayed],
+    ["saveVersion",           p.saveVersion],
+    ["glyphs",                p.glyphs            ?? 0],
+    ["pendingGlyphs",         p.pendingGlyphs     ?? 0],
+    ["ascensionCount",        p.ascensionCount    ?? 0],
+    ["glyphPatternCount",     p.glyphPatternCount ?? 0]
+  ]
+  for (const [name, value] of numericFields) {
+    if (!finiteNonNeg(value)) return `${name} must be a finite, non-negative number`
+  }
+  if (!Array.isArray(p.slots) || p.slots.length > 5)            return "slots must be an array of ≤5"
+  if (!Array.isArray(p.upgrades) || p.upgrades.length > 200)    return "upgrades array too large"
+  if (!Array.isArray(p.machines) || p.machines.length > 50)     return "machines array too large"
+  if (!Array.isArray(p.patterns) || p.patterns.length > 10)     return "patterns array too large"
+  if (p.glyphUpgrades && p.glyphUpgrades.length > 100)          return "glyphUpgrades array too large"
+  return null
 }
 
 export async function getSave(req: AuthRequest, res: Response): Promise<void> {
@@ -80,7 +116,7 @@ export async function getSave(req: AuthRequest, res: Response): Promise<void> {
       return
     }
 
-    const save = saveResult.rows[0]!
+    const save   = saveResult.rows[0]!
     const saveId = save.id
 
     const [slots, upgrades, machines, patterns, glyphUpgrades] = await Promise.all([
@@ -92,15 +128,15 @@ export async function getSave(req: AuthRequest, res: Response): Promise<void> {
     ])
 
     res.json({
-      money:          save.money,
-      dc:             save.dc,
-      prestigePoints: save.prestige_points,
+      money:                 save.money,
+      dc:                    save.dc,
+      prestigePoints:        save.prestige_points,
       pendingPrestigePoints: save.pending_prestige_points ?? 0,
-      level:          save.level,
-      exp:            save.exp,
-      unlockedSlots:  save.unlocked_slots,
-      lastPlayed:     save.last_played,
-      saveVersion:    save.save_version,
+      level:                 save.level,
+      exp:                   save.exp,
+      unlockedSlots:         save.unlocked_slots,
+      lastPlayed:            save.last_played,
+      saveVersion:           save.save_version,
       slots:    slots.rows,
       upgrades: upgrades.rows,
       machines: machines.rows,
@@ -117,13 +153,19 @@ export async function getSave(req: AuthRequest, res: Response): Promise<void> {
       glyphUpgrades:     glyphUpgrades.rows
     })
   } catch (err) {
-    console.error(err)
+    log.error("save.get", "load failed", { err, userId: req.userId })
     res.status(500).json({ error: "Failed to load save" })
   }
 }
 
 export async function upsertSave(req: AuthRequest, res: Response): Promise<void> {
   const payload = req.body as SavePayload
+  const invalid = validateSavePayload(payload)
+  if (invalid) {
+    res.status(400).json({ error: invalid })
+    return
+  }
+
   const clientVersion = payload.saveVersion ?? 0
 
   // Reality Engine fields — default everything so older clients that
@@ -167,11 +209,10 @@ export async function upsertSave(req: AuthRequest, res: Response): Promise<void>
       ]
     )
 
-    let saveId: number
+    let saveId:     number
     let newVersion: number
 
     if (updateResult.rows.length > 0) {
-      // Version matched — update succeeded
       saveId     = updateResult.rows[0]!.id
       newVersion = updateResult.rows[0]!.save_version
     } else {
@@ -182,9 +223,16 @@ export async function upsertSave(req: AuthRequest, res: Response): Promise<void>
       )
 
       if (existsResult.rows.length > 0) {
-        // Row exists but version didn't match → conflict
+        // Save exists but version didn't match → conflict. Worth logging:
+        // a high rate of these flags either tab-juggling, clock skew, or
+        // an autosave bug.
+        log.info("save.upsert", "version conflict", {
+          userId:        req.userId,
+          clientVersion,
+          serverVersion: existsResult.rows[0]!.save_version
+        })
         res.status(409).json({
-          error: "Save conflict",
+          error:         "Save conflict",
           serverVersion: existsResult.rows[0]!.save_version
         })
         return
@@ -257,8 +305,8 @@ export async function upsertSave(req: AuthRequest, res: Response): Promise<void>
         `INSERT INTO pattern_progress (save_id, pattern_id, level, exp, unlocked)
          VALUES ($1,$2,$3,$4,$5)
          ON CONFLICT (save_id, pattern_id) DO UPDATE SET
-           level   = EXCLUDED.level,
-           exp     = EXCLUDED.exp,
+           level    = EXCLUDED.level,
+           exp      = EXCLUDED.exp,
            unlocked = EXCLUDED.unlocked`,
         [saveId, pattern.patternId, pattern.level, pattern.exp, pattern.unlocked]
       )
@@ -281,17 +329,18 @@ export async function upsertSave(req: AuthRequest, res: Response): Promise<void>
 
     res.json({ saveVersion: newVersion })
   } catch (err) {
-    console.error(err)
+    log.error("save.upsert", "save failed", { err, userId: req.userId })
     res.status(500).json({ error: "Failed to save game" })
   }
 }
 
 export async function deleteSave(req: AuthRequest, res: Response): Promise<void> {
   try {
-    await query("DELETE FROM game_saves WHERE user_id = $1", [req.userId])
+    const result = await query("DELETE FROM game_saves WHERE user_id = $1", [req.userId])
+    log.info("save.delete", "save deleted", { userId: req.userId, rowsDeleted: result.rowCount })
     res.json({ message: "Save deleted" })
   } catch (err) {
-    console.error(err)
+    log.error("save.delete", "delete failed", { err, userId: req.userId })
     res.status(500).json({ error: "Failed to delete save" })
   }
 }

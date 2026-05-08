@@ -3,16 +3,18 @@ import bcrypt from "bcryptjs"
 import jwt from "jsonwebtoken"
 import crypto from "crypto"
 import { query } from "../db.js"
+import { config } from "../config.js"
+import { log } from "../utils/logger.js"
 
 interface RegisterBody {
-  username: string
-  email: string
-  password: string
+  username:    string
+  email:       string
+  password:    string
   factoryName: string
 }
 
 interface LoginBody {
-  email: string
+  email:    string
   password: string
 }
 
@@ -71,30 +73,34 @@ export async function register(req: Request<{}, {}, RegisterBody>, res: Response
       )
     }
 
-    // Email verification token
+    // Email verification token. Until nodemailer is wired up, we surface
+    // the token via dev-only log. In production we never log the value;
+    // the caller is expected to pull it from the DB or trigger the mailer.
     const verifyToken = crypto.randomBytes(32).toString("hex")
-    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000)
+    const expiresAt   = new Date(Date.now() + 24 * 60 * 60 * 1000)
     await query(
       `INSERT INTO email_verification_tokens (user_id, token, expires_at)
        VALUES ($1, $2, $3)`,
       [userId, verifyToken, expiresAt]
     )
 
-    // TODO: send verification email via nodemailer here
-    console.log(`Verification token for ${email}: ${verifyToken}`)
+    if (!config.isProd) {
+      log.debug("auth.register", "verification token issued (dev only)", { userId, verifyToken })
+    }
 
     const token = jwt.sign(
       { userId, username },
-      process.env.JWT_SECRET ?? "fallback_secret",
+      config.jwtSecret,
       { expiresIn: "7d" }
     )
 
+    log.info("auth.register", "user registered", { userId, username })
     res.status(201).json({
       token,
       user: { id: userId, username, email, factoryName }
     })
   } catch (err) {
-    console.error(err)
+    log.error("auth.register", "registration failed", { err, username, email })
     res.status(500).json({ error: "Registration failed" })
   }
 }
@@ -104,27 +110,30 @@ export async function login(req: Request<{}, {}, LoginBody>, res: Response): Pro
 
   try {
     const result = await query<{
-      id: number
-      username: string
-      email: string
-      factory_name: string
+      id:            number
+      username:      string
+      email:         string
+      factory_name:  string
       password_hash: string
-      verified: boolean
-      is_admin: boolean
+      verified:      boolean
+      is_admin:      boolean
     }>(
       "SELECT * FROM users WHERE email = $1",
       [email]
     )
 
     if (result.rows.length === 0) {
+      // Generic message — don't disclose whether email exists.
+      log.info("auth.login", "failed: unknown email", { email })
       res.status(401).json({ error: "Invalid credentials" })
       return
     }
 
-    const user = result.rows[0]
+    const user  = result.rows[0]
     const valid = await bcrypt.compare(password, user.password_hash)
 
     if (!valid) {
+      log.info("auth.login", "failed: bad password", { userId: user.id })
       res.status(401).json({ error: "Invalid credentials" })
       return
     }
@@ -133,22 +142,23 @@ export async function login(req: Request<{}, {}, LoginBody>, res: Response): Pro
 
     const token = jwt.sign(
       { userId: user.id, username: user.username, isAdmin: user.is_admin ?? false },
-      process.env.JWT_SECRET ?? "fallback_secret",
+      config.jwtSecret,
       { expiresIn: "7d" }
     )
 
+    log.info("auth.login", "user logged in", { userId: user.id, username: user.username })
     res.json({
       token,
       user: {
-        id: user.id,
-        username: user.username,
-        email: user.email,
+        id:          user.id,
+        username:    user.username,
+        email:       user.email,
         factoryName: user.factory_name,
-        isAdmin: user.is_admin ?? false
+        isAdmin:     user.is_admin ?? false
       }
     })
   } catch (err) {
-    console.error(err)
+    log.error("auth.login", "login error", { err, email })
     res.status(500).json({ error: "Login failed" })
   }
 }
@@ -176,9 +186,10 @@ export async function verifyEmail(req: Request, res: Response): Promise<void> {
     await query("UPDATE users SET verified = TRUE WHERE id = $1", [record.user_id])
     await query("DELETE FROM email_verification_tokens WHERE token = $1", [token])
 
+    log.info("auth.verifyEmail", "email verified", { userId: record.user_id })
     res.json({ message: "Email verified successfully" })
   } catch (err) {
-    console.error(err)
+    log.error("auth.verifyEmail", "verification failed", { err })
     res.status(500).json({ error: "Verification failed" })
   }
 }
@@ -188,13 +199,13 @@ export async function getMe(req: Request, res: Response): Promise<void> {
 
   try {
     const result = await query<{
-      id: number
-      username: string
-      email: string
+      id:           number
+      username:     string
+      email:        string
       factory_name: string
-      verified: boolean
-      is_admin: boolean
-      created_at: string
+      verified:     boolean
+      is_admin:     boolean
+      created_at:   string
     }>(
       "SELECT id, username, email, factory_name, verified, is_admin, created_at FROM users WHERE id = $1",
       [authReq.userId]
@@ -207,16 +218,16 @@ export async function getMe(req: Request, res: Response): Promise<void> {
 
     const u = result.rows[0]
     res.json({
-      id: u.id,
-      username: u.username,
-      email: u.email,
+      id:          u.id,
+      username:    u.username,
+      email:       u.email,
       factoryName: u.factory_name,
-      isAdmin: u.is_admin ?? false,
-      verified: u.verified,
-      createdAt: u.created_at
+      isAdmin:     u.is_admin ?? false,
+      verified:    u.verified,
+      createdAt:   u.created_at
     })
   } catch (err) {
-    console.error(err)
+    log.error("auth.getMe", "lookup failed", { err, userId: authReq.userId })
     res.status(500).json({ error: "Failed to fetch user" })
   }
 }

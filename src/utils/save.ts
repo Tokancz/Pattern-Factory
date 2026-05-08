@@ -5,7 +5,32 @@ import { useUpgradeStore } from "@/stores/upgrade"
 import { useMachineStore } from "@/stores/machine"
 import { useGlyphStore }   from "@/stores/glyph"
 import { api, ApiError }   from "@/utils/api"
+import { log }             from "@/utils/logger"
 import type { SavePayload } from "../../shared/types"
+
+// Server returns rows in snake_case (raw from Postgres). We keep the on-the-
+// wire shape narrow here so the patch path doesn't have to use `as any`.
+interface SlotRow {
+  slot_index:        number
+  pattern_id:        string | null
+  progress:          number
+  unlocked:          boolean
+  speed_multiplier:  number
+  output_multiplier: number
+}
+interface UpgradeRow      { upgrade_id: string; level: number; upgrade_type: "normal" | "dc" | "prestige" }
+interface MachineRow      { machine_id: string; level: number }
+interface PatternRow      { pattern_id: string; level: number; exp: number; unlocked: boolean }
+interface GlyphUpgradeRow { upgrade_id: string; level: number }
+
+interface ServerSave extends Omit<SavePayload, "slots" | "upgrades" | "machines" | "patterns" | "glyphUpgrades"> {
+  slots:         SlotRow[]
+  upgrades:      UpgradeRow[]
+  machines:      MachineRow[]
+  patterns:      PatternRow[]
+  glyphUpgrades: GlyphUpgradeRow[]
+  lastPlayed:    number
+}
 
 // Tracks the save_version we last received from the server.
 // Every successful save/load updates this so the next save can
@@ -106,10 +131,12 @@ export function saveGame(): Promise<void> {
       // On version conflict the other device wrote more recently — pull
       // server state instead of overwriting it. Last-write-wins by device.
       if (err instanceof ApiError && err.status === 409) {
+        log.info("save conflict — pulling server state")
         await loadGame()
         return
       }
-      console.error("Save failed:", err)
+      const status = err instanceof ApiError ? err.status : "?"
+      log.error(`save failed (status=${status})`, err)
     }
   })().finally(() => { inFlight = null })
 
@@ -121,38 +148,35 @@ export async function loadGame(): Promise<number | null> {
   if (!token) return null
 
   try {
-    const data = await api.get<SavePayload & { lastPlayed: number }>("/save")
+    const data = await api.get<ServerSave>("/save")
 
     // Sync our local version with what the server has
     saveVersion = data.saveVersion ?? 0
 
-    const game = useGameStore()
+    const game     = useGameStore()
     const patterns = usePatternStore()
-    const slots = useSlotStore()
+    const slots    = useSlotStore()
     const upgrades = useUpgradeStore()
     const machines = useMachineStore()
-    const glyph = useGlyphStore()
+    const glyph    = useGlyphStore()
 
     // Patch game state
     game.$patch({
-      money: data.money,
-      dc: data.dc,
-      prestigePoints: data.prestigePoints,
+      money:                 data.money,
+      dc:                    data.dc,
+      prestigePoints:        data.prestigePoints,
       pendingPrestigePoints: data.pendingPrestigePoints ?? 0,
-      level: data.level,
-      exp: data.exp,
-      unlockedSlots: data.unlockedSlots
+      level:                 data.level,
+      exp:                   data.exp,
+      unlockedSlots:         data.unlockedSlots
     })
 
     // Patch glyph state (Reality Engine expansion). Older saves predate
     // these columns — defaults keep them zeroed/false so legacy accounts
     // start the expansion fresh on first load.
     const glyphUpgradeMap: Record<string, number> = {}
-    for (const u of (data.glyphUpgrades ?? []) as any[]) {
-      // Server returns snake_case from the SQL row.
-      const id    = u.upgrade_id ?? u.upgradeId
-      const level = u.level
-      if (id !== undefined) glyphUpgradeMap[id] = level
+    for (const u of data.glyphUpgrades ?? []) {
+      glyphUpgradeMap[u.upgrade_id] = u.level
     }
     glyph.$patch({
       glyphs:            data.glyphs            ?? 0,
@@ -164,10 +188,10 @@ export async function loadGame(): Promise<number | null> {
       boughtUpgrades:    glyphUpgradeMap
     })
 
-    // Patch slots
-    const defaultSlots = slots.getDefaultSlots
-    slots.slots = defaultSlots.map((defaultSlot, i) => {
-      const saved = (data.slots as any[]).find((s: any) => s.slot_index === i)
+    // Patch slots — keep the default array shape so any new slots we add
+    // later are present even when missing from the server payload.
+    slots.slots = slots.getDefaultSlots.map((defaultSlot, i) => {
+      const saved = data.slots.find(s => s.slot_index === i)
       if (!saved) return defaultSlot
       return {
         ...defaultSlot,
@@ -179,38 +203,36 @@ export async function loadGame(): Promise<number | null> {
       }
     })
 
-    // Patch upgrades
-    const normalLevels: Record<string, number>   = {}
-    const dcLevels: Record<string, number>        = {}
-    const prestigeLevels: Record<string, number>  = {}
+    // Patch upgrades — split server rows by upgrade_type into the three
+    // sibling level maps the upgrade store keeps separately.
+    const normalLevels:   Record<string, number> = {}
+    const dcLevels:       Record<string, number> = {}
+    const prestigeLevels: Record<string, number> = {}
 
-    for (const u of data.upgrades as any[]) {
-      if (u.upgrade_type === "normal")   normalLevels[u.upgrade_id]   = u.level
-      if (u.upgrade_type === "dc")       dcLevels[u.upgrade_id]       = u.level
-      if (u.upgrade_type === "prestige") prestigeLevels[u.upgrade_id] = u.level
+    for (const u of data.upgrades) {
+      if      (u.upgrade_type === "normal")   normalLevels[u.upgrade_id]   = u.level
+      else if (u.upgrade_type === "dc")       dcLevels[u.upgrade_id]       = u.level
+      else if (u.upgrade_type === "prestige") prestigeLevels[u.upgrade_id] = u.level
     }
 
     upgrades.$patch({ levels: normalLevels, dcLevels, prestigeLevels })
 
     // Patch machines
     const machineLevels: Record<string, number> = {}
-    for (const m of data.machines as any[]) {
-      machineLevels[m.machine_id] = m.level
-    }
+    for (const m of data.machines) machineLevels[m.machine_id] = m.level
     machines.$patch({ levels: machineLevels })
 
     // Patch patterns
     const patternData: Record<string, { level: number; exp: number }> = {}
     const unlockedPatterns: string[] = []
-
-    for (const p of data.patterns as any[]) {
+    for (const p of data.patterns) {
       patternData[p.pattern_id] = { level: p.level, exp: p.exp }
       if (p.unlocked) unlockedPatterns.push(p.pattern_id)
     }
-
     patterns.$patch({ patterns: patternData, unlockedPatterns })
 
     gameLoaded = true
+    log.debug("save loaded", { saveVersion, lastPlayed: data.lastPlayed })
     return data.lastPlayed
   } catch (err) {
     if (err instanceof ApiError && err.status === 404) {
@@ -219,7 +241,8 @@ export async function loadGame(): Promise<number | null> {
       gameLoaded = true
       return null
     }
-    console.error("Load failed:", err)
+    const status = err instanceof ApiError ? err.status : "?"
+    log.error(`load failed (status=${status})`, err)
     return null
   }
 }

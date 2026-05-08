@@ -92,7 +92,7 @@
 import Panel from "../components/system/Panel.vue"
 import { computed, ref, watch } from "vue"
 import { useSynergyStore } from "@/stores/synergy"
-import { SYNERGIES, type SynergyDef, type PatternId, ALL_PATTERNS } from "@/data/synergies"
+import { type SynergyDef, type PatternId, ALL_PATTERNS } from "@/data/synergies"
 
 type FilterId = "active" | "almost" | "all"
 type Status = "active" | "almost" | "locked"
@@ -116,7 +116,7 @@ const pendingMap = computed(() => {
   return map
 })
 
-const allEntries = computed((): Entry[] => SYNERGIES.map(syn => {
+const allEntries = computed((): Entry[] => synergy.visibleSynergies.map(syn => {
   if (activeIds.value.has(syn.id)) return { syn, status: "active" }
   if (pendingMap.value.has(syn.id)) return { syn, status: "almost", missing: pendingMap.value.get(syn.id) }
   return { syn, status: "locked" }
@@ -125,7 +125,7 @@ const allEntries = computed((): Entry[] => SYNERGIES.map(syn => {
 const filters = computed(() => [
   { id: "active" as FilterId, label: "ACTIVE", count: synergy.activeSynergies.length },
   { id: "almost" as FilterId, label: "ALMOST", count: synergy.pendingSynergies.length },
-  { id: "all"    as FilterId, label: "ALL",    count: SYNERGIES.length }
+  { id: "all"    as FilterId, label: "ALL",    count: synergy.visibleSynergies.length }
 ])
 
 const visibleSynergies = computed(() => {

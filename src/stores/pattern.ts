@@ -81,10 +81,9 @@ export const usePatternStore = defineStore("patterns", {
     addExp(id: string, amount: number) {
       const p = this.patterns[id]
 
-      if (!p || isNaN(amount)) {
-        console.warn("Invalid EXP:", id, amount)
-        return
-      }
+      // Drop NaN/Infinity at the source so they don't silently propagate
+      // into exp/level fields and corrupt the save downstream.
+      if (!p || !Number.isFinite(amount)) return
 
       p.exp += amount
 

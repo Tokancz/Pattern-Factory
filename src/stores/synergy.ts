@@ -38,6 +38,23 @@ export const useSynergyStore = defineStore("synergy", () => {
     return 1 + machines.getLevel("synergyBoost") * 0.15
   })
 
+  // Synergies stay hidden until the player has unlocked the prerequisites
+  // that make them reachable — otherwise the resonance list spoils that
+  // 5-slot setups and a 5th pattern type exist before the player has any
+  // way to engage with them.
+  const visibleSynergies = computed((): SynergyDef[] => {
+    const slots = useSlotStore()
+    const glyph = useGlyphStore()
+    const fifthSlotUnlocked  = slots.slots[4]?.unlocked === true
+    const glyphPatternOwned  = glyph.hasUpgrade("glyphPattern")
+    return SYNERGIES.filter(syn => {
+      const total = ALL_PATTERNS.reduce((sum, p) => sum + (syn.requiredCounts[p] ?? 0), 0)
+      if (total >= 5 && !fifthSlotUnlocked) return false
+      if ((syn.requiredCounts.glyph ?? 0) > 0 && !glyphPatternOwned) return false
+      return true
+    })
+  })
+
   // Resonance Glyph upgrade allows synergies to fire when the slot
   // composition is one pattern short of the exact requirement. Without
   // it, synergies stay strict (current behaviour).
@@ -47,7 +64,7 @@ export const useSynergyStore = defineStore("synergy", () => {
     const glyph = useGlyphStore()
     const allowedDeficit = glyph.hasUpgrade("resonance") ? 1 : 0
 
-    return SYNERGIES.filter(syn => {
+    return visibleSynergies.value.filter(syn => {
       let totalDeficit = 0
       for (const p of ALL_PATTERNS) {
         const need = syn.requiredCounts[p] ?? 0
@@ -75,7 +92,7 @@ export const useSynergyStore = defineStore("synergy", () => {
     const levels = patternLevels.value
     const activeIds = new Set(activeSynergies.value.map(s => s.id))
 
-    return SYNERGIES
+    return visibleSynergies.value
       .filter(syn => !activeIds.has(syn.id))
       .flatMap(syn => {
         let deficitTotal = 0
@@ -131,6 +148,7 @@ export const useSynergyStore = defineStore("synergy", () => {
     slotCounts,
     patternLevels,
     synergyAmplifier,
+    visibleSynergies,
     activeSynergies,
     pendingSynergies,
     getOutputMultiplier,
