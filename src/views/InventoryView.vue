@@ -1,6 +1,6 @@
 <template>
   <Panel title="Archive">
-    <ul class="pattern-grid">
+    <ul class="pattern-grid" :style="{ '--cols': patternCount }">
       <li v-for="(p, id) in visiblePatterns" :key="id" class="pattern">
         <img :src="p.visuals.icon" :alt="id" class="pattern-image">
         <div class="text-container-inventory">
@@ -46,6 +46,8 @@ const visiblePatterns = computed(() => {
     Object.entries(PATTERNS).filter(([id]) => showGlyph || id !== "glyph")
   ) as typeof PATTERNS
 })
+
+const patternCount = computed(() => Object.keys(visiblePatterns.value).length)
 </script>
 
 <style scoped lang="scss">

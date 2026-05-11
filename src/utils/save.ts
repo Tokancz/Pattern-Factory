@@ -178,11 +178,15 @@ export async function loadGame(): Promise<number | null> {
     for (const u of data.glyphUpgrades ?? []) {
       glyphUpgradeMap[u.upgrade_id] = u.level
     }
+    // Number() coerces BIGINT columns that node-postgres may still return
+    // as strings on environments without the int8 type-parser registered
+    // (e.g. an older deployment). Without this, `count += 1` becomes
+    // string concatenation and the next save fails validation.
     glyph.$patch({
-      glyphs:            data.glyphs            ?? 0,
-      pendingGlyphs:     data.pendingGlyphs     ?? 0,
-      ascensionCount:    data.ascensionCount    ?? 0,
-      glyphPatternCount: data.glyphPatternCount ?? 0,
+      glyphs:            Number(data.glyphs            ?? 0),
+      pendingGlyphs:     Number(data.pendingGlyphs     ?? 0),
+      ascensionCount:    Number(data.ascensionCount    ?? 0),
+      glyphPatternCount: Number(data.glyphPatternCount ?? 0),
       endgameState:      data.endgameState      ?? null,
       seenIntro:         data.seenIntro         ?? false,
       boughtUpgrades:    glyphUpgradeMap

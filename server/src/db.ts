@@ -5,7 +5,14 @@ import { log } from "./utils/logger.js"
 
 dotenv.config()
 
-const { Pool } = pg
+const { Pool, types } = pg
+
+// Parse BIGINT (oid 20) as a JS number instead of the default string. Our
+// BIGINT columns (last_played ms timestamp, glyph_pattern_count) never
+// approach Number.MAX_SAFE_INTEGER, so the precision tradeoff is safe.
+// Without this, glyphPatternCount round-trips as a string and the client's
+// `+= 1` becomes string concat — saves then fail validation server-side.
+types.setTypeParser(20, (v) => parseInt(v, 10))
 
 export const pool = new Pool({
   connectionString: process.env.DATABASE_URL,

@@ -1,5 +1,8 @@
 <template>
-  <Login v-if="!user.loggedIn" @logged-in="onLoggedIn" />
+  <Login v-if="!user.loggedIn" />
+  <div v-else-if="!gameReady" class="boot-splash" role="status" aria-live="polite">
+    <p>Loading the Engine…</p>
+  </div>
 
   <template v-else>
     <header>
@@ -131,6 +134,13 @@ const introOpen   = ref(false)
 const choiceOpen  = ref(false)
 const creditsOpen = ref(false)
 
+// Gates the main UI until loadGame() has populated the stores. Without
+// this, flipping user.loggedIn = true inside register()/login() makes
+// Vue paint the main view with default 0 values before /save resolves —
+// users perceive that as "the DB only loads after a refresh."
+const gameReady = ref(false)
+let autoSaveStarted = false
+
 function maybeShowIntro() {
   if (!glyphStore.seenIntro) introOpen.value = true
 }
@@ -229,26 +239,43 @@ function totalExpDelta(beforeLevel: number, beforeExp: number, afterLevel: numbe
   return sum
 }
 
-// Called when user logs in via the Login form
-async function onLoggedIn() {
-  await initGame()
-  startAutoSave()
-  maybeShowIntro()
+// Single boot path used by both restoreSession on mount and the
+// post-login/register transition. The watcher below covers the latter
+// so we don't rely on a child emit reaching the parent during the same
+// tick Login unmounts in. bootPromise dedupes the two callers that
+// would otherwise both fire after restoreSession() flips loggedIn.
+let bootPromise: Promise<void> | null = null
+function bootGame(): Promise<void> {
+  if (gameReady.value) return Promise.resolve()
+  if (bootPromise) return bootPromise
+  bootPromise = (async () => {
+    try {
+      await initGame()
+      if (!autoSaveStarted) {
+        startAutoSave()
+        autoSaveStarted = true
+      }
+      maybeShowIntro()
+      gameReady.value = true
+    } finally {
+      bootPromise = null
+    }
+  })()
+  return bootPromise
 }
+
+watch(() => user.loggedIn, async loggedIn => {
+  if (loggedIn) await bootGame()
+  else {
+    gameReady.value = false
+  }
+})
 
 onMounted(async () => {
   // Restore session (JWT still valid from previous visit)
   await user.restoreSession()
 
-  if (user.loggedIn) {
-    // Pull fresh save from DB — this is the source of truth, including
-    // Glyph state (loaded into glyphStore by loadGame()).
-    await initGame()
-    // Only start the autosave loop AFTER the load is done. Otherwise the
-    // 5s interval can fire mid-load and PUT the default empty state.
-    startAutoSave()
-    maybeShowIntro()
-  }
+  if (user.loggedIn) await bootGame()
 
   startGameLoop()
   bossStore.start()
@@ -360,6 +387,16 @@ div#app {
       > p { font-size: 1.25em; }
     }
   }
+}
+
+.boot-splash {
+  position: fixed;
+  inset: 0;
+  background-color: var(--black);
+  color: var(--primary);
+  @include flexRow(0, center, center);
+  font-size: 1.5em;
+  letter-spacing: 0.1em;
 }
 
 /* Mobile burger menu overlay */

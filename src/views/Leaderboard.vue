@@ -72,6 +72,7 @@ import { useUserStore } from "@/stores/user"
 import { formatNumber } from "@/utils/format"
 import { architectTitle } from "@/utils/architect"
 import { api } from "@/utils/api"
+import { saveGame } from "@/utils/save"
 
 interface LeaderboardEntry {
   rank: number
@@ -128,6 +129,10 @@ async function submitScore() {
   submitMessage.value = ""
   submitError.value = false
   try {
+    // Flush the current run to /save first — the server submits from the
+    // game_saves row, so without this it would push whatever stale values
+    // the last autosave wrote (or all-zeros for a fresh account).
+    await saveGame()
     await api.post("/leaderboard/submit", {})
     submitMessage.value = "Score submitted!"
     await fetchLeaderboard()

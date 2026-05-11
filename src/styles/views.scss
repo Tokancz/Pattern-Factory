@@ -100,11 +100,17 @@
 
 // ─── .pattern-grid — used by Pattern + Inventory views ────────────────────
 .pattern-grid {
-  width: 90%;
+  // Width scales with --cols so 5 patterns don't squeeze into the 4-card
+  // footprint. 4 cols → 90% (legacy), 5 cols → 100%. Capped at 100% so
+  // anything wider can't overflow the Panel.
+  width: min(100%, calc(90% + (var(--cols, 4) - 4) * 10%));
   height: 100%;
 
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  // Column count tracks the number of visible patterns via --cols (set
+  // inline by the view). Goes to 5 once the Glyph pattern unlocks so the
+  // catalogue stays a single row instead of 4 + 1 orphan.
+  grid-template-columns: repeat(var(--cols, 4), 1fr);
   grid-gap: 20px;
   padding-top: 20px;
   // Allow vertical scrolling when cards exceed viewport height (e.g. with
@@ -146,7 +152,7 @@
     // text-containers don't collapse the card.
     .text-container,
     .text-container-inventory {
-      @include flexColumn(5px, center, center);
+      @include flexColumn(5px, start, center);
       flex: 1;
       min-width: 0;
       width: 100%;
