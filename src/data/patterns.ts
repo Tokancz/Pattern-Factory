@@ -59,14 +59,15 @@ export const PATTERNS = {
   },
   // ─── Glyph — the 5th pattern (Reality Engine expansion) ───────────────
   // Hidden from the UI until the Glyph Pattern Glyph upgrade (Tier 3) is
-  // owned. Generates pending Glyphs slowly when threaded; tuned for
-  // ~1 Γ per ~30 minutes of active production at base.
+  // owned. Generates pending Glyphs slowly when threaded; intentionally
+  // long-tailed so endgame multipliers (overclocks, boosts, machines) are
+  // what compresses it into a reasonable cadence — not raw base speed.
   glyph: {
     baseValue: 1,
     type: "glyph",
-    baseProgress: 2000,
+    baseProgress: 20000,
     flavour: "Your signature in the substrate.",
-    roleHint: "Generates pending Γ. Slow by design.",
+    roleHint: "Cannot be clicked. Auto-only — generates pending Γ.",
     visuals: {
       icon: `${BASE}img/patterns/Glyph.svg`,
       slot: `${BASE}img/slots/GlyphSlot.svg`

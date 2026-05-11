@@ -1,6 +1,10 @@
 <template>
   <Panel title="Patterns">
-    <ul class="pattern-grid" :style="{ '--cols': patternCount }">
+    <ul
+      class="pattern-grid"
+      :class="{ 'pattern-grid--compact': patternCount > 4 }"
+      :style="{ '--cols': patternCount }"
+    >
       <li v-for="(p, id) in visiblePatterns" :key="id" class="pattern">
         <img :src="p.visuals.icon" :alt="id" class="pattern-image">
         <div class="text-container">

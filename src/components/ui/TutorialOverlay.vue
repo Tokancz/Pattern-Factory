@@ -103,7 +103,7 @@ watch(step, () => nextTick(updateHighlight))
   z-index: 1000;
 
   .tutorial-box {
-    @include flexColumn(20px, start, stretch);
+    @include flexColumn(20px, space-between, stretch);
     width: min(600px, 90vw);
     // Fixed footprint so the actions row (pinned to the bottom) lands at
     // the same y on every step regardless of title / description / image
@@ -123,6 +123,8 @@ watch(step, () => nextTick(updateHighlight))
     .tutorial-content {
       @include flexColumn(20px, start, center);
       width: 100%;
+      height: calc(100% - 60px);
+      margin: auto 0;
 
       @include bp("sm") { gap: 14px; }
     }
@@ -132,7 +134,6 @@ watch(step, () => nextTick(updateHighlight))
       flex-wrap: wrap;
       // Auto top margin absorbs the leftover vertical space inside the
       // flex column, anchoring this row at the bottom of the box.
-      margin-top: auto;
 
       @include bp("sm") { gap: 16px; }
 

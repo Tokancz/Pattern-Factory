@@ -121,6 +121,10 @@ export const useSlotStore = defineStore("slots", {
         const glyph = useGlyphStore()
         if (!glyph.hasUpgrade("echoOfTheCross")) return
       }
+      // Glyph pattern is fully auto-only — slow by design, no manual
+      // acceleration path. Mirrors the Cross block but with no escape
+      // upgrade (intentional: clicking would trivialise endgame Γ gain).
+      if (slot.patternId === "glyph") return
 
       const upgrades = useUpgradeStore()
       slot.progress += upgrades.getClickPower

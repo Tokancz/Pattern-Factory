@@ -310,6 +310,23 @@ div#app {
   }
   @include bp("sm") { font-size: .65em; }
 
+  // ─── Large-display scaling ──────────────────────────────────────────────
+  // Above the legacy 1440×1024 design footprint, lift the hard cap and
+  // resize the app to fill the screen while maintaining the design's
+  // 1.40625:1 aspect ratio. font-size scales with viewport so every em-
+  // based dimension (paddings, gaps, icons, currency bar) grows with the
+  // app — without this, the layout sits in a 1440px letterbox on 4K /
+  // ultrawide monitors.
+  @media (min-width: 1441px) and (min-height: 1025px) {
+    max-width: none;
+    max-height: none;
+    width:  min(100vw, calc(100dvh * 1.40625));
+    height: min(100dvh, calc(100vw  / 1.40625));
+    // Floor at 1rem so we never shrink below the design baseline; cap at
+    // 1.75rem so 8K monitors don't render absurdly large.
+    font-size: clamp(1rem, 1.05vw, 1.75rem);
+  }
+
   > header {
     height: 100px;
 

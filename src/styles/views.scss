@@ -216,4 +216,43 @@
       }
     }
   }
+
+  // ─── Compact mode — 5-column layout (Glyph pattern unlocked) ───────────
+  // Without these, narrow cards turn into tall "stripes": the flavour/role
+  // copy wraps onto 4–6 lines and the 80px image dominates the tile. We
+  // shrink the image, tighten padding, lower min-height, and step font
+  // sizes down so a 5-wide row reads as a clean strip of compact cards.
+  // Mobile breakpoints (md/sm) already force 2 columns, so the compact
+  // overrides only kick in at desktop widths.
+  &.pattern-grid--compact {
+    grid-gap: 12px;
+
+    .pattern {
+      min-height: 240px;
+      padding: 14px 10px;
+      gap: 6px;
+
+      .pattern-image {
+        width: 56px;
+      }
+
+      .text-container,
+      .text-container-inventory {
+        gap: 4px;
+
+        p {
+          font-size: .75em;
+
+          &.pattern-flavour { font-size: .7em; line-height: 1.2; }
+          &.pattern-role    { font-size: .65em; line-height: 1.2; }
+          &.requirements    { font-size: .7em; }
+        }
+
+        h3.pattern-name,
+        p.pattern-name {
+          font-size: 1.1em;
+        }
+      }
+    }
+  }
 }

@@ -158,6 +158,14 @@ function handleClick(event: MouseEvent) {
     crossCooldowns.set(props.slot.id, now + crossCooldownMs())
   }
 
+  // Glyph is fully auto-only with no escape upgrade. Bail before the
+  // click sound / floating-text path so the player doesn't get a fake
+  // "+N" they didn't earn.
+  if (props.slot.patternId === "glyph") {
+    playSound("error")
+    return
+  }
+
   slots.clickSlot(props.slot.id)
   playSound("click")
   spawnFloatingText(event, `+${ formatNumber(upgrades.getClickPower) }`)

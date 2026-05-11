@@ -86,13 +86,17 @@ const loopTrack = useLoopTrack()
     // Desktop: a single row of 5. Tablet: 3 + 2 with the bottom row
     // centered via a 6-col grid where each tile spans 2 cols. Phone:
     // 2 + 2 + 1 with the 5th tile centered via grid-column: 1 / -1.
+    //
+    // Row gap on mobile has to clear the progress-bar overhang from
+    // Slot.vue (positioned `bottom: -40px` + ~14px text ≈ 54px). With
+    // less than that, row-1's progress bars overflow into row-2 slots.
     &.slots-5 {
       grid-template-columns: repeat(5, 1fr);
 
       @include bp("md") {
         grid-template-columns: repeat(6, 1fr);
         grid-template-rows: repeat(2, 1fr);
-        gap: 40px 12px;
+        gap: 70px 12px;
         padding: 60px 0;
 
         > :nth-child(1) { grid-column: 1 / 3; grid-row: 1; }
@@ -105,7 +109,7 @@ const loopTrack = useLoopTrack()
       @include bp("sm") {
         grid-template-columns: repeat(2, 1fr);
         grid-template-rows: repeat(3, auto);
-        gap: 30px 12px;
+        gap: 65px 12px;
 
         // Reset desktop/tablet column placement so the 2-col grid auto-flows.
         > :nth-child(n) { grid-column: auto; grid-row: auto; }
