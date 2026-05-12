@@ -11,9 +11,11 @@ import adminRoutes       from "./routes/admin.js"
 
 // Global limiter — broad protection against runaway clients. Tighter
 // per-route limiters live alongside their routes (see routes/auth.ts).
+// Ceiling is sized for the 5s autosave (~180/15min) plus reads, refreshes,
+// and navigation, with headroom — anything above this is pathological.
 const globalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  limit: 100,
+  limit: 1000,
   standardHeaders: "draft-8",
   legacyHeaders:   false,
   ipv6Subnet: 56

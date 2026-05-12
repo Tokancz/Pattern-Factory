@@ -51,16 +51,16 @@ import { playSound } from "@/utils/sound"
 // pattern still keeps its remaining cooldown if it swaps back.
 const crossCooldowns = new Map<number, number>()
 
-// Cooldown shrinks with the Cross Resolution Glyph upgrade (Tier 3,
-// Step 8). Levels: 0 = 10s, 1 = 7s, 2 = 4s, 3 = 1s.
+// Cooldown shrinks with the Cross Resolution Glyph upgrade (Tier 3).
+// Levels: 0 = 5s, 1 = 3s, 2 = 2s, 3 = 1s.
 function crossCooldownMs(): number {
   const glyph = useGlyphStore()
   const lvl = glyph.upgradeLevel("crossResolution")
   switch (lvl) {
-    case 1:  return 7_000
-    case 2:  return 4_000
+    case 1:  return 3_000
+    case 2:  return 2_000
     case 3:  return 1_000
-    default: return 10_000
+    default: return 5_000
   }
 }
 
@@ -128,6 +128,13 @@ function handleClick(event: MouseEvent) {
   if (event.shiftKey) {
     if (machines.getLevel("targetedBoost") < 1) {
       spawnFloatingText(event, "Module required")
+      playSound("error")
+      return
+    }
+    // Γ threads can't be overclocked — surface the reason instead of
+    // letting the click silently no-op.
+    if (props.slot.patternId === "glyph") {
+      spawnFloatingText(event, "Γ resists overclock")
       playSound("error")
       return
     }

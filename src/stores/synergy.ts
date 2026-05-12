@@ -58,13 +58,24 @@ export const useSynergyStore = defineStore("synergy", () => {
   // Resonance Glyph upgrade allows synergies to fire when the slot
   // composition is one pattern short of the exact requirement. Without
   // it, synergies stay strict (current behaviour).
+  // Dual Resonance additionally lets a second synergy fire even when
+  // the slot composition has *excess* of its required patterns — capped
+  // at 2 active total. The bigger (more demanding) synergy is preferred.
   const activeSynergies = computed((): SynergyDef[] => {
     const counts = slotCounts.value
     const levels = patternLevels.value
     const glyph = useGlyphStore()
     const allowedDeficit = glyph.hasUpgrade("resonance") ? 1 : 0
+    const dualActive     = glyph.hasUpgrade("dualResonance")
 
-    return visibleSynergies.value.filter(syn => {
+    const passesLevelGate = (syn: SynergyDef): boolean => {
+      if (syn.minAvgLevel === undefined) return true
+      const present = ALL_PATTERNS.filter(p => (syn.requiredCounts[p] ?? 0) > 0)
+      const avg = present.reduce((s, p) => s + (levels[p] ?? 1), 0) / present.length
+      return avg >= syn.minAvgLevel
+    }
+
+    const strict = visibleSynergies.value.filter(syn => {
       let totalDeficit = 0
       for (const p of ALL_PATTERNS) {
         const need = syn.requiredCounts[p] ?? 0
@@ -75,14 +86,33 @@ export const useSynergyStore = defineStore("synergy", () => {
         totalDeficit += need - have
       }
       if (totalDeficit > allowedDeficit) return false
-
-      if (syn.minAvgLevel !== undefined) {
-        const present = ALL_PATTERNS.filter(p => (syn.requiredCounts[p] ?? 0) > 0)
-        const avg = present.reduce((s, p) => s + (levels[p] ?? 1), 0) / present.length
-        if (avg < syn.minAvgLevel) return false
-      }
-      return true
+      return passesLevelGate(syn)
     })
+
+    if (!dualActive || strict.length >= 2) return strict
+
+    // Subset matches: required composition is fully contained in current
+    // slot composition (excess of any pattern is fine). These are the
+    // candidates Dual Resonance unlocks.
+    const strictIds = new Set(strict.map(s => s.id))
+    const subsetMatches = visibleSynergies.value
+      .filter(syn => {
+        if (strictIds.has(syn.id)) return false
+        for (const p of ALL_PATTERNS) {
+          const need = syn.requiredCounts[p] ?? 0
+          if (counts[p] < need) return false
+        }
+        return passesLevelGate(syn)
+      })
+      .sort((a, b) => {
+        const aTotal = ALL_PATTERNS.reduce((s, p) => s + (a.requiredCounts[p] ?? 0), 0)
+        const bTotal = ALL_PATTERNS.reduce((s, p) => s + (b.requiredCounts[p] ?? 0), 0)
+        if (aTotal !== bTotal) return bTotal - aTotal
+        return a.id.localeCompare(b.id)
+      })
+
+    const slots = 2 - strict.length
+    return [...strict, ...subsetMatches.slice(0, slots)]
   })
 
   // Pending = exactly one more slot placement would satisfy requiredCounts.

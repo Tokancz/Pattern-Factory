@@ -77,7 +77,10 @@ export const useSlotStore = defineStore("slots", {
         dcSpeedBonus *
         synergySpeedBonus
 
-      if (slot.id === this.selectedSlotId) {
+      // Glyph slots ignore the targeted boost — overclocking a Γ thread
+      // would trivialise endgame pacing, since pending Γ is the dominant
+      // ascension currency. Global Overclock (slotBoost) still applies.
+      if (slot.id === this.selectedSlotId && slot.patternId !== "glyph") {
         speed *= machines.getMultiplier("targetedBoost")
       }
 
@@ -206,6 +209,10 @@ export const useSlotStore = defineStore("slots", {
     selectSlot(id: number) {
       const machines = useMachineStore()
       if (machines.getLevel("targetedBoost") < 1) return
+      // Block selection on Γ threads — the boost is no-op there and
+      // letting it appear selected would be misleading UI.
+      const target = this.slots.find(s => s.id === id)
+      if (target?.patternId === "glyph") return
       this.selectedSlotId = id
     },
 

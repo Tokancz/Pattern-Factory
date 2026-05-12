@@ -73,10 +73,28 @@ export const GLYPH_UPGRADES: Record<string, GlyphUpgrade> = {
   echoOfTheCross: {
     id: "echoOfTheCross",
     name: "Echo of the Cross",
-    description: "Cross pattern becomes clickable, with a 10s cooldown between clicks.",
+    description: "Cross pattern becomes clickable, with a 5s cooldown between clicks.",
     tier: 2,
     cost: 5,
     maxLevel: 1
+  },
+  compression: {
+    id: "compression",
+    name: "Compression",
+    description: "Reduces normal, DC, and prestige upgrade costs by 10% per level. Glyph costs unaffected.",
+    tier: 2,
+    cost: 3,
+    maxLevel: 5,
+    costPerLevel: [3, 4, 5, 7, 10]
+  },
+  prematureAscent: {
+    id: "prematureAscent",
+    name: "Premature Ascent",
+    description: "Ascension level requirement −5 per level. Stackable to −25 (floor: level 50).",
+    tier: 2,
+    cost: 4,
+    maxLevel: 5,
+    costPerLevel: [4, 5, 7, 9, 12]
   },
   timeDilation: {
     id: "timeDilation",
@@ -107,7 +125,7 @@ export const GLYPH_UPGRADES: Record<string, GlyphUpgrade> = {
   crossResolution: {
     id: "crossResolution",
     name: "Cross Resolution",
-    description: "Reduces Echo of the Cross cooldown. 10s → 7s → 4s → 1s. Stackable.",
+    description: "Reduces Echo of the Cross cooldown. 5s → 3s → 2s → 1s. Stackable.",
     tier: 3,
     cost: 7,
     maxLevel: 3,
@@ -121,6 +139,15 @@ export const GLYPH_UPGRADES: Record<string, GlyphUpgrade> = {
     tier: 3,
     cost: 7,
     maxLevel: 1
+  },
+  dualResonance: {
+    id: "dualResonance",
+    name: "Dual Resonance",
+    description: "Up to 2 synergies can be active at once. Excess slots no longer break smaller synergies.",
+    tier: 3,
+    cost: 12,
+    maxLevel: 1,
+    needs: "resonance"
   },
   glyphGenesis: {
     id: "glyphGenesis",
@@ -165,15 +192,24 @@ export const GLYPH_UPGRADES: Record<string, GlyphUpgrade> = {
     cost: 25,
     maxLevel: 1,
     needs: "glyphGenesis"
+  },
+  manifold: {
+    id: "manifold",
+    name: "Manifold",
+    description: "Ascension grants +1 base Γ per level. Stackable up to +5.",
+    tier: 4,
+    cost: 12,
+    maxLevel: 5,
+    costPerLevel: [12, 14, 17, 21, 26]
   }
 }
 
 // Display order for the tree — keeps tiers grouped and orders within each tier.
 export const GLYPH_UPGRADE_ORDER: string[] = [
   "slotV", "bootSequence", "threshold", "foundation",
-  "anomalyResistance", "anomalyShielding", "echoOfTheCross", "timeDilation", "stableLoop",
-  "glyphPattern", "crossResolution", "resonance", "glyphGenesis",
-  "recursiveClick", "patternMemory", "engineOverride", "finalPattern"
+  "anomalyResistance", "anomalyShielding", "echoOfTheCross", "compression", "prematureAscent", "timeDilation", "stableLoop",
+  "glyphPattern", "crossResolution", "resonance", "dualResonance", "glyphGenesis",
+  "recursiveClick", "patternMemory", "engineOverride", "manifold", "finalPattern"
 ]
 
 // Glyph patterns required to trigger the Architect's Choice endgame.

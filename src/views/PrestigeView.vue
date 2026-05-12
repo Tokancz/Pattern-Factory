@@ -2,8 +2,8 @@
   <Panel title="Recursion">
     <div class="recursion">
       <!-- Sub-tab nav. The Ascension tab is gated on having reached
-           level 100 at least once (or having ascended before, which
-           keeps the tab visible across runs). -->
+           the ascend level at least once (or having ascended before,
+           which keeps the tab visible across runs). -->
       <nav class="sub-tabs" role="tablist" aria-label="Recursion modes">
         <button
           type="button"
@@ -67,7 +67,7 @@
         <div class="ascend-row">
           <div class="text-container">
             <p>Recurse one layer deeper into the substrate. <strong>This wipes everything</strong> — IGM, DC, PP, levels, all upgrades and machines — but Glyphs and Glyph upgrades persist forever.</p>
-            <p>You earn <strong>1 Γ</strong> for crossing the level-100 threshold, plus any pending Γ accumulated this run.</p>
+            <p>You earn <strong>1 Γ</strong> for crossing the level-{{ game.ascendLevel }} threshold, plus any pending Γ accumulated this run.</p>
 
             <p id="pending-glyphs">
               Pending Γ: <strong>{{ formatNumber(Math.floor(glyph.pendingGlyphs)) }}</strong>
@@ -90,13 +90,13 @@
               :disabled="!game.canAscend"
               class="ascend-button"
               :class="{ ready: game.canAscend, confirming }"
-              :aria-label="game.canAscend ? 'Ascend — wipe this layer and gain ' + ascendGain + ' Glyphs' : 'Ascend locked — reach level 100 first'"
+              :aria-label="game.canAscend ? 'Ascend — wipe this layer and gain ' + ascendGain + ' Glyphs' : 'Ascend locked — reach level ' + game.ascendLevel + ' first'"
             >
               <p aria-hidden="true">{{ confirming ? "CONFIRM ASCEND" : "ASCEND" }}</p>
               <p class="sub" aria-hidden="true">+{{ ascendGain }} Γ</p>
             </button>
             <p v-if="!game.canAscend" class="requirement">
-              Reach level 100 to ascend (currently {{ game.level }}).
+              Reach level {{ game.ascendLevel }} to ascend (currently {{ game.level }}).
             </p>
             <p v-else-if="confirming" class="requirement confirm-msg">
               Click again to confirm. This is irreversible.
@@ -119,9 +119,9 @@ const game     = useGameStore()
 const glyph    = useGlyphStore()
 const prestige = game.prestige
 
-// Ascension sub-tab is shown once the player has reached level 100 at
-// least once (or already ascended before — that keeps it visible across
-// runs even though prestige resets level to 1).
+// Ascension sub-tab is shown once the player has reached the ascend
+// threshold at least once (or already ascended before — that keeps it
+// visible across runs even though prestige resets level to 1).
 const ascensionUnlocked = computed(() => game.canAscend || glyph.ascensionCount > 0)
 
 const tab = ref<"prestige" | "ascension">("prestige")
@@ -133,7 +133,9 @@ watch(ascensionUnlocked, unlocked => {
   if (!unlocked && tab.value === "ascension") tab.value = "prestige"
 })
 
-const ascendGain = computed(() => 1 + Math.floor(glyph.pendingGlyphs))
+const ascendGain = computed(() =>
+  1 + glyph.upgradeLevel("manifold") + Math.floor(glyph.pendingGlyphs)
+)
 
 // Two-step confirm: first click arms the button, second click ascends.
 // 4-second timeout reverts back to the unarmed state if the player walks

@@ -76,7 +76,7 @@
       <!-- Locked message -->
       <div v-else class="glyph-locked">
         <p>Ascend to unlock the Glyph Tree.</p>
-        <p class="hint">Complete level 100 and visit the Recursion tab to ascend.</p>
+        <p class="hint">Complete level {{ game.ascendLevel }} and visit the Recursion tab to ascend.</p>
       </div>
     </div>
   </Panel>
@@ -85,6 +85,7 @@
 <script setup lang="ts">
 import { ref } from "vue"
 import Panel from "@/components/system/Panel.vue"
+import { useGameStore } from "@/stores/game"
 import { useGlyphStore } from "@/stores/glyph"
 import { formatNumber } from "@/utils/format"
 import {
@@ -97,6 +98,7 @@ import {
 } from "@/data/glyphUpgrades"
 
 const glyph = useGlyphStore()
+const game  = useGameStore()
 
 function upgradesInTier(tier: GlyphUpgradeTier): GlyphUpgrade[] {
   return GLYPH_UPGRADE_ORDER

@@ -33,25 +33,43 @@ export const useUpgradeStore = defineStore("upgrades", {
   }),
 
   getters: {
-    getCost: (state) => (id: string) => {
-      const upgrade = UPGRADES[id as keyof typeof UPGRADES]
-      if (!upgrade) return Infinity
-      const lvl = state.levels[id] ?? 0
-      return Math.floor(upgrade.baseCost * Math.pow(upgrade.scale, lvl))
+    // Compression Glyph upgrade: 10% off per level, max 5 = 50%. Applies
+    // to money, DC, and prestige upgrades — not Glyph costs (handled
+    // separately by the glyph store).
+    compressionMultiplier: () => {
+      const glyph = useGlyphStore()
+      const lvl = glyph.upgradeLevel("compression")
+      return 1 - 0.10 * lvl
     },
 
-    getDcCost: (state) => (id: string) => {
-      const upgrade = DC_UPGRADES[id as keyof typeof DC_UPGRADES]
-      if (!upgrade) return Infinity
-      const lvl = state.dcLevels[id] ?? 0
-      return Math.floor(upgrade.baseCost * Math.pow(upgrade.scale, lvl))
+    getCost(): (id: string) => number {
+      return (id: string) => {
+        const upgrade = UPGRADES[id as keyof typeof UPGRADES]
+        if (!upgrade) return Infinity
+        const lvl = this.levels[id] ?? 0
+        const raw = upgrade.baseCost * Math.pow(upgrade.scale, lvl)
+        return Math.max(1, Math.floor(raw * this.compressionMultiplier))
+      }
     },
 
-    getPrestigeCost: (state) => (id: string) => {
-      const upgrade = PRESTIGE_UPGRADES[id as keyof typeof PRESTIGE_UPGRADES]
-      if (!upgrade) return Infinity
-      const lvl = state.prestigeLevels[id] ?? 0
-      return Math.floor(upgrade.baseCost * Math.pow(upgrade.scale, lvl))
+    getDcCost(): (id: string) => number {
+      return (id: string) => {
+        const upgrade = DC_UPGRADES[id as keyof typeof DC_UPGRADES]
+        if (!upgrade) return Infinity
+        const lvl = this.dcLevels[id] ?? 0
+        const raw = upgrade.baseCost * Math.pow(upgrade.scale, lvl)
+        return Math.max(1, Math.floor(raw * this.compressionMultiplier))
+      }
+    },
+
+    getPrestigeCost(): (id: string) => number {
+      return (id: string) => {
+        const upgrade = PRESTIGE_UPGRADES[id as keyof typeof PRESTIGE_UPGRADES]
+        if (!upgrade) return Infinity
+        const lvl = this.prestigeLevels[id] ?? 0
+        const raw = upgrade.baseCost * Math.pow(upgrade.scale, lvl)
+        return Math.max(1, Math.floor(raw * this.compressionMultiplier))
+      }
     },
 
     getOfflineCap: (state) => {

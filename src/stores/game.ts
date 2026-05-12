@@ -7,7 +7,7 @@ import { useMachineStore } from "./machine"
 import { useGlyphStore } from "./glyph"
 import { playSound } from "@/utils/sound"
 
-const ASCEND_LEVEL = 100
+const ASCEND_LEVEL = 75
 const PRESTIGE_THRESHOLD_BASE = 1_000_000
 const PRESTIGE_THRESHOLD_BOOSTED = 500_000  // Glyph upgrade: Threshold
 
@@ -41,7 +41,16 @@ export const useGameStore = defineStore("game", {
       return this.money >= this.prestigeThreshold || this.pendingPrestigePoints > 0
     },
 
-    canAscend: (state) => state.level >= ASCEND_LEVEL
+    // Premature Ascent Glyph upgrade lowers the bar by 5 per level
+    // (max 5 levels → floor of 50).
+    ascendLevel(): number {
+      const glyph = useGlyphStore()
+      return ASCEND_LEVEL - glyph.upgradeLevel("prematureAscent") * 5
+    },
+
+    canAscend(): boolean {
+      return this.level >= this.ascendLevel
+    }
   },
 
   actions: {
@@ -144,9 +153,9 @@ export const useGameStore = defineStore("game", {
 
       const glyph = useGlyphStore()
 
-      // 1 base Glyph for crossing the level-100 threshold + any pending
-      // Glyphs accumulated this run.
-      const gained = 1 + Math.floor(glyph.pendingGlyphs)
+      // 1 base Glyph for crossing the ascend threshold + Manifold
+      // bonus (+1 per level, max +5) + any pending Glyphs from this run.
+      const gained = 1 + glyph.upgradeLevel("manifold") + Math.floor(glyph.pendingGlyphs)
       glyph.glyphs += gained
       glyph.pendingGlyphs = 0
       glyph.ascensionCount += 1
