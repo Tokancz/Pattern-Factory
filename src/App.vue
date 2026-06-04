@@ -16,7 +16,7 @@
       <ProgressBar v-if="!mobileLayout" :type="'level'" :length="15"/>
       <img
         v-if="mobileLayout"
-        @click="mobileMenuOpened = true"
+        @click="openMobileMenu"
         src="/img/icons/Menu.svg"
         alt="Open menu"
         class="menu-icon"
@@ -99,7 +99,7 @@ import { useUserStore } from "@/stores/user"
 import { useGlyphStore } from "@/stores/glyph"
 import { loadGame, startAutoSave } from "@/utils/save"
 import { startGameLoop } from "@/composables/gameLoop"
-import { setBoostActive } from "@/utils/sound"
+import { setBoostActive, playSound } from "@/utils/sound"
 
 import CurrencyDisplay from "@/components/ui/CurrencyDisplay.vue"
 import ProgressBar from "@/components/ui/ProgressBar.vue"
@@ -174,6 +174,7 @@ function onStabilize() {
 const { width } = useWindowSize()
 const mobileLayout = computed(() => width.value < 1024)
 const mobileMenuOpened = ref(false)
+function openMobileMenu() { playSound("click"); mobileMenuOpened.value = true }
 
 // Boost loop plays while a slot is selected for targeted overclock.
 watch(

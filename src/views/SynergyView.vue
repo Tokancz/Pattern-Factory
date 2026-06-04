@@ -92,6 +92,7 @@
 import Panel from "../components/system/Panel.vue"
 import { computed, ref, watch } from "vue"
 import { useSynergyStore } from "@/stores/synergy"
+import { playSound } from "@/utils/sound"
 import { type SynergyDef, type PatternId, ALL_PATTERNS } from "@/data/synergies"
 
 type FilterId = "active" | "almost" | "all"
@@ -146,16 +147,17 @@ watch(totalPages, (n) => {
 })
 
 function onFilterChange(id: FilterId) {
+  if (filter.value !== id) playSound("tabClick")
   filter.value = id
   page.value = 0
 }
 
 function nextPage() {
-  if (page.value < totalPages.value - 1) page.value++
+  if (page.value < totalPages.value - 1) { page.value++; playSound("tabClick") }
 }
 
 function prevPage() {
-  if (page.value > 0) page.value--
+  if (page.value > 0) { page.value--; playSound("tabClick") }
 }
 
 function getDisplayBonuses(syn: SynergyDef): Record<string, string> {

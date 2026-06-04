@@ -49,6 +49,7 @@
 <script setup lang="ts">
 import { computed } from "vue"
 import { formatNumber } from "@/utils/format"
+import { playSound } from "@/utils/sound"
 
 export interface AfkReportData {
   awaySeconds: number
@@ -66,7 +67,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{ (e: "close"): void }>()
 
-function dismiss() { emit("close") }
+function dismiss() { playSound("click"); emit("close") }
 
 function formatDuration(s: number): string {
   if (s < 60) return `${Math.floor(s)}s`

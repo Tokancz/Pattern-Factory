@@ -47,6 +47,7 @@ import { MACHINES } from "@/data/machines"
 import { useMachineStore } from "@/stores/machine"
 import { useSlotStore } from "@/stores/slot"
 import { formatNumber } from "@/utils/format"
+import { playSound } from "@/utils/sound"
 import { ref, computed } from "vue"
 
 const machines = useMachineStore()
@@ -83,10 +84,10 @@ const totalPages = computed(() =>
 )
 
 function nextPage() {
-  if (page.value < totalPages.value - 1) page.value++
+  if (page.value < totalPages.value - 1) { page.value++; playSound("tabClick") }
 }
 function prevPage() {
-  if (page.value > 0) page.value--
+  if (page.value > 0) { page.value--; playSound("tabClick") }
 }
 </script>
 

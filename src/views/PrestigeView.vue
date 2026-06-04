@@ -11,7 +11,7 @@
           class="sub-tab"
           :class="{ active: tab === 'prestige' }"
           :aria-selected="tab === 'prestige'"
-          @click="tab = 'prestige'"
+          @click="setTab('prestige')"
         >Prestige</button>
         <button
           v-if="ascensionUnlocked"
@@ -20,7 +20,7 @@
           class="sub-tab"
           :class="{ active: tab === 'ascension' }"
           :aria-selected="tab === 'ascension'"
-          @click="tab = 'ascension'"
+          @click="setTab('ascension')"
         >Ascension</button>
       </nav>
 
@@ -114,6 +114,7 @@ import Panel from "../components/system/Panel.vue"
 import { useGameStore } from "@/stores/game"
 import { useGlyphStore } from "@/stores/glyph"
 import { formatNumber } from "@/utils/format"
+import { playSound } from "@/utils/sound"
 
 const game     = useGameStore()
 const glyph    = useGlyphStore()
@@ -125,6 +126,11 @@ const prestige = game.prestige
 const ascensionUnlocked = computed(() => game.canAscend || glyph.ascensionCount > 0)
 
 const tab = ref<"prestige" | "ascension">("prestige")
+
+function setTab(t: "prestige" | "ascension") {
+  if (tab.value !== t) playSound("tabClick")
+  tab.value = t
+}
 
 // If the player loses access to the Ascension tab (e.g. ascended back to
 // level 1 with ascensionCount=0 — shouldn't happen, but defensive), drop

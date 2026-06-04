@@ -36,6 +36,7 @@
 
 <script setup lang="ts">
 import { ref, computed, watch, nextTick } from "vue"
+import { playSound } from "@/utils/sound"
 
 interface TutorialStep {
   title: string
@@ -59,9 +60,9 @@ const step = computed(() => props.steps[index.value])
 const hasNext = computed(() => index.value < props.steps.length - 1)
 const hasPrev = computed(() => index.value > 0)
 
-function nextStep() { if (hasNext.value) index.value++ }
-function prevStep() { if (hasPrev.value) index.value-- }
-function close() { emits("update:modelValue", false) }
+function nextStep() { if (hasNext.value) { index.value++; playSound("tabClick") } }
+function prevStep() { if (hasPrev.value) { index.value--; playSound("tabClick") } }
+function close() { playSound("click"); emits("update:modelValue", false) }
 
 const highlightStyle = ref({})
 

@@ -89,14 +89,14 @@ body {
 // ─── Animations off (Settings → Display → Animations) ─────────────────────
 // Neutralizes transitions + keyframe animations app-wide when the player
 // disables motion. Kept narrow to motion only so colors/layout still update.
-html.anims-off,
 html.anims-off *,
 html.anims-off *::before,
 html.anims-off *::after {
-  animation-duration: 0.001s !important;
-  animation-delay: 0s !important;
-  transition-duration: 0.001s !important;
-  transition-delay: 0s !important;
+  // Hard-stop both one-shot and infinite animations as well as transitions.
+  // (Using `none` rather than a tiny duration so looping animations don't
+  // flicker at high speed.)
+  animation: none !important;
+  transition: none !important;
 }
 
 // ─── Global transitions ───────────────────────────────────────────────────

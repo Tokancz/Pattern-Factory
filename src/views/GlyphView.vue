@@ -25,7 +25,7 @@
             class="tier-tab"
             :class="{ active: selectedTier === tier, locked: !glyph.isTierUnlocked(tier) }"
             :aria-selected="selectedTier === tier"
-            @click="selectedTier = tier"
+            @click="selectTier(tier)"
           >
             Tier {{ tier }}
           </button>
@@ -88,6 +88,7 @@ import Panel from "@/components/system/Panel.vue"
 import { useGameStore } from "@/stores/game"
 import { useGlyphStore } from "@/stores/glyph"
 import { formatNumber } from "@/utils/format"
+import { playSound } from "@/utils/sound"
 import {
   GLYPH_UPGRADES,
   GLYPH_UPGRADE_ORDER,
@@ -107,6 +108,11 @@ function upgradesInTier(tier: GlyphUpgradeTier): GlyphUpgrade[] {
 }
 
 const selectedTier = ref<1 | 2 | 3 | 4>(1)
+
+function selectTier(tier: 1 | 2 | 3 | 4) {
+  if (selectedTier.value !== tier) playSound("tabClick")
+  selectedTier.value = tier
+}
 </script>
 
 <style scoped lang="scss">

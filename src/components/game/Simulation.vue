@@ -27,19 +27,19 @@
   
     <aside class="nav">
       <div class="top-buttons">
-        <button type="button" class="tutorial-btn" @click="openTutorial">Tutorial</button>
-        <button type="button" class="settings-btn" aria-label="Settings" @click="openSettings">
+        <button type="button" class="tutorial-btn" @click="onOpenTutorial">Tutorial</button>
+        <button type="button" class="settings-btn" aria-label="Settings" @click="onOpenSettings">
           <i class="fa-solid fa-gear" aria-hidden="true"></i>
         </button>
       </div>
       <div class="audio-controls">
-        <button type="button" class="arrow" aria-label="Previous track" @click="cycleLoopTrack(-1)">‹</button>
-        <button type="button" class="mute" @click="toggleMute" :aria-pressed="muted" :aria-label="muted ? 'Unmute' : 'Mute'">
+        <button type="button" class="arrow" aria-label="Previous track" @click="onCycleTrack(-1)">‹</button>
+        <button type="button" class="mute" @click="onToggleMute" :aria-pressed="muted" :aria-label="muted ? 'Unmute' : 'Mute'">
           <i v-if="muted" class="fa-solid fa-volume-xmark" aria-hidden="true"></i>
           <i v-else class="fa-solid fa-volume" aria-hidden="true"></i>
           ({{ loopTrack }})
         </button>
-        <button type="button" class="arrow" aria-label="Next track" @click="cycleLoopTrack(1)">›</button>
+        <button type="button" class="arrow" aria-label="Next track" @click="onCycleTrack(1)">›</button>
       </div>
     </aside>
   </div>
@@ -51,7 +51,7 @@ import Slot from "./Slot.vue"
 import TutorialOverlay from "@/components/ui/TutorialOverlay.vue"
 import SettingsOverlay from "@/components/ui/SettingsOverlay.vue"
 import { TUTORIAL_STEPS } from "@/data/tutorial"
-import { useMuted, toggleMute, useLoopTrack, cycleLoopTrack } from "@/utils/sound"
+import { useMuted, toggleMute, useLoopTrack, cycleLoopTrack, playSound } from "@/utils/sound"
 import { tutorialVisible, openTutorial } from "@/composables/tutorial"
 import { useSettingsOpen, openSettings, closeSettings } from "@/composables/settings"
 
@@ -60,6 +60,11 @@ const tutorialSteps = TUTORIAL_STEPS
 const muted = useMuted()
 const loopTrack = useLoopTrack()
 const settingsOpen = useSettingsOpen()
+
+function onOpenTutorial() { playSound("click"); openTutorial() }
+function onOpenSettings() { playSound("click"); openSettings() }
+function onToggleMute()   { toggleMute(); playSound("click") }
+function onCycleTrack(dir: 1 | -1) { cycleLoopTrack(dir); playSound("tabClick") }
 </script>
 
 <style scoped lang="scss">
@@ -149,11 +154,24 @@ const settingsOpen = useSettingsOpen()
       img {
         width: 60px;
         user-select: none;
+        // Slow ambient drift so the backdrop feels alive. Purely decorative;
+        // the global .anims-off switch neutralizes it.
+        animation: bgDrift 11s ease-in-out infinite;
 
         @include bp-below("lg") { width: 50px; }
         @include bp("sm")       { width: 40px; }
+
+        &:nth-child(2) { animation-delay: -3.5s; animation-duration: 13s; }
       }
+
+      &:nth-child(2) img { animation-delay: -7s; animation-duration: 15s; }
     }
+  }
+
+  @keyframes bgDrift {
+    0%   { transform: translateY(0)    rotate(0deg); }
+    50%  { transform: translateY(-8px) rotate(6deg); }
+    100% { transform: translateY(0)    rotate(0deg); }
   }
 
   .nav {

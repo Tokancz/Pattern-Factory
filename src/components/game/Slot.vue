@@ -34,7 +34,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from "vue"
+import { computed, ref, watch } from "vue"
 import { PATTERNS } from "@/data/patterns"
 import { generateBar } from "@/utils/ascii"
 import { useSlotStore } from "@/stores/slot"
@@ -83,6 +83,17 @@ const props = defineProps<{
 }>()
 
 const slotFlash = ref(false)
+let flashTimer: ReturnType<typeof setTimeout> | null = null
+
+// Flash the thread each time it completes a render cycle. Progress climbs to
+// max then wraps back down, so a downward step marks a completed output.
+watch(() => props.slot.progress, (now, prev) => {
+  if (now < prev) {
+    slotFlash.value = true
+    if (flashTimer) clearTimeout(flashTimer)
+    flashTimer = setTimeout(() => { slotFlash.value = false }, 320)
+  }
+})
 
 const patternData = computed(() => {
   if (!props.slot.patternId) return null
@@ -277,6 +288,17 @@ function spawnFloatingText(event: MouseEvent, value: string) {
 .locked {
   opacity: 0.5;
   pointer-events: none;
+}
+
+// Brief glow + nudge when a render cycle completes (driven by slotFlash).
+.slot.flash .slotPattern > img {
+  animation: slotComplete 0.32s ease-out;
+}
+
+@keyframes slotComplete {
+  0%   { filter: drop-shadow(0 0 0 var(--primary));    transform: scale(1); }
+  40%  { filter: drop-shadow(0 0 14px var(--primary)); transform: scale(1.12); }
+  100% { filter: drop-shadow(0 0 0 var(--primary));    transform: scale(1); }
 }
 
 .selected {

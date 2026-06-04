@@ -113,6 +113,7 @@ export const useGameStore = defineStore("game", {
 
       this.prestigePoints += gained
       this.pendingPrestigePoints = 0
+      playSound("magic")
 
       const patterns = usePatternStore()
       const slots = useSlotStore()
@@ -159,6 +160,7 @@ export const useGameStore = defineStore("game", {
       glyph.glyphs += gained
       glyph.pendingGlyphs = 0
       glyph.ascensionCount += 1
+      playSound("victory")
       // No explicit Glyph save needed — saveGame() at the bottom of this
       // action persists everything (including the Glyph state) in one PUT.
 

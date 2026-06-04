@@ -70,6 +70,7 @@ import Panel from "../components/system/Panel.vue"
 import { UPGRADES, DC_UPGRADES, PRESTIGE_UPGRADES } from "@/data/upgrades"
 import { useUpgradeStore } from "@/stores/upgrade"
 import { formatNumber } from "@/utils/format"
+import { playSound } from "@/utils/sound"
 import { ref, computed } from "vue"
 import { useWindowSize } from "@vueuse/core"
 
@@ -126,10 +127,10 @@ function isNormalMaxed(upgrade: { id: string; maxLevel?: number }) {
 }
 
 function nextPage() {
-  if (page.value < totalPages.value - 1) page.value++
+  if (page.value < totalPages.value - 1) { page.value++; playSound("tabClick") }
 }
 function prevPage() {
-  if (page.value > 0) page.value--
+  if (page.value > 0) { page.value--; playSound("tabClick") }
 }
 </script>
 
