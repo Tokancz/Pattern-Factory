@@ -42,7 +42,10 @@ CREATE TABLE game_saves (
   ascension_count     INTEGER          DEFAULT 0,
   glyph_pattern_count BIGINT           DEFAULT 0,
   endgame_state       VARCHAR(20),                 -- null | 'stabilized'
-  seen_intro          BOOLEAN          DEFAULT FALSE
+  seen_intro          BOOLEAN          DEFAULT FALSE,
+
+  -- Unlocked achievement ids (permanent — survive prestige/ascension)
+  achievements        TEXT[]           DEFAULT '{}'
 );
 
 -- Slot states (up to 5 per save — 4 base + Slot V's 5th thread)

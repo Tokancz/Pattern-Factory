@@ -9,6 +9,7 @@
                 <li><router-link to="/inventory">ARCHIVE</router-link></li>
                 <li><router-link to="/glyphs">GLYPHS</router-link></li>
                 <li><router-link to="/prestige">RECURSION</router-link></li>
+                <li><router-link to="/achievements">MILESTONES</router-link></li>
                 <li><router-link to="/leaderboard">REGISTRY</router-link></li>
             </ul>
         </nav>

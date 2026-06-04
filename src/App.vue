@@ -77,6 +77,7 @@
           <router-link to="/inventory">ARCHIVE</router-link>
           <router-link to="/glyphs">GLYPHS</router-link>
           <router-link to="/prestige">RECURSION</router-link>
+          <router-link to="/achievements">MILESTONES</router-link>
           <router-link to="/leaderboard">REGISTRY</router-link>
 
           <img src="/img/Stripes.png" alt="Stripes Background" aria-hidden="true" draggable="false">
@@ -84,6 +85,8 @@
       </div>
     </Transition>
   </template>
+
+  <ToastHost />
 </template>
 
 <script setup lang="ts">
@@ -109,9 +112,11 @@ import AfkReport, { type AfkReportData } from "@/components/ui/AfkReport.vue"
 import IntroOverlay  from "@/components/ui/IntroOverlay.vue"
 import ChoiceOverlay  from "@/components/ui/ChoiceOverlay.vue"
 import CreditsOverlay from "@/components/ui/CreditsOverlay.vue"
+import ToastHost from "@/components/ui/ToastHost.vue"
 import { openTutorial } from "@/composables/tutorial"
 import { architectTitle } from "@/utils/architect"
 import { useBossStore } from "@/stores/boss"
+import { useAchievementStore } from "@/stores/achievement"
 
 const slotStore = useSlotStore()
 const upgradeStore = useUpgradeStore()
@@ -119,6 +124,7 @@ const gameStore = useGameStore()
 const user = useUserStore()
 const glyphStore = useGlyphStore()
 const bossStore = useBossStore()
+const achievementStore = useAchievementStore()
 
 const afkOpen = ref(false)
 const afkReport = reactive<AfkReportData>({
@@ -251,6 +257,9 @@ function bootGame(): Promise<void> {
   bootPromise = (async () => {
     try {
       await initGame()
+      // Backfill achievements the loaded save already qualifies for, silently
+      // (no toast storm). New unlocks during play toast via the game loop.
+      achievementStore.check(true)
       if (!autoSaveStarted) {
         startAutoSave()
         autoSaveStarted = true

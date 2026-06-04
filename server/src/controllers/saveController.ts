@@ -58,6 +58,7 @@ interface SavePayload {
   endgameState?:      "stabilized" | null
   seenIntro?:         boolean
   glyphUpgrades?:     GlyphUpgradeLevelPayload[]
+  achievements?:      string[]
 }
 
 // The client is authoritative for its own progression (idle game, no
@@ -92,6 +93,8 @@ function validateSavePayload(p: SavePayload): string | null {
   if (!Array.isArray(p.machines) || p.machines.length > 50)     return "machines array too large"
   if (!Array.isArray(p.patterns) || p.patterns.length > 10)     return "patterns array too large"
   if (p.glyphUpgrades && p.glyphUpgrades.length > 100)          return "glyphUpgrades array too large"
+  if (p.achievements && (!Array.isArray(p.achievements) || p.achievements.length > 200))
+    return "achievements array invalid"
   return null
 }
 
@@ -106,6 +109,7 @@ export async function getSave(req: AuthRequest, res: Response): Promise<void> {
       ascension_count: number; glyph_pattern_count: number
       endgame_state: string | null
       seen_intro: boolean
+      achievements: string[] | null
     }>(
       "SELECT * FROM game_saves WHERE user_id = $1",
       [req.userId]
@@ -150,7 +154,8 @@ export async function getSave(req: AuthRequest, res: Response): Promise<void> {
       glyphPatternCount: save.glyph_pattern_count ?? 0,
       endgameState:      save.endgame_state ?? null,
       seenIntro:         save.seen_intro ?? false,
-      glyphUpgrades:     glyphUpgrades.rows
+      glyphUpgrades:     glyphUpgrades.rows,
+      achievements:      save.achievements ?? []
     })
   } catch (err) {
     log.error("save.get", "load failed", { err, userId: req.userId })
@@ -176,6 +181,9 @@ export async function upsertSave(req: AuthRequest, res: Response): Promise<void>
   const glyphPatternCount = payload.glyphPatternCount ?? 0
   const endgameState      = payload.endgameState      ?? null
   const seenIntro         = payload.seenIntro         ?? false
+  // null = "client didn't send it" → COALESCE keeps the existing column on
+  // UPDATE so an older client can't wipe unlocked achievements.
+  const achievements      = payload.achievements      ?? null
 
   try {
     // Try a version-gated update first
@@ -195,6 +203,7 @@ export async function upsertSave(req: AuthRequest, res: Response): Promise<void>
          glyph_pattern_count     = $12,
          endgame_state           = $13,
          seen_intro              = $14,
+         achievements            = COALESCE($17, achievements),
          save_version            = save_version + 1
        WHERE user_id = $15 AND save_version = $16
        RETURNING id, save_version`,
@@ -205,7 +214,8 @@ export async function upsertSave(req: AuthRequest, res: Response): Promise<void>
         payload.lastPlayed,
         glyphs, pendingGlyphs, ascensionCount, glyphPatternCount,
         endgameState, seenIntro,
-        req.userId, clientVersion
+        req.userId, clientVersion,
+        achievements
       ]
     )
 
@@ -244,16 +254,16 @@ export async function upsertSave(req: AuthRequest, res: Response): Promise<void>
            (user_id, money, dc, prestige_points, pending_prestige_points,
             level, exp, unlocked_slots, last_played,
             glyphs, pending_glyphs, ascension_count, glyph_pattern_count,
-            endgame_state, seen_intro,
+            endgame_state, seen_intro, achievements,
             save_version)
-         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,1)
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,1)
          RETURNING id, save_version`,
         [
           req.userId, payload.money, payload.dc, payload.prestigePoints,
           payload.pendingPrestigePoints ?? 0,
           payload.level, payload.exp, payload.unlockedSlots, payload.lastPlayed,
           glyphs, pendingGlyphs, ascensionCount, glyphPatternCount,
-          endgameState, seenIntro
+          endgameState, seenIntro, achievements ?? []
         ]
       )
       saveId     = insertResult.rows[0]!.id

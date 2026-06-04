@@ -9,6 +9,7 @@ import InventoryView from "@/views/InventoryView.vue"
 import GlyphView from "@/views/GlyphView.vue"
 import PrestigeView from "@/views/PrestigeView.vue"
 import Leaderboard from "@/views/Leaderboard.vue"
+import AchievementView from "@/views/AchievementView.vue"
 import AdminView from "@/views/AdminView.vue"
 
 const routes = [
@@ -20,6 +21,7 @@ const routes = [
   { path: "/inventory",  component: InventoryView },
   { path: "/glyphs",     component: GlyphView },
   { path: "/prestige",   component: PrestigeView },
+  { path: "/achievements", component: AchievementView },
   { path: "/leaderboard", component: Leaderboard },
   {
     path: "/admin",

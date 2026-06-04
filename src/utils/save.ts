@@ -4,9 +4,51 @@ import { useSlotStore }    from "@/stores/slot"
 import { useUpgradeStore } from "@/stores/upgrade"
 import { useMachineStore } from "@/stores/machine"
 import { useGlyphStore }   from "@/stores/glyph"
+import { useUserStore }    from "@/stores/user"
+import { useAchievementStore } from "@/stores/achievement"
 import { api, ApiError }   from "@/utils/api"
 import { log }             from "@/utils/logger"
 import type { SavePayload } from "../../shared/types"
+
+// ─── Local save-file export/import ─────────────────────────────────────────
+// Files are base64-wrapped so casual users can't eyeball-edit numbers, carry
+// a salted checksum so a hand-tampered file is rejected on import, and are
+// stamped with the owner's account id so a save can't be loaded into a
+// *different* account (the "alt-account admin mode" exploit). The owner id is
+// folded into the checksum, so editing it also breaks the hash.
+// This is tamper-*evidence*, not real security — the salt ships in the bundle
+// — but it stops casual cross-account transfers and value edits.
+const SAVE_MAGIC = "PFSAVE2"
+const SAVE_SALT  = "pattern-factory::do-not-edit::v1"
+
+// cyrb53 — fast, well-distributed 53-bit string hash. Returns 16 hex chars.
+function cyrb53(str: string, seed = 0): string {
+  let h1 = 0xdeadbeef ^ seed
+  let h2 = 0x41c6ce57 ^ seed
+  for (let i = 0; i < str.length; i++) {
+    const ch = str.charCodeAt(i)
+    h1 = Math.imul(h1 ^ ch, 2654435761)
+    h2 = Math.imul(h2 ^ ch, 1597334677)
+  }
+  h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909)
+  h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909)
+  const high = (h2 >>> 0).toString(16).padStart(8, "0")
+  const low  = (h1 >>> 0).toString(16).padStart(8, "0")
+  return high + low
+}
+
+// Unicode-safe base64 (avoids the deprecated escape/unescape pair).
+function toBase64(s: string): string {
+  const bytes = new TextEncoder().encode(s)
+  let bin = ""
+  for (const b of bytes) bin += String.fromCharCode(b)
+  return btoa(bin)
+}
+function fromBase64(s: string): string {
+  const bin = atob(s)
+  const bytes = Uint8Array.from(bin, c => c.charCodeAt(0))
+  return new TextDecoder().decode(bytes)
+}
 
 // Server returns rows in snake_case (raw from Postgres). We keep the on-the-
 // wire shape narrow here so the patch path doesn't have to use `as any`.
@@ -29,6 +71,7 @@ interface ServerSave extends Omit<SavePayload, "slots" | "upgrades" | "machines"
   machines:      MachineRow[]
   patterns:      PatternRow[]
   glyphUpgrades: GlyphUpgradeRow[]
+  achievements?: string[]
   lastPlayed:    number
 }
 
@@ -57,6 +100,7 @@ function buildSavePayload(): SavePayload {
   const upgrades = useUpgradeStore()
   const machines = useMachineStore()
   const glyph    = useGlyphStore()
+  const achievements = useAchievementStore()
 
   const upgradePayload = [
     ...Object.entries(upgrades.levels).map(([upgradeId, level]) => ({
@@ -108,7 +152,9 @@ function buildSavePayload(): SavePayload {
     seenIntro:         glyph.seenIntro,
     glyphUpgrades:     Object.entries(glyph.boughtUpgrades).map(([upgradeId, level]) => ({
       upgradeId, level
-    }))
+    })),
+
+    achievements: [...achievements.unlocked]
   }
 }
 
@@ -159,6 +205,9 @@ export async function loadGame(): Promise<number | null> {
     const upgrades = useUpgradeStore()
     const machines = useMachineStore()
     const glyph    = useGlyphStore()
+    const achievements = useAchievementStore()
+
+    achievements.$patch({ unlocked: data.achievements ?? [] })
 
     // Patch game state
     game.$patch({
@@ -260,4 +309,133 @@ export function startAutoSave(): void {
 export function resetSave(): void {
   localStorage.removeItem("token")
   location.reload()
+}
+
+// Apply a camelCase SavePayload (as produced by buildSavePayload / a save
+// file) onto the stores. Mirrors loadGame()'s snake_case patch path.
+function applyPayload(data: SavePayload): void {
+  const game     = useGameStore()
+  const patterns = usePatternStore()
+  const slots    = useSlotStore()
+  const upgrades = useUpgradeStore()
+  const machines = useMachineStore()
+  const glyph    = useGlyphStore()
+  const achievements = useAchievementStore()
+
+  achievements.$patch({ unlocked: data.achievements ?? [] })
+
+  game.$patch({
+    money:                 data.money,
+    dc:                    data.dc,
+    prestigePoints:        data.prestigePoints,
+    pendingPrestigePoints: data.pendingPrestigePoints ?? 0,
+    level:                 data.level,
+    exp:                   data.exp,
+    unlockedSlots:         data.unlockedSlots
+  })
+
+  const glyphUpgradeMap: Record<string, number> = {}
+  for (const u of data.glyphUpgrades ?? []) glyphUpgradeMap[u.upgradeId] = u.level
+  glyph.$patch({
+    glyphs:            Number(data.glyphs            ?? 0),
+    pendingGlyphs:     Number(data.pendingGlyphs     ?? 0),
+    ascensionCount:    Number(data.ascensionCount    ?? 0),
+    glyphPatternCount: Number(data.glyphPatternCount ?? 0),
+    endgameState:      data.endgameState      ?? null,
+    seenIntro:         data.seenIntro         ?? false,
+    boughtUpgrades:    glyphUpgradeMap
+  })
+
+  slots.slots = slots.getDefaultSlots.map((defaultSlot, i) => {
+    const saved = data.slots.find(s => s.slotIndex === i)
+    if (!saved) return defaultSlot
+    return {
+      ...defaultSlot,
+      patternId:        saved.patternId,
+      progress:         saved.progress,
+      unlocked:         saved.unlocked,
+      speedMultiplier:  saved.speedMultiplier,
+      outputMultiplier: saved.outputMultiplier
+    }
+  })
+
+  const normalLevels:   Record<string, number> = {}
+  const dcLevels:       Record<string, number> = {}
+  const prestigeLevels: Record<string, number> = {}
+  for (const u of data.upgrades) {
+    if      (u.upgradeType === "normal")   normalLevels[u.upgradeId]   = u.level
+    else if (u.upgradeType === "dc")       dcLevels[u.upgradeId]       = u.level
+    else if (u.upgradeType === "prestige") prestigeLevels[u.upgradeId] = u.level
+  }
+  upgrades.$patch({ levels: normalLevels, dcLevels, prestigeLevels })
+
+  const machineLevels: Record<string, number> = {}
+  for (const m of data.machines) machineLevels[m.machineId] = m.level
+  machines.$patch({ levels: machineLevels })
+
+  const patternData: Record<string, { level: number; exp: number }> = {}
+  const unlockedPatterns: string[] = []
+  for (const p of data.patterns) {
+    patternData[p.patternId] = { level: p.level, exp: p.exp }
+    if (p.unlocked) unlockedPatterns.push(p.patternId)
+  }
+  patterns.$patch({ patterns: patternData, unlockedPatterns })
+}
+
+// Folds the save body + owner id + salt into one checksum input, so editing
+// either the data or the stamped owner id invalidates the file.
+function saveChecksum(data: SavePayload, ownerId: number | null): string {
+  return cyrb53(`${JSON.stringify(data)}|${ownerId}${SAVE_SALT}`)
+}
+
+// Serialize the current game into a portable, checksum-protected save string
+// stamped with the logged-in account's id.
+export function exportSave(): string {
+  const user = useUserStore()
+  const ownerId = user.user?.id ?? null
+  const data = buildSavePayload()
+  const hash = saveChecksum(data, ownerId)
+  return toBase64(JSON.stringify({ magic: SAVE_MAGIC, ownerId, hash, data }))
+}
+
+export interface ImportResult {
+  ok: boolean
+  error?: string
+}
+
+// Validate + apply a save string produced by exportSave(). Rejects files that
+// are corrupted/hand-edited (checksum mismatch) or that belong to a different
+// account (owner-id mismatch). On success the imported state is pushed to the
+// server so it survives a refresh.
+export async function importSave(text: string): Promise<ImportResult> {
+  let envelope: { magic?: string; hash?: string; ownerId?: number | null; data?: SavePayload }
+  try {
+    envelope = JSON.parse(fromBase64(text.trim()))
+  } catch {
+    return { ok: false, error: "This file isn't a valid Pattern Factory save." }
+  }
+
+  if (!envelope || envelope.magic !== SAVE_MAGIC || typeof envelope.hash !== "string" || !envelope.data) {
+    return { ok: false, error: "Unrecognized save format." }
+  }
+
+  const ownerId = envelope.ownerId ?? null
+  if (saveChecksum(envelope.data, ownerId) !== envelope.hash) {
+    return { ok: false, error: "Save file is corrupted or has been modified." }
+  }
+
+  // Account binding: only the account that exported the file may import it.
+  const currentId = useUserStore().user?.id ?? null
+  if (ownerId === null || currentId === null || ownerId !== currentId) {
+    return { ok: false, error: "This save belongs to a different account." }
+  }
+
+  try {
+    applyPayload(envelope.data)
+    await saveGame()
+    return { ok: true }
+  } catch (err) {
+    log.error("import failed while applying save", err)
+    return { ok: false, error: "Couldn't apply the save — it may be from an incompatible version." }
+  }
 }

@@ -5,6 +5,8 @@
       :steps="tutorialSteps"
     />
 
+    <SettingsOverlay :open="settingsOpen" @close="closeSettings" />
+
     <div id="simulation-bg">
       <div>
         <img src="/img/patterns/Square.svg" alt="square pattern background" aria-hidden="true" draggable="false">
@@ -24,7 +26,12 @@
     </div>
   
     <aside class="nav">
-      <button type="button" @click="openTutorial">Tutorial</button>
+      <div class="top-buttons">
+        <button type="button" class="tutorial-btn" @click="openTutorial">Tutorial</button>
+        <button type="button" class="settings-btn" aria-label="Settings" @click="openSettings">
+          <i class="fa-solid fa-gear" aria-hidden="true"></i>
+        </button>
+      </div>
       <div class="audio-controls">
         <button type="button" class="arrow" aria-label="Previous track" @click="cycleLoopTrack(-1)">‹</button>
         <button type="button" class="mute" @click="toggleMute" :aria-pressed="muted" :aria-label="muted ? 'Unmute' : 'Mute'">
@@ -42,14 +49,17 @@
 import { useSlotStore } from "@/stores/slot"
 import Slot from "./Slot.vue"
 import TutorialOverlay from "@/components/ui/TutorialOverlay.vue"
+import SettingsOverlay from "@/components/ui/SettingsOverlay.vue"
 import { TUTORIAL_STEPS } from "@/data/tutorial"
 import { useMuted, toggleMute, useLoopTrack, cycleLoopTrack } from "@/utils/sound"
 import { tutorialVisible, openTutorial } from "@/composables/tutorial"
+import { useSettingsOpen, openSettings, closeSettings } from "@/composables/settings"
 
 const slots = useSlotStore()
 const tutorialSteps = TUTORIAL_STEPS
 const muted = useMuted()
 const loopTrack = useLoopTrack()
+const settingsOpen = useSettingsOpen()
 </script>
 
 <style scoped lang="scss">
@@ -168,6 +178,21 @@ const loopTrack = useLoopTrack()
       &:hover {
         background: var(--primary);
         color: var(--black);
+      }
+    }
+
+    .top-buttons {
+      @include flexRow(0, end, stretch);
+      width: 100%;
+
+      .tutorial-btn { flex: 1; }
+
+      .settings-btn {
+        width: 44px;
+        flex: 0 0 44px;
+        padding: 10px 0;
+        text-align: center;
+        border-left: 1px solid var(--secondary);
       }
     }
 

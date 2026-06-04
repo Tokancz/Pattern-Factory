@@ -5,43 +5,86 @@ export type LoopTrack = 1 | 2 | 3 | 4 | 5
 
 const BASE = import.meta.env.BASE_URL
 
-function makeAudio(file: string, volume: number): HTMLAudioElement {
+function clamp01(n: number): number {
+  return Math.min(1, Math.max(0, n))
+}
+
+function loadVolume(key: string, fallback: number): number {
+  const raw = localStorage.getItem(key)
+  if (raw === null) return fallback
+  const n = Number(raw)
+  return isNaN(n) ? fallback : clamp01(n)
+}
+
+// Two independent category sliders, persisted. The per-sound numbers below
+// are *design* volumes (the relative mix between sounds); the category
+// volume scales that mix so the player can dial each group up or down.
+const musicVolume = ref(loadVolume("musicVolume", 1))
+const sfxVolume   = ref(loadVolume("sfxVolume", 1))
+
+// Every long-lived music element + its design volume, so a music-volume
+// change can re-apply `base * musicVolume` to all of them at once.
+const musicEls: { el: HTMLAudioElement; base: number }[] = []
+
+function makeMusic(file: string, base: number): HTMLAudioElement {
   const a = new Audio(`${BASE}sound/${file}`)
-  a.volume = volume
+  a.volume = clamp01(base * musicVolume.value)
+  musicEls.push({ el: a, base })
   return a
 }
 
+function makeSfx(file: string): HTMLAudioElement {
+  // SFX are templates that get cloned per play; the clone's volume is set
+  // at play time from SFX_BASE * sfxVolume, so the template volume is moot.
+  return new Audio(`${BASE}sound/${file}`)
+}
+
+// Design volumes for one-shot effects.
+const SFX_BASE: Record<SoundName, number> = {
+  click:     0.5,
+  error:     0.6,
+  magic:     0.7,
+  pop:       0.5,
+  buy:       0.55,
+  tabClick:  0.4,
+  hit:       0.6,
+  victory:   0.7,
+  defeat:    0.7,
+  countdown: 0.7,
+  fight:     0.7,
+}
+
 const sounds: Record<SoundName, HTMLAudioElement> = {
-  click:    makeAudio("click.wav",    0.5),
-  error:    makeAudio("error.wav",    0.6),
-  magic:    makeAudio("magic.wav",    0.7),
-  pop:      makeAudio("pop.wav",      0.5),
-  buy:      makeAudio("buy.wav",      0.55),
-  tabClick: makeAudio("tabClick.wav", 0.4),
-  hit:       makeAudio("hit.wav",       0.6),
-  victory:   makeAudio("victory.mp3",   0.7),
-  defeat:    makeAudio("defeat.mp3",    0.7),
-  countdown: makeAudio("countdown.wav", 0.7),
-  fight:     makeAudio("fight.wav",     0.7),
+  click:     makeSfx("click.wav"),
+  error:     makeSfx("error.wav"),
+  magic:     makeSfx("magic.wav"),
+  pop:       makeSfx("pop.wav"),
+  buy:       makeSfx("buy.wav"),
+  tabClick:  makeSfx("tabClick.wav"),
+  hit:       makeSfx("hit.wav"),
+  victory:   makeSfx("victory.mp3"),
+  defeat:    makeSfx("defeat.mp3"),
+  countdown: makeSfx("countdown.wav"),
+  fight:     makeSfx("fight.wav"),
 }
 
 // Background loop tracks — selectable via setLoopTrack()
 const loopTracks: Record<LoopTrack, HTMLAudioElement> = {
-  1: makeAudio("loop.wav",  0.15),
-  2: makeAudio("loop2.wav", 0.15),
-  3: makeAudio("loop3.wav", 0.15),
-  4: makeAudio("loop4.wav", 0.15),
-  5: makeAudio("loop5.wav", 0.15),
+  1: makeMusic("loop.wav",  0.15),
+  2: makeMusic("loop2.wav", 0.15),
+  3: makeMusic("loop3.wav", 0.15),
+  4: makeMusic("loop4.wav", 0.15),
+  5: makeMusic("loop5.wav", 0.15),
 }
 for (const a of Object.values(loopTracks)) a.loop = true
 
 // Boss loops — one is picked at random when a boss fight starts; replaces the BG loop while active.
 const bossLoops: HTMLAudioElement[] = [
-  makeAudio("bossloop.wav",  0.2),
-  makeAudio("bossloop2.wav", 0.2),
-  makeAudio("bossloop3.wav", 0.2),
-  makeAudio("bossloop4.wav", 0.2),
-  makeAudio("bossloop5.wav", 0.2),
+  makeMusic("bossloop.wav",  0.2),
+  makeMusic("bossloop2.wav", 0.2),
+  makeMusic("bossloop3.wav", 0.2),
+  makeMusic("bossloop4.wav", 0.2),
+  makeMusic("bossloop5.wav", 0.2),
 ]
 for (const a of bossLoops) a.loop = true
 let activeBossLoop: HTMLAudioElement | null = null
@@ -51,7 +94,7 @@ const currentTrack = ref<LoopTrack>(loopTracks[storedTrack] ? storedTrack : 1)
 let loop: HTMLAudioElement = loopTracks[currentTrack.value]
 
 // Boost layer — plays on top of the BG loop while targeted overclock is active.
-const boost = makeAudio("boost.wav", 0.25)
+const boost = makeMusic("boost.wav", 0.25)
 boost.loop = true
 let boostWanted = false
 
@@ -73,6 +116,17 @@ watch(muted, v => {
   }
 })
 
+// Re-mix every live music element when the music slider moves.
+watch(musicVolume, v => {
+  localStorage.setItem("musicVolume", String(v))
+  for (const { el, base } of musicEls) el.volume = clamp01(base * v)
+})
+
+// SFX volume is applied per-clone at play time; just persist on change.
+watch(sfxVolume, v => {
+  localStorage.setItem("sfxVolume", String(v))
+})
+
 export interface PlaySoundOptions {
   // Multiplier on playback rate. Doubles as pitch since we don't
   // preserve pitch — passing 1.1 plays back ~a whole step higher.
@@ -81,6 +135,7 @@ export interface PlaySoundOptions {
 
 export function playSound(name: SoundName, opts?: PlaySoundOptions): void {
   if (muted.value) return
+  if (sfxVolume.value <= 0) return
   // Kick off the background loop on the first audible event.
   // Browsers block autoplay until a user gesture — this piggy-backs on one.
   // Skip while a boss loop owns the audio, otherwise hits/countdown sounds
@@ -89,7 +144,7 @@ export function playSound(name: SoundName, opts?: PlaySoundOptions): void {
 
   const template = sounds[name]
   const clone = template.cloneNode() as HTMLAudioElement
-  clone.volume = template.volume
+  clone.volume = clamp01(SFX_BASE[name] * sfxVolume.value)
   if (opts?.rate && opts.rate > 0) clone.playbackRate = opts.rate
   clone.play().catch(() => {})
 }
@@ -158,4 +213,21 @@ export function toggleMute(): void {
 
 export function useMuted() {
   return muted
+}
+
+// ─── Category volume controls (used by the Settings panel) ─────────────────
+export function useMusicVolume() {
+  return musicVolume
+}
+
+export function useSfxVolume() {
+  return sfxVolume
+}
+
+export function setMusicVolume(v: number): void {
+  musicVolume.value = clamp01(v)
+}
+
+export function setSfxVolume(v: number): void {
+  sfxVolume.value = clamp01(v)
 }

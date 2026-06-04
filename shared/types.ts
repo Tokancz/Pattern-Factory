@@ -74,6 +74,10 @@ export interface SavePayload {
   endgameState?:      "stabilized" | null
   seenIntro?:         boolean
   glyphUpgrades?:     GlyphUpgradeLevelPayload[]
+
+  // Unlocked achievement ids. Optional on the wire so older clients/servers
+  // round-trip safely (treated as an empty list when absent).
+  achievements?:      string[]
 }
 
 export interface LeaderboardEntry {
